@@ -1,1214 +1,205 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Entreprise 3 — Espace Artisan</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>
-/* =========================================================================
-   ENTREPRISE 3 — DESIGN SYSTEM
-   Bleu marine / crème / or — Fraunces (titres) + Inter (texte)
-   ========================================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap');
-
-:root{
-  --navy-950:#0a1729;
-  --navy-900:#0e1f3d;
-  --navy-700:#16305a;
-  --navy-500:#2c4d80;
-  --cream-100:#f7f2e7;
-  --cream-200:#efe6d2;
-  --gold-500:#b8935a;
-  --gold-400:#cdac78;
-  --gold-100:#f1e2c6;
-  --ink:#16213a;
-  --muted:#667088;
-  --border:#e3d9c4;
-  --success:#2f6b4f;
-  --success-bg:#e7f2ec;
-  --warning:#b8863a;
-  --warning-bg:#f6ecdb;
-  --danger:#a3372f;
-  --danger-bg:#f7e5e3;
-  --radius-s:8px;
-  --radius-m:14px;
-  --radius-l:22px;
-  --shadow-card:0 2px 16px rgba(14,31,61,.08);
-  --shadow-modal:0 -12px 40px rgba(10,23,41,.25);
-  --font-display:'Fraunces',Georgia,serif;
-  --font-body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-}
-
-*{box-sizing:border-box;}
-html,body{height:100%;}
-body{
-  margin:0;
-  font-family:var(--font-body);
-  color:var(--ink);
-  background:var(--cream-100);
-  -webkit-font-smoothing:antialiased;
-  overflow:hidden;
-}
-h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0;color:var(--navy-950);}
-p{margin:0;line-height:1.5;}
-button{font-family:inherit;cursor:pointer;}
-input,select,textarea{font-family:inherit;font-size:inherit;}
-:focus-visible{outline:2px solid var(--gold-500);outline-offset:2px;}
-@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
-
-/* ---- Boutons -------------------------------------------------------- */
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:.5em;
-  border:none;border-radius:var(--radius-s);padding:.85em 1.3em;
-  font-weight:700;font-size:.92rem;transition:transform .1s ease, opacity .15s ease;
-}
-.btn:active{transform:scale(.98);}
-.btn:disabled{opacity:.5;cursor:not-allowed;}
-.btn-block{width:100%;}
-.btn-sm{padding:.5em 1em;font-size:.8rem;}
-.btn-primary{background:var(--navy-950);color:var(--cream-100);}
-.btn-primary:hover{background:var(--navy-700);}
-.btn-gold{background:var(--gold-500);color:var(--navy-950);box-shadow:0 4px 14px rgba(184,147,90,.35);}
-.btn-gold:hover{background:var(--gold-400);}
-.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--navy-950);}
-.btn-ghost:hover{background:var(--cream-200);}
-.btn-danger-outline{background:var(--danger-bg);color:var(--danger);}
-.btn-success{background:var(--success);color:#fff;}
-
-/* ---- Champs de formulaire -------------------------------------------- */
-.field{margin-bottom:1.1rem;}
-.field label{display:block;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.03em;color:var(--navy-700);margin-bottom:.4em;}
-.field input,.field select,.field textarea{
-  width:100%;padding:.8em .9em;border:1.5px solid var(--border);border-radius:var(--radius-s);
-  background:#fff;color:var(--ink);transition:border-color .15s ease;
-}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold-500);}
-.field .hint{font-size:.75rem;color:var(--muted);margin-top:.35em;}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
-fieldset{border:none;padding:0;margin:0 0 1.4rem;}
-legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem;color:var(--navy-900);
-  padding-bottom:.5rem;border-bottom:1.5px solid var(--border);margin-bottom:1rem;}
-
-/* ---- Chips -------------------------------------------------------- */
-.chip-group{display:flex;flex-wrap:wrap;gap:.5rem;}
-.chip{padding:.55em 1em;border-radius:999px;border:1.5px solid var(--border);background:#fff;
-  font-size:.85rem;font-weight:600;color:var(--ink);}
-.chip.is-selected{background:var(--navy-950);border-color:var(--navy-950);color:var(--cream-100);}
-
-/* =========================================================================
-   ÉCRANS D'AUTHENTIFICATION
-   ========================================================================= */
-.auth-screen{
-  position:fixed;inset:0;z-index:100;
-  background:
-    radial-gradient(circle at 15% 0%, var(--navy-700), var(--navy-950) 60%);
-  display:flex;align-items:center;justify-content:center;
-  padding:2rem 1.1rem;overflow-y:auto;
-}
-.auth-screen[hidden]{display:none;}
-.auth-card{
-  width:100%;max-width:430px;background:#fff;border-radius:var(--radius-l);
-  padding:2rem 1.6rem;box-shadow:0 30px 70px rgba(0,0,0,.35);
-  max-height:92vh;overflow-y:auto;
-}
-.brand-row{display:flex;align-items:center;gap:.65rem;margin-bottom:1.4rem;}
-.brand-mark{
-  display:grid;place-items:center;width:38px;height:38px;border-radius:50%;
-  background:var(--gold-500);color:var(--navy-950);font-family:var(--font-display);
-  font-weight:700;font-size:1rem;flex-shrink:0;
-}
-.brand-name{font-family:var(--font-display);font-size:1.25rem;font-weight:600;color:var(--navy-950);}
-.auth-card h1{font-size:1.4rem;margin-bottom:.3rem;}
-.auth-card > p.lead{color:var(--muted);margin-bottom:1.5rem;font-size:.9rem;}
-.form-error{background:var(--danger-bg);color:var(--danger);padding:.75em 1em;border-radius:var(--radius-s);
-  font-size:.82rem;margin-bottom:1rem;font-weight:600;}
-.form-success{background:var(--success-bg);color:var(--success);padding:.75em 1em;border-radius:var(--radius-s);
-  font-size:.82rem;margin-bottom:1rem;font-weight:600;}
-.auth-switch{text-align:center;margin-top:1.3rem;font-size:.85rem;color:var(--muted);}
-.auth-switch button{background:none;border:none;color:var(--gold-500);font-weight:700;padding:0;font-size:inherit;}
-.file-field{border:1.5px dashed var(--border);border-radius:var(--radius-s);padding:.9em;font-size:.8rem;}
-.file-field.has-file{border-color:var(--success);background:var(--success-bg);}
-
-/* =========================================================================
-   APPLICATION
-   ========================================================================= */
-#app-screen{position:fixed;inset:0;display:none;flex-direction:column;}
-#app-screen.is-active{display:flex;}
-.views{position:relative;flex:1;min-height:0;}
-.view{position:absolute;inset:0;display:none;}
-.view.is-active{display:block;overflow-y:auto;}
-
-/* ---- Barre supérieure -------------------------------------------------- */
-.top-bar{
-  position:absolute;top:0;left:0;right:0;z-index:15;
-  padding:calc(env(safe-area-inset-top,0px) + .7rem) 1rem .7rem;
-  background:#fff;box-shadow:0 2px 14px rgba(14,31,61,.06);
-  display:flex;align-items:center;justify-content:space-between;gap:.6rem;
-}
-.top-bar .brand-row{margin:0;}
-.top-bar .brand-name{font-size:1.05rem;}
-.status-pill{font-size:.7rem;font-weight:700;padding:.3em .7em;border-radius:999px;white-space:nowrap;}
-.status-pill--valide{background:var(--success-bg);color:var(--success);}
-.status-pill--en_attente{background:var(--warning-bg);color:var(--warning);}
-.status-pill--refuse{background:var(--danger-bg);color:var(--danger);}
-
-/* ---- Bandeau vérification ---------------------------------------------- */
-.verify-banner{
-  position:absolute;top:64px;left:0;right:0;z-index:14;
-  background:var(--warning-bg);color:#6b4f22;font-size:.8rem;font-weight:600;
-  padding:.6rem 1rem;text-align:center;
-}
-.verify-banner[hidden]{display:none;}
-
-/* ---- Vue carte ----------------------------------------------------------- */
-#map{position:absolute;inset:0;z-index:0;}
-.map-toolbar{
-  position:absolute;left:1rem;right:1rem;z-index:6;
-  display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.2rem;
-}
-.map-toolbar::-webkit-scrollbar{display:none;}
-.map-toolbar .chip{background:#fff;box-shadow:var(--shadow-card);white-space:nowrap;flex-shrink:0;}
-.locate-btn{
-  position:absolute;z-index:6;width:44px;height:44px;border-radius:50%;
-  background:#fff;box-shadow:var(--shadow-card);border:none;display:grid;place-items:center;font-size:1.1rem;
-}
-.marker-pin{width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-  display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.3);border:2.5px solid #fff;}
-.marker-pin span{transform:rotate(45deg);font-size:1.05rem;}
-.marker-pin--faible{background:var(--success);}
-.marker-pin--modere{background:var(--warning);}
-.marker-pin--urgent{background:var(--danger);}
-.marker-pin--mine{background:var(--navy-950);}
-
-/* ---- Bottom sheet -------------------------------------------------------- */
-.bottom-sheet{
-  position:absolute;left:0;right:0;bottom:0;z-index:5;
-  background:#fff;border-radius:var(--radius-l) var(--radius-l) 0 0;
-  box-shadow:var(--shadow-modal);
-  max-height:46%;display:flex;flex-direction:column;
-  padding-bottom:env(safe-area-inset-bottom,0px);
-  touch-action:pan-y;
-}
-.bottom-sheet__handle{width:38px;height:4px;background:var(--border);border-radius:999px;margin:.65rem auto .3rem;}
-.bottom-sheet__header{display:flex;align-items:center;justify-content:space-between;padding:.35rem 1.25rem .7rem;}
-.bottom-sheet__header h2{font-size:1.05rem;}
-.badge-count{background:var(--gold-500);color:var(--navy-950);font-weight:800;font-size:.72rem;
-  padding:.18em .6em;border-radius:999px;}
-.chantier-list{overflow-y:auto;padding:0 1.1rem .8rem;}
-.empty-state{color:var(--muted);text-align:center;padding:2rem 1rem;font-size:.88rem;}
-.chantier-card{
-  display:flex;align-items:center;gap:.8rem;padding:.85rem .2rem;
-  border-bottom:1px solid var(--border);border:none;background:none;width:100%;text-align:left;
-}
-.chantier-card__icon{width:42px;height:42px;border-radius:var(--radius-s);background:var(--cream-200);
-  display:grid;place-items:center;font-size:1.15rem;flex-shrink:0;}
-.chantier-card__info{flex:1;min-width:0;}
-.chantier-card__title{font-weight:700;font-size:.9rem;margin:0 0 .1rem;}
-.chantier-card__meta{font-size:.76rem;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.urgence-tag{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;
-  padding:.22em .55em;border-radius:6px;flex-shrink:0;}
-.urgence-tag--faible{background:var(--success-bg);color:var(--success);}
-.urgence-tag--modere{background:var(--warning-bg);color:var(--warning);}
-.urgence-tag--urgent{background:var(--danger-bg);color:var(--danger);}
-.statut-tag{font-size:.64rem;font-weight:800;padding:.22em .55em;border-radius:6px;flex-shrink:0;
-  background:var(--cream-200);color:var(--navy-900);}
-
-/* ---- Vue "Mes missions" -------------------------------------------------- */
-.page{padding:calc(env(safe-area-inset-top,0px) + 4.6rem) 1.1rem 2rem;}
-.page h1{font-size:1.4rem;margin-bottom:1rem;}
-.tab-filter{display:flex;gap:.5rem;margin-bottom:1.1rem;overflow-x:auto;}
-.tab-filter button{
-  border:1.5px solid var(--border);background:#fff;border-radius:999px;
-  padding:.5em 1em;font-size:.8rem;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0;
-}
-.tab-filter button.is-active{background:var(--navy-950);border-color:var(--navy-950);color:var(--cream-100);}
-.mission-item{
-  background:#fff;border-radius:var(--radius-m);padding:1rem;margin-bottom:.8rem;
-  box-shadow:var(--shadow-card);border:none;width:100%;text-align:left;
-}
-.mission-item__top{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.4rem;}
-.mission-item__title{font-weight:700;font-size:.92rem;}
-.mission-item__addr{font-size:.8rem;color:var(--muted);}
-
-/* ---- Vue profil ------------------------------------------------------- */
-.profile-card{background:#fff;border-radius:var(--radius-m);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-card);}
-.profile-card h3{font-size:.95rem;margin-bottom:.9rem;}
-.profile-row{display:flex;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.85rem;}
-.profile-row:last-child{border-bottom:none;}
-.profile-row dt{color:var(--muted);}
-.profile-row dd{margin:0;font-weight:700;text-align:right;}
-.spec-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.3rem;}
-.spec-tag{background:var(--cream-200);color:var(--navy-900);font-size:.72rem;font-weight:700;padding:.25em .65em;border-radius:6px;}
-
-/* ---- Navigation basse ---------------------------------------------------- */
-.nav-bar{
-  height:64px;background:#fff;border-top:1px solid var(--border);
-  display:flex;justify-content:space-around;align-items:center;
-  padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0;z-index:20;
-}
-.nav-item{
-  display:flex;flex-direction:column;align-items:center;gap:.2rem;
-  background:none;border:none;color:var(--muted);font-size:.68rem;font-weight:700;padding:.4rem .8rem;
-}
-.nav-item svg{width:21px;height:21px;fill:currentColor;}
-.nav-item.is-active{color:var(--gold-500);}
-.nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--danger);position:relative;top:-14px;left:10px;display:none;}
-.nav-item .dot.show{display:block;}
-
-/* =========================================================================
-   MODALE MISSION
-   ========================================================================= */
-.modal-overlay{
-  position:fixed;inset:0;z-index:200;background:rgba(10,23,41,.6);
-  display:flex;align-items:flex-end;justify-content:center;
-}
-.modal-overlay[hidden]{display:none;}
-@media (min-width:640px){.modal-overlay{align-items:center;}}
-.modal{
-  position:relative;background:#fff;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;
-  border-radius:var(--radius-l) var(--radius-l) 0 0;padding:1.6rem;
-  padding-bottom:calc(1.6rem + env(safe-area-inset-bottom,0px));
-  animation:slideUp .22s ease-out;
-}
-@media (min-width:640px){.modal{border-radius:var(--radius-l);}}
-@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal__close{position:absolute;top:1rem;right:1rem;width:32px;height:32px;border-radius:50%;
-  border:none;background:var(--cream-200);font-size:.9rem;color:var(--navy-950);}
-.modal__title{font-size:1.3rem;margin-bottom:.3rem;padding-right:2rem;}
-.modal__meta{display:flex;gap:.5rem;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted);}
-.modal__section{margin-bottom:1.2rem;}
-.modal__section h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem;font-weight:700;}
-.modal__photos{display:flex;gap:.6rem;flex-wrap:wrap;}
-.modal__photos img{width:88px;height:88px;object-fit:cover;border-radius:var(--radius-s);}
-.action-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.8rem;}
-.btn-action{padding:.8em;border-radius:var(--radius-s);text-align:center;font-size:.8rem;font-weight:700;
-  text-decoration:none;display:flex;align-items:center;justify-content:center;gap:.4rem;
-  border:1.5px solid var(--border);background:#fff;color:var(--navy-950);}
-.btn-call{background:var(--success);color:#fff;border:none;}
-.btn-mail{background:var(--navy-950);color:var(--cream-100);border:none;}
-.progress-steps{display:flex;align-items:center;gap:.3rem;margin-bottom:1.2rem;}
-.progress-steps .seg{flex:1;height:5px;border-radius:999px;background:var(--border);}
-.progress-steps .seg.done{background:var(--gold-500);}
-.photo-zone{border:1.5px dashed var(--gold-500);background:var(--gold-100);padding:.9rem;border-radius:var(--radius-s);margin-bottom:1rem;}
-.photo-zone h5{font-size:.78rem;color:#6b4f22;margin-bottom:.5rem;font-weight:700;}
-.photo-zone input{font-size:.78rem;width:100%;}
-
-/* =========================================================================
-   TOASTS
-   ========================================================================= */
-#toast-region{position:fixed;top:calc(env(safe-area-inset-top,0px) + 1rem);left:1rem;right:1rem;
-  z-index:500;display:flex;flex-direction:column;gap:.5rem;align-items:center;pointer-events:none;}
-.toast{
-  background:var(--navy-950);color:var(--cream-100);padding:.75em 1.1em;border-radius:var(--radius-s);
-  font-size:.85rem;font-weight:600;box-shadow:0 10px 28px rgba(0,0,0,.25);max-width:420px;
-  display:flex;align-items:center;gap:.5em;animation:toast-in .2s ease-out;
-}
-.toast--success{background:var(--success);}
-.toast--error{background:var(--danger);}
-@keyframes toast-in{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:none;}}
-
-/* ---- Skeleton loading ---------------------------------------------------- */
-.skeleton{background:linear-gradient(90deg,var(--cream-200) 25%,#fff 37%,var(--cream-200) 63%);
-  background-size:400% 100%;animation:skeleton-loading 1.4s ease infinite;border-radius:var(--radius-s);}
-@keyframes skeleton-loading{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
-
-@media (max-width:360px){.field-row{grid-template-columns:1fr;}.action-grid-2{grid-template-columns:1fr;}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Artisans - Entreprise 3</title>
+    <!-- Tailwind CSS pour un design moderne et pro -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-20">
 
-<div id="toast-region" role="status" aria-live="polite"></div>
-
-<!-- =====================================================================
-     CONNEXION
-     ===================================================================== -->
-<div id="login-screen" class="auth-screen">
-  <div class="auth-card">
-    <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
-    <h1>Espace artisan</h1>
-    <p class="lead">Connectez-vous pour accéder aux chantiers disponibles en Île-de-France.</p>
-    <p class="form-error" id="login-error" hidden></p>
-    <form id="login-form">
-      <div class="field">
-        <label for="login-email">E-mail professionnel</label>
-        <input type="email" id="login-email" required autocomplete="email" />
-      </div>
-      <div class="field">
-        <label for="login-pass">Mot de passe</label>
-        <input type="password" id="login-pass" required autocomplete="current-password" />
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" id="login-btn">Se connecter</button>
-    </form>
-    <button type="button" class="btn btn-ghost btn-block" style="margin-top:.7rem;" onclick="lancerModeDemo()">🧪 Essayer en mode démo (sans Supabase)</button>
-    <p class="auth-switch">Pas encore de compte ? <button type="button" onclick="afficherEcran('register')">S'inscrire avec un code partenaire</button></p>
-  </div>
-</div>
-
-<!-- =====================================================================
-     INSCRIPTION
-     ===================================================================== -->
-<div id="register-screen" class="auth-screen" hidden>
-  <div class="auth-card">
-    <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
-    <h1>Rejoindre le réseau</h1>
-    <p class="lead">Votre dossier sera vérifié avant validation de votre accès aux chantiers.</p>
-    <p class="form-error" id="register-error" hidden></p>
-
-    <form id="register-form">
-      <fieldset>
-        <legend>Accès partenaire</legend>
-        <div class="field">
-          <label for="reg-code">Code d'accès partenaire</label>
-          <input type="text" id="reg-code" required placeholder="ENTREPRISE3" />
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white font-bold">
+                    <i class="fa-solid fa-helmet-safety"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">ENTREPRISE 3</h1>
+                    <p class="text-xs text-indigo-300">Réseau Artisans & Syndics</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="chargerInterventions()" class="bg-indigo-800 hover:bg-indigo-700 p-2 rounded-full text-xs transition" title="Actualiser">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-indigo-700 flex items-center justify-center font-bold text-sm border border-indigo-500">
+                    A
+                </div>
+            </div>
         </div>
-      </fieldset>
+    </header>
 
-      <fieldset>
-        <legend>Identifiants</legend>
-        <div class="field">
-          <label for="reg-email">E-mail</label>
-          <input type="email" id="reg-email" required autocomplete="email" />
+    <!-- CONTENU PRINCIPAL -->
+    <main class="max-w-md mx-auto px-4 mt-4">
+
+        <!-- STATUT DISPONIBILITÉ -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-4 flex justify-between items-center">
+            <div>
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Mon statut</span>
+                <h2 class="font-bold text-emerald-600 flex items-center gap-2 mt-0.5">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span> Prêt à intervenir
+                </h2>
+            </div>
+            <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full font-medium">Île-de-France</span>
         </div>
-        <div class="field">
-          <label for="reg-pass">Mot de passe</label>
-          <input type="password" id="reg-pass" required minlength="8" autocomplete="new-password" />
-          <p class="hint">8 caractères minimum.</p>
+
+        <!-- FILTRES RAPIDES -->
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
+            <button onclick="filtrer('tous')" class="px-4 py-2 bg-indigo-900 text-white text-xs font-medium rounded-full whitespace-nowrap shadow-sm">Toutes les offres</button>
+            <button onclick="filtrer('urgent')" class="px-4 py-2 bg-white text-slate-600 border border-slate-200 text-xs font-medium rounded-full whitespace-nowrap hover:bg-slate-50">Urgents</button>
+            <button onclick="filtrer('ponctuel')" class="px-4 py-2 bg-white text-slate-600 border border-slate-200 text-xs font-medium rounded-full whitespace-nowrap hover:bg-slate-50">Ponctuels</button>
+            <button onclick="filtrer('recurrent')" class="px-4 py-2 bg-white text-slate-600 border border-slate-200 text-xs font-medium rounded-full whitespace-nowrap hover:bg-slate-50">Contrats</button>
         </div>
-      </fieldset>
 
-      <fieldset>
-        <legend>Entreprise</legend>
-        <div class="field">
-          <label for="reg-company">Nom de l'entreprise</label>
-          <input type="text" id="reg-company" required />
+        <!-- LISTE DES DEMANDES -->
+        <div id="liste-interventions" class="space-y-4">
+            <div class="text-center py-12 text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-indigo-600"></i>
+                <p class="text-sm">Connexion à la base de données...</p>
+            </div>
         </div>
-        <div class="field">
-          <label for="reg-gerant">Nom du gérant</label>
-          <input type="text" id="reg-gerant" required />
+
+    </main>
+
+    <!-- NAVIGATION BASSE -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg py-2 z-50">
+        <div class="max-w-md mx-auto flex justify-around text-slate-500 text-xs font-medium">
+            <a href="#" class="flex flex-col items-center text-indigo-600">
+                <i class="fa-solid fa-map-location-dot text-lg mb-1"></i>
+                <span>Chantiers</span>
+            </a>
+            <a href="#" class="flex flex-col items-center hover:text-indigo-600">
+                <i class="fa-solid fa-clock-rotate-left text-lg mb-1"></i>
+                <span>Historique</span>
+            </a>
+            <a href="#" class="flex flex-col items-center hover:text-indigo-600">
+                <i class="fa-solid fa-wallet text-lg mb-1"></i>
+                <span>Gains</span>
+            </a>
+            <a href="#" class="flex flex-col items-center hover:text-indigo-600">
+                <i class="fa-solid fa-gear text-lg mb-1"></i>
+                <span>Profil</span>
+            </a>
         </div>
-        <div class="field">
-          <label for="reg-tel">Téléphone</label>
-          <input type="tel" id="reg-tel" required />
-        </div>
-        <div class="field">
-          <label for="reg-siret">SIRET <span style="font-weight:400;">(facultatif)</span></label>
-          <input type="text" id="reg-siret" inputmode="numeric" pattern="[0-9]{14}" />
-        </div>
-        <div class="field">
-          <label>Spécialités</label>
-          <div class="chip-group" id="reg-specialites"></div>
-        </div>
-        <div class="field">
-          <label for="reg-zones">Zone d'intervention (départements)</label>
-          <input type="text" id="reg-zones" placeholder="75, 92, 93" required />
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Dossier de vérification</legend>
-        <div class="field">
-          <label for="doc-identite">Pièce d'identité du gérant</label>
-          <input type="file" id="doc-identite" class="file-field" accept="image/*,application/pdf" required />
-        </div>
-        <div class="field">
-          <label for="doc-decennale">Attestation d'assurance décennale</label>
-          <input type="file" id="doc-decennale" class="file-field" accept="image/*,application/pdf" required />
-        </div>
-        <div class="field">
-          <label for="doc-rcpro">Attestation RC Pro</label>
-          <input type="file" id="doc-rcpro" class="file-field" accept="image/*,application/pdf" required />
-        </div>
-        <div class="field">
-          <label for="doc-kbis">Extrait Kbis / justificatif d'activité</label>
-          <input type="file" id="doc-kbis" class="file-field" accept="image/*,application/pdf" required />
-        </div>
-      </fieldset>
-
-      <button type="submit" class="btn btn-gold btn-block" id="register-btn">Envoyer mon dossier</button>
-    </form>
-    <p class="auth-switch">Déjà inscrit ? <button type="button" onclick="afficherEcran('login')">Se connecter</button></p>
-  </div>
-</div>
-
-<!-- =====================================================================
-     APPLICATION
-     ===================================================================== -->
-<div id="app-screen">
-
-  <div class="views">
-
-    <!-- VUE CARTE ------------------------------------------------------ -->
-    <section id="view-map" class="view is-active">
-      <div class="top-bar">
-        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
-        <span class="status-pill" id="verif-pill">—</span>
-      </div>
-      <p class="verify-banner" id="verify-banner" hidden></p>
-
-      <div id="map"></div>
-      <div class="map-toolbar" style="top:76px;" id="category-toolbar"></div>
-      <button class="locate-btn" style="right:1rem; bottom:calc(46% + 1rem);" id="locate-btn" title="Me localiser" aria-label="Centrer la carte sur ma position">📍</button>
-
-      <section class="bottom-sheet" id="bottom-sheet" aria-label="Liste des chantiers disponibles">
-        <div class="bottom-sheet__handle"></div>
-        <div class="bottom-sheet__header">
-          <h2>Chantiers disponibles</h2>
-          <span class="badge-count" id="chantiers-count">0</span>
-        </div>
-        <div class="chantier-list" id="chantier-list"></div>
-      </section>
-    </section>
-
-    <!-- VUE MES MISSIONS ------------------------------------------------ -->
-    <section id="view-missions" class="view">
-      <div class="top-bar">
-        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Mes missions</span></div>
-      </div>
-      <div class="page">
-        <div class="tab-filter" id="missions-filter">
-          <button data-filter="actif" class="is-active">En cours</button>
-          <button data-filter="termine">Terminées</button>
-          <button data-filter="tous">Toutes</button>
-        </div>
-        <div id="missions-list"></div>
-      </div>
-    </section>
-
-    <!-- VUE PROFIL -------------------------------------------------------- -->
-    <section id="view-profile" class="view">
-      <div class="top-bar">
-        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Mon profil</span></div>
-        <button class="btn btn-ghost btn-sm" id="logout-btn">Déconnexion</button>
-      </div>
-      <div class="page" id="profile-page"></div>
-    </section>
-
-  </div>
-
-  <!-- NAVIGATION BASSE -->
-  <nav class="nav-bar" aria-label="Navigation principale">
-    <button class="nav-item is-active" data-view="map" aria-current="page">
-      <svg viewBox="0 0 24 24"><path d="M12 2.1L1 12h3v9h7v-6h2v6h7v-9h3L12 2.1zm0 2.9l6 5.4v7.6h-3v-6H9v6H6v-7.6l6-5.4z"/></svg>
-      Chantiers
-    </button>
-    <button class="nav-item" data-view="missions">
-      <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
-      Missions<span class="dot" id="missions-dot"></span>
-    </button>
-    <button class="nav-item" data-view="profile">
-      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      Profil
-    </button>
-  </nav>
-</div>
-
-<!-- =====================================================================
-     MODALE DÉTAIL MISSION
-     ===================================================================== -->
-<div class="modal-overlay" id="modal-overlay" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <button class="modal__close" id="modal-close" aria-label="Fermer">✕</button>
-    <div id="modal-body"></div>
-  </div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-/* =========================================================================
-   CONFIGURATION SUPABASE
-   ========================================================================= */
-const SUPABASE_URL = 'https://nyowrqutvwrgpcwvyeup.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55b3dycXV0dndyZ3Bjd3Z5ZXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDE1MzUsImV4cCI6MjA5NDA3NzUzNX0.fl3MNDrEJOpH5JMHvKCJQDNfQZ1V4sZKEPWUai8MKf8';
-const CODE_PARTENAIRE = 'ENTREPRISE3';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const CATEGORIES = [
-  { value:'plomberie', label:'Plomberie', icone:'🔧' },
-  { value:'electricite', label:'Électricité', icone:'⚡' },
-  { value:'chauffage', label:'Chauffage', icone:'🔥' },
-  { value:'ascenseur', label:'Ascenseur', icone:'🛗' },
-  { value:'interphone', label:'Interphone', icone:'📞' },
-  { value:'portes', label:'Portes', icone:'🚪' },
-  { value:'camera', label:'Caméra', icone:'📷' },
-  { value:'proprete', label:'Propreté', icone:'🧹' },
-  { value:'serrurerie', label:'Serrurerie', icone:'🔑' },
-  { value:'renovation', label:'Rénovation', icone:'🏗️' },
-  { value:'deratisation', label:'Dératisation', icone:'🐀' },
-  { value:'autre', label:'Autre', icone:'✨' },
-];
-const URGENCES = {
-  faible:{ label:'Faible' }, modere:{ label:'Modéré' }, urgent:{ label:'Urgent' }
-};
-const STATUTS = {
-  nouveau:'Disponible', assigne:'Assignée', en_cours:'En cours', termine:'Terminée', annule:'Annulée'
-};
-
-/* =========================================================================
-   TOASTS
-   ========================================================================= */
-function toast(message, type = 'info') {
-  const region = document.getElementById('toast-region');
-  const el = document.createElement('div');
-  el.className = `toast toast--${type}`;
-  el.textContent = message;
-  region.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; setTimeout(() => el.remove(), 250); }, 3200);
-}
-
-/* =========================================================================
-   ÉTAT GLOBAL
-   ========================================================================= */
-let DEMO_MODE = false;
-let currentArtisan = null;
-let map = null;
-
-/* ---- Données de démonstration (aucun Supabase requis) ------------------- */
-const MOCK_ARTISAN = {
-  id: 'demo-artisan',
-  nom_entreprise: 'Bati Rénov 92 (démo)',
-  nom_gerant: 'Alex Martin',
-  telephone: '06 12 34 56 78',
-  email: 'demo@entreprise3.fr',
-  siret: null,
-  specialites: ['plomberie', 'electricite'],
-  zones_intervention: ['75', '92', '93'],
-  statut_verification: 'valide',
-};
-const MOCK_INTERVENTIONS = [
-  { id:'demo-1', reference:'GD-2026-0001', zone:'parties_communes', adresse:'12 rue des Lilas', code_postal:'75011', ville:'Paris', etage:null, porte:null, latitude:48.8589, longitude:2.3800, categorie:'plomberie', urgence:'urgent', description:"Fuite d'eau importante dans la cage d'escalier, niveau RDC.", photos:[], profil_demandeur:'gestionnaire', nom:'Martin', prenom:'Claire', telephone:'0612345678', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
-  { id:'demo-2', reference:'GD-2026-0002', zone:'appartement', adresse:'45 avenue Jean Jaurès', code_postal:'93500', ville:'Pantin', etage:'3', porte:'B', latitude:48.8958, longitude:2.4014, categorie:'electricite', urgence:'modere', description:'Disjoncteur qui saute régulièrement dans la cuisine.', photos:[], profil_demandeur:'locataire', nom:'Nguyen', prenom:'Paul', telephone:'0623456789', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
-  { id:'demo-3', reference:'GD-2026-0003', zone:'exterieur', adresse:'8 place de la Mairie', code_postal:'92300', ville:'Levallois-Perret', etage:null, porte:null, latitude:48.8938, longitude:2.2870, categorie:'serrurerie', urgence:'faible', description:'Porte du local vélo qui ferme mal, gond à resserrer.', photos:[], profil_demandeur:'proprietaire', nom:'Dubois', prenom:'Sophie', telephone:'0634567890', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
-];
-let markers = new Map();
-let userMarker = null;
-let userPosition = null;
-let interventions = [];
-let missions = [];
-let categorieFiltre = null;
-let missionsFiltre = 'actif';
-
-/* =========================================================================
-   NAVIGATION AUTH <-> APP
-   ========================================================================= */
-function afficherEcran(mode) {
-  document.getElementById('login-screen').hidden = mode !== 'login';
-  document.getElementById('register-screen').hidden = mode !== 'register';
-}
-
-// Chips de spécialités à l'inscription
-const selectedSpecialites = new Set();
-(function initSpecialitesChips() {
-  const container = document.getElementById('reg-specialites');
-  if (!container) return;
-  container.innerHTML = CATEGORIES.filter(c => c.value !== 'autre').map(c =>
-    `<button type="button" class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`
-  ).join('');
-  container.addEventListener('click', (e) => {
-    const btn = e.target.closest('.chip');
-    if (!btn) return;
-    btn.classList.toggle('is-selected');
-    btn.classList.contains('is-selected') ? selectedSpecialites.add(btn.dataset.value) : selectedSpecialites.delete(btn.dataset.value);
-  });
-})();
-
-// Suivi visuel des fichiers sélectionnés à l'inscription
-document.querySelectorAll('.file-field').forEach(input => {
-  input.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-      e.target.classList.add('has-file');
-    } else {
-      e.target.classList.remove('has-file');
-    }
-  });
-});
-
-/* =========================================================================
-   CONNEXION
-   ========================================================================= */
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const errorEl = document.getElementById('login-error');
-  const btn = document.getElementById('login-btn');
-  errorEl.hidden = true;
-  btn.disabled = true; btn.textContent = 'Connexion…';
-
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-pass').value;
-
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) {
-    errorEl.textContent = 'Identifiants invalides. Vérifiez votre e-mail et mot de passe.';
-    errorEl.hidden = false;
-    btn.disabled = false; btn.textContent = 'Se connecter';
-    return;
-  }
-  await lancerApplication();
-});
-
-/* =========================================================================
-   INSCRIPTION
-   ========================================================================= */
-document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const errorEl = document.getElementById('register-error');
-  const btn = document.getElementById('register-btn');
-  errorEl.hidden = true;
-
-  if (document.getElementById('reg-code').value.trim().toUpperCase() !== CODE_PARTENAIRE) {
-    errorEl.textContent = "Code d'accès partenaire invalide.";
-    errorEl.hidden = false;
-    return;
-  }
-  if (selectedSpecialites.size === 0) {
-    errorEl.textContent = 'Sélectionnez au moins une spécialité.';
-    errorEl.hidden = false;
-    return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Envoi en cours…';
-
-  try {
-    const email = document.getElementById('reg-email').value;
-    const password = document.getElementById('reg-pass').value;
-
-    const { data: signUpData, error: signUpError } = await sb.auth.signUp({ email, password });
-    if (signUpError) throw signUpError;
-    const artisanId = signUpData.user.id;
-
-    const zones = document.getElementById('reg-zones').value.split(',').map(z => z.trim()).filter(Boolean);
-
-    const { error: profileError } = await sb.from('artisans').insert({
-      id: artisanId,
-      code_partenaire: CODE_PARTENAIRE,
-      nom_entreprise: document.getElementById('reg-company').value,
-      nom_gerant: document.getElementById('reg-gerant').value,
-      telephone: document.getElementById('reg-tel').value,
-      email,
-      siret: document.getElementById('reg-siret').value || null,
-      specialites: Array.from(selectedSpecialites),
-      zones_intervention: zones,
-    });
-    if (profileError) throw profileError;
-
-    const documentFields = [
-      ['doc-identite', 'piece_identite'],
-      ['doc-decennale', 'assurance_decennale'],
-      ['doc-rcpro', 'rc_pro'],
-      ['doc-kbis', 'kbis'],
-    ];
-    for (const [inputId, typeDocument] of documentFields) {
-      const file = document.getElementById(inputId).files[0];
-      if (!file) continue;
-      const path = `${artisanId}/${typeDocument}-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await sb.storage.from('artisan-documents').upload(path, file);
-      if (uploadError) throw uploadError;
-      await sb.from('artisan_documents').insert({ artisan_id: artisanId, type_document: typeDocument, chemin_fichier: path });
-    }
-
-    toast('Dossier envoyé ! Vous serez notifié dès sa validation.', 'success');
-    await lancerApplication();
-  } catch (err) {
-    console.error(err);
-    errorEl.textContent = err.message || "Une erreur est survenue lors de l'inscription.";
-    errorEl.hidden = false;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Envoyer mon dossier';
-  }
-});
-
-/* =========================================================================
-   LANCEMENT DE L'APPLICATION
-   ========================================================================= */
-function lancerModeDemo() {
-  DEMO_MODE = true;
-  currentArtisan = { ...MOCK_ARTISAN };
-  interventions = MOCK_INTERVENTIONS.map(i => ({ ...i }));
-  missions = [];
-  demarrerApplication();
-  toast('Mode démo activé — aucune donnée n\'est envoyée à Supabase.', 'success');
-}
-
-async function lancerApplication() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { afficherEcran('login'); return; }
-
-  const { data: artisan, error } = await sb.from('artisans').select('*').eq('id', session.user.id).single();
-  if (error || !artisan) {
-    toast("Impossible de charger votre profil. Vérifiez que Supabase est configuré, ou utilisez le mode démo.", 'error');
-    afficherEcran('login');
-    return;
-  }
-  currentArtisan = artisan;
-  await demarrerApplication();
-}
-
-async function demarrerApplication() {
-
-  document.getElementById('login-screen').hidden = true;
-  document.getElementById('register-screen').hidden = true;
-  document.getElementById('app-screen').classList.add('is-active');
-
-  const pill = document.getElementById('verif-pill');
-  pill.textContent = DEMO_MODE ? '🧪 Mode démo' : currentArtisan.statut_verification === 'valide' ? '✓ Compte validé'
-    : currentArtisan.statut_verification === 'refuse' ? 'Dossier refusé' : 'En vérification';
-  pill.className = `status-pill status-pill--${DEMO_MODE ? 'valide' : currentArtisan.statut_verification}`;
-
-  const banner = document.getElementById('verify-banner');
-  if (!DEMO_MODE && currentArtisan.statut_verification !== 'valide') {
-    banner.hidden = false;
-    banner.textContent = currentArtisan.statut_verification === 'refuse'
-      ? "Votre dossier n'a pas été validé. Contactez le support pour plus d'informations."
-      : "Votre dossier est en cours de vérification. Vous aurez accès aux chantiers dès sa validation.";
-  } else {
-    banner.hidden = true;
-  }
-
-  initCategoryToolbar();
-  initMap();
-  renderProfile();
-
-  if (DEMO_MODE) {
-    renderMarkers();
-    renderChantierList();
-    renderMissionsList();
-  } else {
-    await chargerChantiers();
-    await chargerMesMissions();
-    subscribeRealtime();
-  }
-  localiserArtisan();
-}
-
-/* =========================================================================
-   NAVIGATION ENTRE VUES
-   ========================================================================= */
-document.querySelectorAll('.nav-item').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const target = btn.dataset.view;
-    document.querySelectorAll('.nav-item').forEach(b => { b.classList.toggle('is-active', b === btn); b.removeAttribute('aria-current'); });
-    btn.setAttribute('aria-current', 'page');
-    document.querySelectorAll('.view').forEach(v => v.classList.toggle('is-active', v.id === `view-${target}`));
-    if (target === 'map' && map) setTimeout(() => map.invalidateSize(), 50);
-    if (target === 'missions') renderMissionsList();
-  });
-});
-
-/* =========================================================================
-   CARTE
-   ========================================================================= */
-function initMap() {
-  if (map) return;
-  map = L.map('map', { zoomControl: false }).setView([48.8566, 2.3522], 11);
-  L.control.zoom({ position: 'bottomleft' }).addTo(map);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
-}
-
-function initCategoryToolbar() {
-  const toolbar = document.getElementById('category-toolbar');
-  if (!toolbar) return;
-  toolbar.innerHTML = `<button class="chip is-selected" data-value="">Toutes</button>` +
-    CATEGORIES.map(c => `<button class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`).join('');
-  toolbar.addEventListener('click', (e) => {
-    const btn = e.target.closest('.chip');
-    if (!btn) return;
-    toolbar.querySelectorAll('.chip').forEach(c => c.classList.remove('is-selected'));
-    btn.classList.add('is-selected');
-    categorieFiltre = btn.dataset.value || null;
-    renderMarkers();
-    renderChantierList();
-  });
-}
-
-function markerIcon(urgence, mine = false) {
-  const cls = mine ? 'mine' : urgence;
-  const symbol = urgence === 'urgent' ? '!' : '•';
-  return L.divIcon({ className: '', html: `<div class="marker-pin marker-pin--${cls}"><span>${symbol}</span></div>`, iconSize:[36,36], iconAnchor:[18,36] });
-}
-
-function distanceKm(lat1, lng1, lat2, lng2) {
-  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-function localiserArtisan() {
-  if (!navigator.geolocation || !map) return;
-  navigator.geolocation.getCurrentPosition((pos) => {
-    userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    if (userMarker) map.removeLayer(userMarker);
-    userMarker = L.circleMarker([userPosition.lat, userPosition.lng], { radius: 8, color:'#fff', weight:3, fillColor:'#2c4d80', fillOpacity:1 }).addTo(map);
-    renderChantierList();
-  }, () => {}, { enableHighAccuracy: true, timeout: 8000 });
-}
-
-document.getElementById('locate-btn').addEventListener('click', () => {
-  if (userPosition && map) map.setView([userPosition.lat, userPosition.lng], 13);
-  else localiserArtisan();
-});
-
-/* =========================================================================
-   CHARGEMENT DES CHANTIERS DISPONIBLES
-   ========================================================================= */
-async function chargerChantiers() {
-  const list = document.getElementById('chantier-list');
-  list.innerHTML = `<div class="skeleton" style="height:64px;margin-bottom:.6rem;"></div>`.repeat(3);
-
-  const { data, error } = await sb.from('interventions').select('*').eq('statut', 'nouveau').order('created_at', { ascending: false });
-  if (error) { toast('Impossible de charger les chantiers.', 'error'); interventions = []; }
-  else interventions = data || [];
-
-  renderMarkers();
-  renderChantierList();
-}
-
-function filteredInterventions() {
-  let list = interventions;
-  if (categorieFiltre) list = list.filter(i => i.categorie === categorieFiltre);
-  if (userPosition) {
-    list = list.map(i => ({ ...i, _distance: (i.latitude && i.longitude) ? distanceKm(userPosition.lat, userPosition.lng, i.latitude, i.longitude) : null }));
-    list.sort((a, b) => (a._distance ?? 999) - (b._distance ?? 999));
-  }
-  return list;
-}
-
-function renderMarkers() {
-  if (!map) return;
-  markers.forEach(m => map.removeLayer(m));
-  markers.clear();
-  filteredInterventions().filter(i => i.latitude && i.longitude).forEach(i => {
-    const marker = L.marker([i.latitude, i.longitude], { icon: markerIcon(i.urgence) }).addTo(map);
-    marker.on('click', () => ouvrirModaleChantier(i));
-    markers.set(i.id, marker);
-  });
-}
-
-function categorieMeta(value) { return CATEGORIES.find(c => c.value === value) ?? { label: value, icone: '🛠️' }; }
-
-function renderChantierList() {
-  const list = document.getElementById('chantier-list');
-  const filtered = filteredInterventions();
-  document.getElementById('chantiers-count').textContent = filtered.length;
-
-  if (filtered.length === 0) {
-    list.innerHTML = `<p class="empty-state">Aucun chantier disponible pour ce filtre actuellement.</p>`;
-    return;
-  }
-
-  list.innerHTML = filtered.map(i => {
-    const cat = categorieMeta(i.categorie);
-    const dist = i._distance != null ? ` · ${i._distance.toFixed(1)} km` : '';
-    return `
-    <button class="chantier-card" data-id="${i.id}">
-      <span class="chantier-card__icon">${cat.icone}</span>
-      <span class="chantier-card__info">
-        <span class="chantier-card__title">${cat.label}</span>
-        <span class="chantier-card__meta">${i.adresse ?? ''}${i.ville ? ', ' + i.ville : ''}${dist}</span>
-      </span>
-      <span class="urgence-tag urgence-tag--${i.urgence}">${URGENCES[i.urgence]?.label ?? i.urgence}</span>
-    </button>`;
-  }).join('');
-
-  list.querySelectorAll('.chantier-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const i = interventions.find(x => x.id === card.dataset.id);
-      if (i) ouvrirModaleChantier(i);
-    });
-  });
-}
-
-/* =========================================================================
-   MODALE — DÉTAIL D'UN CHANTIER
-   ========================================================================= */
-const overlay = document.getElementById('modal-overlay');
-const modalBody = document.getElementById('modal-body');
-
-async function photoUrl(path) { 
-  return sb.storage.from('intervention-photos').getPublicUrl(path).data.publicUrl; 
-}
-
-async function ouvrirModaleChantier(intervention) {
-  const cat = categorieMeta(intervention.categorie);
-  const photos = await Promise.all((intervention.photos || []).map(photoUrl));
-
-  modalBody.innerHTML = `
-    <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
-    <div class="modal__meta">
-      <span class="urgence-tag urgence-tag--${intervention.urgence}">${URGENCES[intervention.urgence]?.label}</span>
-      <span>Réf. ${intervention.reference ?? '—'}</span>
-    </div>
-    <div class="modal__section">
-      <h4>Adresse</h4>
-      <p>${intervention.adresse ?? ''}${intervention.etage ? `, étage ${intervention.etage}` : ''}${intervention.porte ? `, porte ${intervention.porte}` : ''}<br>${intervention.code_postal ?? ''} ${intervention.ville ?? ''}</p>
-    </div>
-    <div class="action-grid-2">
-      <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((intervention.adresse||'')+' '+(intervention.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
-      <a class="btn-action btn-call" href="tel:${intervention.telephone}">📞 Appeler</a>
-    </div>
-    <div class="modal__section">
-      <h4>Description</h4>
-      <p>${intervention.description ?? ''}</p>
-    </div>
-    ${photos.length ? `<div class="modal__section"><h4>Photos</h4><div class="modal__photos">${photos.map(u => `<img src="${u}" alt="Photo du chantier" />`).join('')}</div></div>` : ''}
-    <div class="modal__section">
-      <h4>Demandeur</h4>
-      <p>${intervention.prenom ?? ''} ${intervention.nom ?? ''} · ${intervention.telephone ?? ''}</p>
-    </div>
-    <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' && !DEMO_MODE ? 'disabled' : ''}>
-      ${currentArtisan.statut_verification !== 'valide' && !DEMO_MODE ? 'Compte non validé' : 'Accepter la mission'}
-    </button>
-  `;
-  document.getElementById('accept-btn')?.addEventListener('click', () => accepterMission(intervention.id));
-  ouvrirOverlay();
-}
-
-function ouvrirOverlay() {
-  overlay.hidden = false;
-  document.getElementById('modal-close').focus();
-}
-function fermerModale() { overlay.hidden = true; modalBody.innerHTML = ''; }
-document.getElementById('modal-close').addEventListener('click', fermerModale);
-overlay.addEventListener('click', (e) => { if (e.target === overlay) fermerModale(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) fermerModale(); });
-
-async function accepterMission(interventionId) {
-  if (DEMO_MODE) {
-    const i = interventions.find(x => x.id === interventionId);
-    if (i) {
-      i.statut = 'assigne';
-      i.artisan_id = currentArtisan.id;
-      i.assigned_at = new Date().toISOString();
-      missions.unshift({ ...i });
-      interventions = interventions.filter(x => x.id !== interventionId);
-    }
-    toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
-    fermerModale();
-    renderMarkers();
-    renderChantierList();
-    renderMissionsList();
-    return;
-  }
-
-  const { error } = await sb.from('interventions')
-    .update({ statut: 'assigne', artisan_id: currentArtisan.id, assigned_at: new Date().toISOString() })
-    .eq('id', interventionId).eq('statut', 'nouveau');
-
-  if (error) {
-    toast("Ce chantier vient d'être pris en charge par un autre artisan.", 'error');
-  } else {
-    toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
-  }
-  fermerModale();
-  await chargerChantiers();
-  await chargerMesMissions();
-}
-
-/* =========================================================================
-   MES MISSIONS
-   ========================================================================= */
-async function chargerMesMissions() {
-  if (DEMO_MODE) return;
-  const { data, error } = await sb.from('interventions').select('*').eq('artisan_id', currentArtisan.id).order('assigned_at', { ascending: false });
-  if (error) { toast('Impossible de charger vos missions.', 'error'); return; }
-  missions = data || [];
-  const dot = document.getElementById('missions-dot');
-  dot.classList.toggle('show', missions.some(m => m.statut === 'assigne'));
-  renderMissionsList();
-}
-
-document.getElementById('missions-filter').addEventListener('click', (e) => {
-  const btn = e.target.closest('button');
-  if (!btn) return;
-  document.querySelectorAll('#missions-filter button').forEach(b => b.classList.remove('is-active'));
-  btn.classList.add('is-active');
-  missionsFiltre = btn.dataset.filter;
-  renderMissionsList();
-});
-
-function renderMissionsList() {
-  const container = document.getElementById('missions-list');
-  let list = missions;
-  if (missionsFiltre === 'actif') list = list.filter(m => ['assigne','en_cours'].includes(m.statut));
-  if (missionsFiltre === 'termine') list = list.filter(m => m.statut === 'termine');
-
-  if (list.length === 0) {
-    container.innerHTML = `<p class="empty-state">Aucune mission dans cette catégorie.</p>`;
-    return;
-  }
-
-  container.innerHTML = list.map(m => {
-    const cat = categorieMeta(m.categorie);
-    return `
-    <button class="mission-item" data-id="${m.id}">
-      <div class="mission-item__top">
-        <span class="mission-item__title">${cat.icone} ${cat.label}</span>
-        <span class="statut-tag">${STATUTS[m.statut] ?? m.statut}</span>
-      </div>
-      <p class="mission-item__addr">${m.adresse ?? ''}${m.ville ? ', ' + m.ville : ''}</p>
-    </button>`;
-  }).join('');
-
-  container.querySelectorAll('.mission-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const m = missions.find(x => x.id === item.dataset.id);
-      if (m) ouvrirModaleMission(m);
-    });
-  });
-}
-
-/* =========================================================================
-   MODALE — SUIVI D'UNE MISSION ASSIGNÉE
-   ========================================================================= */
-function ouvrirModaleMission(mission) {
-  const cat = categorieMeta(mission.categorie);
-  const steps = ['assigne', 'en_cours', 'termine'];
-  const currentIdx = steps.indexOf(mission.statut);
-
-  modalBody.innerHTML = `
-    <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
-    <div class="modal__meta"><span>Réf. ${mission.reference ?? '—'}</span></div>
-
-    <div class="progress-steps">
-      ${steps.map((s, i) => `<div class="seg ${i <= currentIdx ? 'done' : ''}"></div>`).join('')}
-    </div>
-
-    <div class="modal__section">
-      <h4>Adresse</h4>
-      <p>${mission.adresse ?? ''}${mission.ville ? ', ' + mission.ville : ''}</p>
-    </div>
-    <div class="action-grid-2">
-      <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((mission.adresse||'')+' '+(mission.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
-      <a class="btn-action btn-call" href="tel:${mission.telephone}">📞 Appeler</a>
-    </div>
-    <div class="modal__section">
-      <h4>Description</h4>
-      <p>${mission.description ?? ''}</p>
-    </div>
-
-    ${mission.statut === 'termine' ? `
-      <div class="form-success">✓ Mission clôturée le ${new Date(mission.updated_at).toLocaleDateString('fr-FR')}.</div>
-    ` : mission.statut === 'en_cours' ? `
-      <div class="photo-zone">
-        <h5>📸 Photo de fin de chantier (preuve pour le syndic)</h5>
-        <input type="file" id="photo-fin-input" accept="image/*" />
-      </div>
-      <button class="btn btn-gold btn-block" id="cloturer-btn">Clôturer le chantier</button>
-    ` : `
-      <button class="btn btn-primary btn-block" id="demarrer-btn">Démarrer l'intervention</button>
-    `}
-  `;
-
-  document.getElementById('demarrer-btn')?.addEventListener('click', () => changerStatutMission(mission.id, 'en_cours'));
-  document.getElementById('cloturer-btn')?.addEventListener('click', () => cloturerMission(mission.id));
-  ouvrirOverlay();
-}
-
-async function changerStatutMission(id, statut) {
-  if (DEMO_MODE) {
-    const m = missions.find(x => x.id === id);
-    if (m) m.statut = statut;
-    toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
-    fermerModale();
-    renderMissionsList();
-    return;
-  }
-  const { error } = await sb.from('interventions').update({ statut }).eq('id', id);
-  if (error) { toast('Une erreur est survenue.', 'error'); return; }
-  toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
-  fermerModale();
-  await chargerMesMissions();
-}
-
-async function cloturerMission(id) {
-  const fileInput = document.getElementById('photo-fin-input');
-  const btn = document.getElementById('cloturer-btn');
-  btn.disabled = true; btn.textContent = 'Clôture en cours…';
-
-  if (DEMO_MODE) {
-    const m = missions.find(x => x.id === id);
-    if (m) { m.statut = 'termine'; m.updated_at = new Date().toISOString(); }
-    toast('Chantier clôturé, rapport transmis.', 'success');
-    fermerModale();
-    renderMissionsList();
-    return;
-  }
-
-  try {
-    const updates = { statut: 'termine', updated_at: new Date().toISOString() };
-    if (fileInput?.files[0]) {
-      const file = fileInput.files[0];
-      const path = `preuve-fin/${id}-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await sb.storage.from('intervention-photos').upload(path, file);
-      if (uploadError) throw uploadError;
-      updates.photos_fin = [path];
-    }
-    const { error } = await sb.from('interventions').update(updates).eq('id', id);
-    if (error) throw error;
-
-    toast('Chantier clôturé, rapport transmis.', 'success');
-    fermerModale();
-    await chargerMesMissions();
-  } catch (err) {
-    console.error(err);
-    toast("Erreur lors de la clôture. Réessayez.", 'error');
-    btn.disabled = false; btn.textContent = 'Clôturer le chantier';
-  }
-}
-
-/* =========================================================================
-   PROFIL
-   ========================================================================= */
-function renderProfile() {
-  const a = currentArtisan;
-  if (!a) return;
-  document.getElementById('profile-page').innerHTML = `
-    <div class="profile-card">
-      <h3>${a.nom_entreprise}</h3>
-      <dl>
-        <div class="profile-row"><dt>Gérant</dt><dd>${a.nom_gerant}</dd></div>
-        <div class="profile-row"><dt>Téléphone</dt><dd>${a.telephone}</dd></div>
-        <div class="profile-row"><dt>E-mail</dt><dd>${a.email}</dd></div>
-        <div class="profile-row"><dt>SIRET</dt><dd>${a.siret ?? '—'}</dd></div>
-        <div class="profile-row"><dt>Zones</dt><dd>${(a.zones_intervention||[]).join(', ') || '—'}</dd></div>
-      </dl>
-      <div class="spec-tags">
-        ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone}${categorieMeta(s).label}</span>`).join('')}
-      </div>
-    </div>
-    <div class="profile-card">
-      <h3>Statut du dossier</h3>
-      <span class="status-pill status-pill--${a.statut_verification}">${a.statut_verification === 'valide' ? '✓ Validé' : a.statut_verification === 'refuse' ? 'Refusé' : 'En vérification'}</span>
-    </div>
-  `;
-}
-
-document.getElementById('logout-btn').addEventListener('click', async () => {
-  await sb.auth.signOut();
-  window.location.reload();
-});
-
-/* =========================================================================
-   TEMPS RÉEL
-   ========================================================================= */
-function subscribeRealtime() {
-  if (DEMO_MODE) return;
-  sb.channel('interventions-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'interventions' }, () => {
-      chargerChantiers();
-      chargerMesMissions();
-    })
-    .subscribe();
-}
-
-/* =========================================================================
-   INITIALISATION
-   ========================================================================= */
-(async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) await lancerApplication();
-})();
-</script>
+    </nav>
+
+    <!-- SCRIPT DE CONNEXION SUPABASE -->
+    <script>
+        // Utilisation des mêmes identifiants que votre formulaire client (demande.html)
+        const SUPABASE_URL = 'https://nyowrqutvwrgpcwvyeup.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55b3dycXV0dndyZ3Bjd3Z5ZXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDE1MzUsImV4cCI6MjA5NDA3NzUzNX0.fl3MNDrEJOpH5JMHvKCJQDNfQZ1V4sZKEPWUai8MKf8';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let toutesLesInterventions = [];
+
+        async function chargerInterventions() {
+            const container = document.getElementById('liste-interventions');
+            container.innerHTML = `
+                <div class="text-center py-12 text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-indigo-600"></i>
+                    <p class="text-sm">Actualisation des chantiers...</p>
+                </div>
+            `;
+
+            try {
+                const { data, error } = await _supabase
+                    .from('interventions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                toutesLesInterventions = data || [];
+                afficherInterventions(toutesLesInterventions);
+
+            } catch (err) {
+                console.error("Erreur Supabase :", err);
+                container.innerHTML = `
+                    <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-center">
+                        <i class="fa-solid fa-triangle-exclamation text-xl mb-1 text-amber-600"></i>
+                        <p class="text-sm font-semibold">Erreur de chargement</p>
+                        <p class="text-xs text-amber-600 mt-1">Impossible de récupérer les interventions depuis Supabase.</p>
+                        <button onclick="chargerInterventions()" class="mt-3 bg-amber-600 text-white text-xs px-4 py-2 rounded-lg font-medium hover:bg-amber-700">Réessayer</button>
+                    </div>
+                `;
+            }
+        }
+
+        function afficherInterventions(data) {
+            const container = document.getElementById('liste-interventions');
+            
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white border border-slate-100 p-8 rounded-xl text-center shadow-sm">
+                        <i class="fa-solid fa-folder-open text-3xl text-slate-300 mb-2"></i>
+                        <p class="text-sm font-semibold text-slate-600">Aucun chantier disponible pour le moment</p>
+                        <p class="text-xs text-slate-400 mt-1">Les nouvelles demandes issues de vos formulaires apparaîtront ici en direct.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = data.map(item => {
+                const isUrgent = item.urgence === 'urgent';
+                const adresseCompletes = `${item.adresse || ''}, ${item.code_postal || ''} ${item.ville || ''}`;
+                
+                return `
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-md ${isUrgent ? 'bg-rose-100 text-rose-700' : 'bg-indigo-50 text-indigo-700'}">
+                            ${item.type_demande || 'Intervention'} • Urgence : ${item.urgence || 'normale'}
+                        </span>
+                        <span class="text-xs text-slate-400">${item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}</span>
+                    </div>
+                    
+                    <h3 class="font-bold text-slate-900 text-sm mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-dot text-indigo-600"></i> ${adresseCompletes}
+                    </h3>
+                    
+                    <p class="text-xs text-slate-600 mb-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                        <b>Prestation(s) :</b> ${Array.isArray(item.prestations) ? item.prestations.join(', ') : (item.categorie || 'Non spécifié')}<br>
+                        ${item.description || 'Pas de description particulière.'}
+                    </p>
+
+                    <div class="flex gap-2">
+                        <button onclick="accepterMission('${item.reference || item.id}')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2.5 px-4 rounded-lg transition shadow-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check"></i> Accepter la mission
+                        </button>
+                        <a href="https://maps.google.com/?q=${encodeURIComponent(adresseCompletes)}" target="_blank" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center transition">
+                            <i class="fa-solid fa-diamond-turn-right"></i>
+                        </a>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        async function accepterMission(ref) {
+            alert("Mission sélectionnée ! Référence : " + ref);
+        }
+
+        function filtrer(critere) {
+            if (critere === 'tous') {
+                afficherInterventions(toutesLesInterventions);
+            } else if (critere === 'urgent') {
+                afficherInterventions(toutesLesInterventions.filter(i => i.urgence === 'urgent'));
+            } else if (critere === 'ponctuel' || critere === 'recurrent') {
+                afficherInterventions(toutesLesInterventions.filter(i => i.type_demande === critere));
+            }
+        }
+
+        chargerInterventions();
+    </script>
 </body>
 </html>
