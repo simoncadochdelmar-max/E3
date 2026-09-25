@@ -323,27 +323,14 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 <div id="toast-region" role="status" aria-live="polite"></div>
 
 <!-- =====================================================================
-     CONNEXION
+     CONNEXION (Simplifiée sans mail ni mot de passe)
      ===================================================================== -->
 <div id="login-screen" class="auth-screen">
   <div class="auth-card">
     <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
     <h1>Espace artisan</h1>
-    <p class="lead">Connectez-vous pour accéder aux chantiers disponibles en Île-de-France.</p>
-    <p class="form-error" id="login-error" hidden></p>
-    <form id="login-form">
-      <div class="field">
-        <label for="login-email">E-mail professionnel</label>
-        <input type="email" id="login-email" required autocomplete="email" />
-      </div>
-      <div class="field">
-        <label for="login-pass">Mot de passe</label>
-        <input type="password" id="login-pass" required autocomplete="current-password" />
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" id="login-btn">Se connecter</button>
-    </form>
-    <button type="button" class="btn btn-ghost btn-block" style="margin-top:.7rem;" onclick="lancerModeDemo()">🧪 Essayer en mode démo (sans Supabase)</button>
-    <p class="auth-switch">Pas encore de compte ? <button type="button" onclick="afficherEcran('register')">S'inscrire avec un code partenaire</button></p>
+    <p class="lead">Accédez directement aux chantiers disponibles en Île-de-France.</p>
+    <button type="button" class="btn btn-primary btn-block" id="login-btn" onclick="lancerModeDemo()">Connexion</button>
   </div>
 </div>
 
@@ -363,19 +350,6 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
         <div class="field">
           <label for="reg-code">Code d'accès partenaire</label>
           <input type="text" id="reg-code" required placeholder="ENTREPRISE3" />
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Identifiants</legend>
-        <div class="field">
-          <label for="reg-email">E-mail</label>
-          <input type="email" id="reg-email" required autocomplete="email" />
-        </div>
-        <div class="field">
-          <label for="reg-pass">Mot de passe</label>
-          <input type="password" id="reg-pass" required minlength="8" autocomplete="new-password" />
-          <p class="hint">8 caractères minimum.</p>
         </div>
       </fieldset>
 
@@ -429,7 +403,6 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 
       <button type="submit" class="btn btn-gold btn-block" id="register-btn">Envoyer mon dossier</button>
     </form>
-    <p class="auth-switch">Déjà inscrit ? <button type="button" onclick="afficherEcran('login')">Se connecter</button></p>
   </div>
 </div>
 
@@ -518,7 +491,7 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* =========================================================================
-   CONFIGURATION SUPABASE (PROJET OFFICIEL)
+   CONFIGURATION SUPABASE
    ========================================================================= */
 const SUPABASE_URL = 'https://yqjeqcomrubelahrvizd.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_hKaiVb_fWBPRgESxpwWNCA_iAN9acMe';
@@ -561,27 +534,28 @@ function toast(message, type = 'info') {
 /* =========================================================================
    ÉTAT GLOBAL
    ========================================================================= */
-let DEMO_MODE = false;
+let DEMO_MODE = true;
 let currentArtisan = null;
 let map = null;
 
-/* ---- Données de démonstration (aucun Supabase requis) ------------------- */
 const MOCK_ARTISAN = {
   id: 'demo-artisan',
-  nom_entreprise: 'Bati Rénov 92 (démo)',
-  nom_gerant: 'Alex Martin',
-  telephone: '06 12 34 56 78',
-  email: 'demo@entreprise3.fr',
+  nom_entreprise: 'Entreprise 3 Partenaire',
+  nom_gerant: 'Artisan',
+  telephone: '06 00 00 00 00',
+  email: 'artisan@entreprise3.fr',
   siret: null,
-  specialites: ['plomberie', 'electricite'],
+  specialites: ['plomberie', 'electricite', 'serrurerie'],
   zones_intervention: ['75', '92', '93'],
   statut_verification: 'valide',
 };
+
 const MOCK_INTERVENTIONS = [
   { id:'demo-1', reference:'GD-2026-0001', zone:'parties_communes', adresse:'12 rue des Lilas', code_postal:'75011', ville:'Paris', etage:null, porte:null, latitude:48.8589, longitude:2.3800, categorie:'plomberie', urgence:'urgent', description:"Fuite d'eau importante dans la cage d'escalier, niveau RDC.", photos:[], profil_demandeur:'gestionnaire', nom:'Martin', prenom:'Claire', telephone:'0612345678', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
   { id:'demo-2', reference:'GD-2026-0002', zone:'appartement', adresse:'45 avenue Jean Jaurès', code_postal:'93500', ville:'Pantin', etage:'3', porte:'B', latitude:48.8958, longitude:2.4014, categorie:'electricite', urgence:'modere', description:'Disjoncteur qui saute régulièrement dans la cuisine.', photos:[], profil_demandeur:'locataire', nom:'Nguyen', prenom:'Paul', telephone:'0623456789', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
   { id:'demo-3', reference:'GD-2026-0003', zone:'exterieur', adresse:'8 place de la Mairie', code_postal:'92300', ville:'Levallois-Perret', etage:null, porte:null, latitude:48.8938, longitude:2.2870, categorie:'serrurerie', urgence:'faible', description:'Porte du local vélo qui ferme mal, gond à resserrer.', photos:[], profil_demandeur:'proprietaire', nom:'Dubois', prenom:'Sophie', telephone:'0634567890', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
 ];
+
 let markers = new Map();
 let userMarker = null;
 let userPosition = null;
@@ -590,18 +564,10 @@ let missions = [];
 let categorieFiltre = null;
 let missionsFiltre = 'actif';
 
-/* =========================================================================
-   NAVIGATION AUTH <-> APP
-   ========================================================================= */
-function afficherEcran(mode) {
-  document.getElementById('login-screen').hidden = mode !== 'login';
-  document.getElementById('register-screen').hidden = mode !== 'register';
-}
-
-// Chips de spécialités à l'inscription
 const selectedSpecialites = new Set();
 (function initSpecialitesChips() {
   const container = document.getElementById('reg-specialites');
+  if (!container) return;
   container.innerHTML = CATEGORIES.filter(c => c.value !== 'autre').map(c =>
     `<button type="button" class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`
   ).join('');
@@ -613,166 +579,36 @@ const selectedSpecialites = new Set();
   });
 })();
 
-/* =========================================================================
-   CONNEXION
-   ========================================================================= */
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const errorEl = document.getElementById('login-error');
-  const btn = document.getElementById('login-btn');
-  errorEl.hidden = true;
-  btn.disabled = true; btn.textContent = 'Connexion…';
-
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-pass').value;
-
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) {
-    errorEl.textContent = 'Identifiants invalides. Vérifiez votre e-mail et mot de passe.';
-    errorEl.hidden = false;
-    btn.disabled = false; btn.textContent = 'Se connecter';
-    return;
-  }
-  await lancerApplication();
-});
-
-/* =========================================================================
-   INSCRIPTION
-   ========================================================================= */
-document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const errorEl = document.getElementById('register-error');
-  const btn = document.getElementById('register-btn');
-  errorEl.hidden = true;
-
-  if (document.getElementById('reg-code').value.trim().toUpperCase() !== CODE_PARTENAIRE) {
-    errorEl.textContent = "Code d'accès partenaire invalide.";
-    errorEl.hidden = false;
-    return;
-  }
-  if (selectedSpecialites.size === 0) {
-    errorEl.textContent = 'Sélectionnez au moins une spécialité.';
-    errorEl.hidden = false;
-    return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Envoi en cours…';
-
-  try {
-    const email = document.getElementById('reg-email').value;
-    const password = document.getElementById('reg-pass').value;
-
-    const { data: signUpData, error: signUpError } = await sb.auth.signUp({ email, password });
-    if (signUpError) throw signUpError;
-    const artisanId = signUpData.user.id;
-
-    const zones = document.getElementById('reg-zones').value.split(',').map(z => z.trim()).filter(Boolean);
-
-    const { error: profileError } = await sb.from('artisans').insert({
-      id: artisanId,
-      code_partenaire: CODE_PARTENAIRE,
-      nom_entreprise: document.getElementById('reg-company').value,
-      nom_gerant: document.getElementById('reg-gerant').value,
-      telephone: document.getElementById('reg-tel').value,
-      email,
-      siret: document.getElementById('reg-siret').value || null,
-      specialites: Array.from(selectedSpecialites),
-      zones_intervention: zones,
-    });
-    if (profileError) throw profileError;
-
-    const documentFields = [
-      ['doc-identite', 'piece_identite'],
-      ['doc-decennale', 'assurance_decennale'],
-      ['doc-rcpro', 'rc_pro'],
-      ['doc-kbis', 'kbis'],
-    ];
-    for (const [inputId, typeDocument] of documentFields) {
-      const file = document.getElementById(inputId).files[0];
-      if (!file) continue;
-      const path = `${artisanId}/${typeDocument}-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await sb.storage.from('artisan-documents').upload(path, file);
-      if (uploadError) throw uploadError;
-      await sb.from('artisan_documents').insert({ artisan_id: artisanId, type_document: typeDocument, chemin_fichier: path });
-    }
-
-    toast('Dossier envoyé ! Vous serez notifié dès sa validation.', 'success');
-    await lancerApplication();
-  } catch (err) {
-    console.error(err);
-    errorEl.textContent = err.message || "Une erreur est survenue lors de l'inscription.";
-    errorEl.hidden = false;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Envoyer mon dossier';
-  }
-});
-
-/* =========================================================================
-   LANCEMENT DE L'APPLICATION
-   ========================================================================= */
 function lancerModeDemo() {
   DEMO_MODE = true;
   currentArtisan = { ...MOCK_ARTISAN };
   interventions = MOCK_INTERVENTIONS.map(i => ({ ...i }));
   missions = [];
   demarrerApplication();
-  toast('Mode démo activé — aucune donnée n\'est envoyée à Supabase.', 'success');
-}
-
-async function lancerApplication() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) { afficherEcran('login'); return; }
-
-  const { data: artisan, error } = await sb.from('artisans').select('*').eq('id', session.user.id).single();
-  if (error || !artisan) {
-    toast("Impossible de charger votre profil. Vérifiez que Supabase est configuré (schema.sql exécuté), ou utilisez le mode démo.", 'error');
-    afficherEcran('login');
-    return;
-  }
-  currentArtisan = artisan;
-  await demarrerApplication();
 }
 
 async function demarrerApplication() {
-
   document.getElementById('login-screen').hidden = true;
   document.getElementById('register-screen').hidden = true;
   document.getElementById('app-screen').classList.add('is-active');
 
   const pill = document.getElementById('verif-pill');
-  pill.textContent = DEMO_MODE ? '🧪 Mode démo' : currentArtisan.statut_verification === 'valide' ? '✓ Compte validé'
-    : currentArtisan.statut_verification === 'refuse' ? 'Dossier refusé' : 'En vérification';
-  pill.className = `status-pill status-pill--${DEMO_MODE ? 'valide' : currentArtisan.statut_verification}`;
+  pill.textContent = '✓ Connecté';
+  pill.className = 'status-pill status-pill--valide';
 
   const banner = document.getElementById('verify-banner');
-  if (!DEMO_MODE && currentArtisan.statut_verification !== 'valide') {
-    banner.hidden = false;
-    banner.textContent = currentArtisan.statut_verification === 'refuse'
-      ? "Votre dossier n'a pas été validé. Contactez le support pour plus d'informations."
-      : "Votre dossier est en cours de vérification. Vous aurez accès aux chantiers dès sa validation.";
-  } else {
-    banner.hidden = true;
-  }
+  banner.hidden = true;
 
   initCategoryToolbar();
   initMap();
   renderProfile();
 
-  if (DEMO_MODE) {
-    renderMarkers();
-    renderChantierList();
-    renderMissionsList();
-  } else {
-    await chargerChantiers();
-    await chargerMesMissions();
-    subscribeRealtime();
-  }
+  renderMarkers();
+  renderChantierList();
+  renderMissionsList();
   localiserArtisan();
 }
 
-/* =========================================================================
-   NAVIGATION ENTRE VUES
-   ========================================================================= */
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.addEventListener('click', () => {
     const target = btn.dataset.view;
@@ -784,9 +620,6 @@ document.querySelectorAll('.nav-item').forEach(btn => {
   });
 });
 
-/* =========================================================================
-   CARTE
-   ========================================================================= */
 function initMap() {
   map = L.map('map', { zoomControl: false }).setView([48.8566, 2.3522], 11);
   L.control.zoom({ position: 'bottomleft' }).addTo(map);
@@ -827,27 +660,12 @@ function localiserArtisan() {
     if (userMarker) map.removeLayer(userMarker);
     userMarker = L.circleMarker([userPosition.lat, userPosition.lng], { radius: 8, color:'#fff', weight:3, fillColor:'#2c4d80', fillOpacity:1 }).addTo(map);
     renderChantierList();
-  }, () => { /* géolocalisation refusée : on continue sans */ }, { enableHighAccuracy: true, timeout: 8000 });
+  }, () => {}, { enableHighAccuracy: true, timeout: 8000 });
 }
 document.getElementById('locate-btn').addEventListener('click', () => {
   if (userPosition) map.setView([userPosition.lat, userPosition.lng], 13);
   else localiserArtisan();
 });
-
-/* =========================================================================
-   CHARGEMENT DES CHANTIERS DISPONIBLES
-   ========================================================================= */
-async function chargerChantiers() {
-  const list = document.getElementById('chantier-list');
-  list.innerHTML = `<div class="skeleton" style="height:64px;margin-bottom:.6rem;"></div>`.repeat(3);
-
-  const { data, error } = await sb.from('interventions').select('*').eq('statut', 'nouveau').order('created_at', { ascending: false });
-  if (error) { toast('Impossible de charger les chantiers.', 'error'); interventions = []; }
-  else interventions = data || [];
-
-  renderMarkers();
-  renderChantierList();
-}
 
 function filteredInterventions() {
   let list = interventions;
@@ -903,18 +721,11 @@ function renderChantierList() {
   });
 }
 
-/* =========================================================================
-   MODALE — DÉTAIL D'UN CHANTIER (nouveau -> acceptation)
-   ========================================================================= */
 const overlay = document.getElementById('modal-overlay');
 const modalBody = document.getElementById('modal-body');
 
-async function photoUrl(path) { return sb.storage.from('intervention-photos').getPublicUrl(path).data.publicUrl; }
-
-async function ouvrirModaleChantier(intervention) {
+function ouvrirModaleChantier(intervention) {
   const cat = categorieMeta(intervention.categorie);
-  const photos = await Promise.all((intervention.photos || []).map(photoUrl));
-
   modalBody.innerHTML = `
     <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
     <div class="modal__meta">
@@ -933,69 +744,33 @@ async function ouvrirModaleChantier(intervention) {
       <h4>Description</h4>
       <p>${intervention.description ?? ''}</p>
     </div>
-    ${photos.length ? `<div class="modal__section"><h4>Photos</h4><div class="modal__photos">${photos.map(u => `<img src="${u}" alt="Photo du chantier" />`).join('')}</div></div>` : ''}
     <div class="modal__section">
       <h4>Demandeur</h4>
       <p>${intervention.prenom ?? ''} ${intervention.nom ?? ''} · ${intervention.telephone ?? ''}</p>
     </div>
-    <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' ? 'disabled' : ''}>
-      ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : 'Accepter la mission'}
-    </button>
+    <button class="btn btn-gold btn-block" id="accept-btn">Accepter la mission</button>
   `;
-  document.getElementById('accept-btn')?.addEventListener('click', () => accepterMission(intervention.id));
+  document.getElementById('accept-btn').addEventListener('click', () => accepterMission(intervention.id));
   ouvrirOverlay();
 }
 
-function ouvrirOverlay() {
-  overlay.hidden = false;
-  document.getElementById('modal-close').focus();
-}
+function ouvrirOverlay() { overlay.hidden = false; document.getElementById('modal-close').focus(); }
 function fermerModale() { overlay.hidden = true; modalBody.innerHTML = ''; }
 document.getElementById('modal-close').addEventListener('click', fermerModale);
 overlay.addEventListener('click', (e) => { if (e.target === overlay) fermerModale(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) fermerModale(); });
 
-async function accepterMission(interventionId) {
-  if (DEMO_MODE) {
-    const i = interventions.find(x => x.id === interventionId);
-    if (i) {
-      i.statut = 'assigne';
-      i.artisan_id = currentArtisan.id;
-      i.assigned_at = new Date().toISOString();
-      missions.unshift({ ...i });
-      interventions = interventions.filter(x => x.id !== interventionId);
-    }
-    toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
-    fermerModale();
-    renderMarkers();
-    renderChantierList();
-    renderMissionsList();
-    return;
+function accepterMission(interventionId) {
+  const i = interventions.find(x => x.id === interventionId);
+  if (i) {
+    i.statut = 'assigne';
+    i.artisan_id = currentArtisan.id;
+    missions.unshift({ ...i });
+    interventions = interventions.filter(x => x.id !== interventionId);
   }
-
-  const { error } = await sb.from('interventions')
-    .update({ statut: 'assigne', artisan_id: currentArtisan.id, assigned_at: new Date().toISOString() })
-    .eq('id', interventionId).eq('statut', 'nouveau');
-
-  if (error) {
-    toast("Ce chantier vient d'être pris en charge par un autre artisan.", 'error');
-  } else {
-    toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
-  }
+  toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
   fermerModale();
-  await chargerChantiers();
-  await chargerMesMissions();
-}
-
-/* =========================================================================
-   MES MISSIONS (assignées à cet artisan)
-   ========================================================================= */
-async function chargerMesMissions() {
-  const { data, error } = await sb.from('interventions').select('*').eq('artisan_id', currentArtisan.id).order('assigned_at', { ascending: false });
-  if (error) { toast('Impossible de charger vos missions.', 'error'); return; }
-  missions = data || [];
-  const dot = document.getElementById('missions-dot');
-  dot.classList.toggle('show', missions.some(m => m.statut === 'assigne'));
+  renderMarkers();
+  renderChantierList();
   renderMissionsList();
 }
 
@@ -1039,9 +814,6 @@ function renderMissionsList() {
   });
 }
 
-/* =========================================================================
-   MODALE — SUIVI D'UNE MISSION ASSIGNÉE (progression + clôture photo)
-   ========================================================================= */
 function ouvrirModaleMission(mission) {
   const cat = categorieMeta(mission.categorie);
   const steps = ['assigne', 'en_cours', 'termine'];
@@ -1050,11 +822,9 @@ function ouvrirModaleMission(mission) {
   modalBody.innerHTML = `
     <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
     <div class="modal__meta"><span>Réf. ${mission.reference ?? '—'}</span></div>
-
     <div class="progress-steps">
       ${steps.map((s, i) => `<div class="seg ${i <= currentIdx ? 'done' : ''}"></div>`).join('')}
     </div>
-
     <div class="modal__section">
       <h4>Adresse</h4>
       <p>${mission.adresse ?? ''}${mission.ville ? ', ' + mission.ville : ''}</p>
@@ -1067,80 +837,20 @@ function ouvrirModaleMission(mission) {
       <h4>Description</h4>
       <p>${mission.description ?? ''}</p>
     </div>
-
     ${mission.statut === 'termine' ? `
-      <div class="form-success">✓ Mission clôturée le ${new Date(mission.updated_at).toLocaleDateString('fr-FR')}.</div>
+      <div class="form-success">✓ Mission clôturée.</div>
     ` : mission.statut === 'en_cours' ? `
-      <div class="photo-zone">
-        <h5>📸 Photo de fin de chantier (preuve pour le syndic)</h5>
-        <input type="file" id="photo-fin-input" accept="image/*" />
-      </div>
       <button class="btn btn-gold btn-block" id="cloturer-btn">Clôturer le chantier</button>
     ` : `
       <button class="btn btn-primary btn-block" id="demarrer-btn">Démarrer l'intervention</button>
     `}
   `;
 
-  document.getElementById('demarrer-btn')?.addEventListener('click', () => changerStatutMission(mission.id, 'en_cours'));
-  document.getElementById('cloturer-btn')?.addEventListener('click', () => cloturerMission(mission.id));
+  document.getElementById('demarrer-btn')?.addEventListener('click', () => { mission.statut = 'en_cours'; fermerModale(); renderMissionsList(); toast('Intervention démarrée', 'success'); });
+  document.getElementById('cloturer-btn')?.addEventListener('click', () => { mission.statut = 'termine'; fermerModale(); renderMissionsList(); toast('Chantier clôturé', 'success'); });
   ouvrirOverlay();
 }
 
-async function changerStatutMission(id, statut) {
-  if (DEMO_MODE) {
-    const m = missions.find(x => x.id === id);
-    if (m) m.statut = statut;
-    toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
-    fermerModale();
-    renderMissionsList();
-    return;
-  }
-  const { error } = await sb.from('interventions').update({ statut }).eq('id', id);
-  if (error) { toast('Une erreur est survenue.', 'error'); return; }
-  toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
-  fermerModale();
-  await chargerMesMissions();
-}
-
-async function cloturerMission(id) {
-  const fileInput = document.getElementById('photo-fin-input');
-  const btn = document.getElementById('cloturer-btn');
-  btn.disabled = true; btn.textContent = 'Clôture en cours…';
-
-  if (DEMO_MODE) {
-    const m = missions.find(x => x.id === id);
-    if (m) { m.statut = 'termine'; m.updated_at = new Date().toISOString(); }
-    toast('Chantier clôturé, rapport transmis.', 'success');
-    fermerModale();
-    renderMissionsList();
-    return;
-  }
-
-  try {
-    const updates = { statut: 'termine', updated_at: new Date().toISOString() };
-    if (fileInput?.files[0]) {
-      const file = fileInput.files[0];
-      const path = `preuve-fin/${id}-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await sb.storage.from('intervention-photos').upload(path, file);
-      if (uploadError) throw uploadError;
-      updates.photos_fin = [path];
-    }
-    const { error } = await sb.from('interventions').update(updates).eq('id', id);
-    if (error) throw error;
-
-    toast('Chantier clôturé, rapport transmis.', 'success');
-    fermerModale();
-    await chargerMesMissions();
-  } catch (err) {
-    console.error(err);
-    toast("Erreur lors de la clôture. Réessayez.", 'error');
-    btn.disabled = false; btn.textContent = 'Clôturer le chantier';
-  }
-}
-
-/* =========================================================================
-   PROFIL
-   ========================================================================= */
 function renderProfile() {
   const a = currentArtisan;
   document.getElementById('profile-page').innerHTML = `
@@ -1150,44 +860,14 @@ function renderProfile() {
         <div class="profile-row"><dt>Gérant</dt><dd>${a.nom_gerant}</dd></div>
         <div class="profile-row"><dt>Téléphone</dt><dd>${a.telephone}</dd></div>
         <div class="profile-row"><dt>E-mail</dt><dd>${a.email}</dd></div>
-        <div class="profile-row"><dt>SIRET</dt><dd>${a.siret ?? '—'}</dd></div>
-        <div class="profile-row"><dt>Zones</dt><dd>${(a.zones_intervention||[]).join(', ') || '—'}</dd></div>
       </dl>
-      <div class="spec-tags">
-        ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone}${categorieMeta(s).label}</span>`).join('')}
-      </div>
-    </div>
-    <div class="profile-card">
-      <h3>Statut du dossier</h3>
-      <span class="status-pill status-pill--${a.statut_verification}">${a.statut_verification === 'valide' ? '✓ Validé' : a.statut_verification === 'refuse' ? 'Refusé' : 'En vérification'}</span>
     </div>
   `;
 }
 
-document.getElementById('logout-btn').addEventListener('click', async () => {
-  await sb.auth.signOut();
+document.getElementById('logout-btn').addEventListener('click', () => {
   window.location.reload();
 });
-
-/* =========================================================================
-   TEMPS RÉEL
-   ========================================================================= */
-function subscribeRealtime() {
-  sb.channel('interventions-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'interventions' }, () => {
-      chargerChantiers();
-      chargerMesMissions();
-    })
-    .subscribe();
-}
-
-/* =========================================================================
-   INITIALISATION — reprise de session existante
-   ========================================================================= */
-(async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) await lancerApplication();
-})();
 </script>
 </body>
 </html>
