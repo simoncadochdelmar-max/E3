@@ -602,6 +602,7 @@ function afficherEcran(mode) {
 const selectedSpecialites = new Set();
 (function initSpecialitesChips() {
   const container = document.getElementById('reg-specialites');
+  if (!container) return;
   container.innerHTML = CATEGORIES.filter(c => c.value !== 'autre').map(c =>
     `<button type="button" class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`
   ).join('');
@@ -612,6 +613,17 @@ const selectedSpecialites = new Set();
     btn.classList.contains('is-selected') ? selectedSpecialites.add(btn.dataset.value) : selectedSpecialites.delete(btn.dataset.value);
   });
 })();
+
+// Suivi visuel des fichiers sélectionnés à l'inscription
+document.querySelectorAll('.file-field').forEach(input => {
+  input.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      e.target.classList.add('has-file');
+    } else {
+      e.target.classList.remove('has-file');
+    }
+  });
+});
 
 /* =========================================================================
    CONNEXION
@@ -725,7 +737,7 @@ async function lancerApplication() {
 
   const { data: artisan, error } = await sb.from('artisans').select('*').eq('id', session.user.id).single();
   if (error || !artisan) {
-    toast("Impossible de charger votre profil. Vérifiez que Supabase est configuré (schema.sql exécuté), ou utilisez le mode démo.", 'error');
+    toast("Impossible de charger votre profil. Vérifiez que Supabase est configuré, ou utilisez le mode démo.", 'error');
     afficherEcran('login');
     return;
   }
@@ -788,6 +800,7 @@ document.querySelectorAll('.nav-item').forEach(btn => {
    CARTE
    ========================================================================= */
 function initMap() {
+  if (map) return;
   map = L.map('map', { zoomControl: false }).setView([48.8566, 2.3522], 11);
   L.control.zoom({ position: 'bottomleft' }).addTo(map);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
@@ -795,6 +808,7 @@ function initMap() {
 
 function initCategoryToolbar() {
   const toolbar = document.getElementById('category-toolbar');
+  if (!toolbar) return;
   toolbar.innerHTML = `<button class="chip is-selected" data-value="">Toutes</button>` +
     CATEGORIES.map(c => `<button class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`).join('');
   toolbar.addEventListener('click', (e) => {
@@ -821,16 +835,17 @@ function distanceKm(lat1, lng1, lat2, lng2) {
 }
 
 function localiserArtisan() {
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation || !map) return;
   navigator.geolocation.getCurrentPosition((pos) => {
     userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     if (userMarker) map.removeLayer(userMarker);
     userMarker = L.circleMarker([userPosition.lat, userPosition.lng], { radius: 8, color:'#fff', weight:3, fillColor:'#2c4d80', fillOpacity:1 }).addTo(map);
     renderChantierList();
-  }, () => { /* géolocalisation refusée : on continue sans */ }, { enableHighAccuracy: true, timeout: 8000 });
+  }, () => {}, { enableHighAccuracy: true, timeout: 8000 });
 }
+
 document.getElementById('locate-btn').addEventListener('click', () => {
-  if (userPosition) map.setView([userPosition.lat, userPosition.lng], 13);
+  if (userPosition && map) map.setView([userPosition.lat, userPosition.lng], 13);
   else localiserArtisan();
 });
 
@@ -860,6 +875,7 @@ function filteredInterventions() {
 }
 
 function renderMarkers() {
+  if (!map) return;
   markers.forEach(m => map.removeLayer(m));
   markers.clear();
   filteredInterventions().filter(i => i.latitude && i.longitude).forEach(i => {
@@ -904,12 +920,14 @@ function renderChantierList() {
 }
 
 /* =========================================================================
-   MODALE — DÉTAIL D'UN CHANTIER (nouveau -> acceptation)
+   MODALE — DÉTAIL D'UN CHANTIER
    ========================================================================= */
 const overlay = document.getElementById('modal-overlay');
 const modalBody = document.getElementById('modal-body');
 
-async function photoUrl(path) { return sb.storage.from('intervention-photos').getPublicUrl(path).data.publicUrl; }
+async function photoUrl(path) { 
+  return sb.storage.from('intervention-photos').getPublicUrl(path).data.publicUrl; 
+}
 
 async function ouvrirModaleChantier(intervention) {
   const cat = categorieMeta(intervention.categorie);
@@ -938,8 +956,8 @@ async function ouvrirModaleChantier(intervention) {
       <h4>Demandeur</h4>
       <p>${intervention.prenom ?? ''} ${intervention.nom ?? ''} · ${intervention.telephone ?? ''}</p>
     </div>
-    <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' ? 'disabled' : ''}>
-      ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : 'Accepter la mission'}
+    <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' && !DEMO_MODE ? 'disabled' : ''}>
+      ${currentArtisan.statut_verification !== 'valide' && !DEMO_MODE ? 'Compte non validé' : 'Accepter la mission'}
     </button>
   `;
   document.getElementById('accept-btn')?.addEventListener('click', () => accepterMission(intervention.id));
@@ -988,9 +1006,10 @@ async function accepterMission(interventionId) {
 }
 
 /* =========================================================================
-   MES MISSIONS (assignées à cet artisan)
+   MES MISSIONS
    ========================================================================= */
 async function chargerMesMissions() {
+  if (DEMO_MODE) return;
   const { data, error } = await sb.from('interventions').select('*').eq('artisan_id', currentArtisan.id).order('assigned_at', { ascending: false });
   if (error) { toast('Impossible de charger vos missions.', 'error'); return; }
   missions = data || [];
@@ -1040,7 +1059,7 @@ function renderMissionsList() {
 }
 
 /* =========================================================================
-   MODALE — SUIVI D'UNE MISSION ASSIGNÉE (progression + clôture photo)
+   MODALE — SUIVI D'UNE MISSION ASSIGNÉE
    ========================================================================= */
 function ouvrirModaleMission(mission) {
   const cat = categorieMeta(mission.categorie);
@@ -1143,6 +1162,7 @@ async function cloturerMission(id) {
    ========================================================================= */
 function renderProfile() {
   const a = currentArtisan;
+  if (!a) return;
   document.getElementById('profile-page').innerHTML = `
     <div class="profile-card">
       <h3>${a.nom_entreprise}</h3>
@@ -1154,7 +1174,7 @@ function renderProfile() {
         <div class="profile-row"><dt>Zones</dt><dd>${(a.zones_intervention||[]).join(', ') || '—'}</dd></div>
       </dl>
       <div class="spec-tags">
-        ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone} ${categorieMeta(s).label}</span>`).join('')}
+        ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone}${categorieMeta(s).label}</span>`).join('')}
       </div>
     </div>
     <div class="profile-card">
@@ -1173,6 +1193,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
    TEMPS RÉEL
    ========================================================================= */
 function subscribeRealtime() {
+  if (DEMO_MODE) return;
   sb.channel('interventions-realtime')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'interventions' }, () => {
       chargerChantiers();
@@ -1182,7 +1203,7 @@ function subscribeRealtime() {
 }
 
 /* =========================================================================
-   INITIALISATION — reprise de session existante
+   INITIALISATION
    ========================================================================= */
 (async function init() {
   const { data: { session } } = await sb.auth.getSession();
