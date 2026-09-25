@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Entreprise 3 — Faire une demande</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+
+:root{
+  --cream:#faf7f2;
+  --cream-dark:#f2ece0;
+  --navy:#0e2140;
+  --navy-mid:#1a3a6b;
+  --navy-soft:#2558a8;
+  --gold:#c9963a;
+  --gold-light:#f0c060;
+  --gold-pale:#fbeecb;
+  --text:#1a2332;
+  --text-mid:#3d4f66;
+  --muted:#8896a8;
+  --border:#e0d8cc;
+  --border-mid:#c8bfb0;
+  --white:#ffffff;
+  --success:#1a7a52;
+  --success-bg:#eaf6f0;
+  --error:#c0322a;
+  --error-bg:#fdf0ef;
+  --urg-h:#c0322a;
+  --urg-m:#b06020;
+  --urg-l:#1a7a52;
+  --radius-s:10px;
+  --radius-m:14px;
+  --radius-l:22px;
+  --shadow:0 10px 28px rgba(14,33,64,.08);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-padding-top:1rem;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  min-height:100dvh;
+  overflow-x:hidden;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+button{font-family:inherit;cursor:pointer;}
+input,textarea,select{font-family:inherit;font-size:inherit;}
+:focus-visible{outline:2.5px solid var(--navy-soft);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
+
+/* ---- En-tête ---------------------------------------------------------- */
+.header{
+  background:linear-gradient(135deg,#0e2140,#1a3a6b 65%,#204a86);
+  padding:calc(env(safe-area-inset-top,0px) + 20px) 20px 28px;
+  position:relative;
+  overflow:hidden;
+}
+.header::after{
+  content:'';
+  position:absolute;bottom:-1px;left:0;right:0;height:26px;
+  background:var(--cream);border-radius:26px 26px 0 0;
+}
+.header-inner{position:relative;z-index:1;}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.brand-mark{
+  width:36px;height:36px;background:var(--gold);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:15px;flex-shrink:0;
+}
+.brand-name{color:white;font-weight:700;font-size:15px;}
+.header-title{font-family:'DM Serif Display',serif;color:white;font-size:29px;line-height:1.12;transition:opacity .2s;}
+.header-title em{font-style:italic;color:var(--gold-light);}
+.profile-chip{
+  display:inline-flex;align-items:center;gap:7px;background:rgba(201,150,58,.18);
+  border:1px solid rgba(201,150,58,.32);border-radius:100px;padding:6px 13px;
+  font-size:12px;font-weight:700;color:var(--gold-light);margin-top:15px;transition:all .2s;
+}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ---- Fil d'étapes -------------------------------------------------------- */
+.progress-wrap{padding:18px 20px 0;}
+.step-track{display:flex;align-items:center;}
+.step-node{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;}
+.step-node::after{
+  content:'';position:absolute;top:12px;left:calc(50% + 13px);right:calc(-50% + 13px);
+  height:1.5px;background:var(--border-mid);transition:background .25s;
+}
+.step-node:last-child::after{display:none;}
+.step-node.done::after{background:var(--navy-soft);}
+.sn-circle{
+  width:25px;height:25px;border-radius:50%;border:1.5px solid var(--border-mid);background:var(--cream);
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted);
+  z-index:1;transition:all .2s;
+}
+.step-node.active .sn-circle{background:var(--navy);border-color:var(--navy);color:white;transform:scale(1.08);}
+.step-node.done .sn-circle{background:var(--navy-soft);border-color:var(--navy-soft);color:white;}
+.sn-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:5px;}
+.step-node.active .sn-label{color:var(--navy);}
+
+/* ---- Sections ------------------------------------------------------------ */
+.section{display:none;padding:22px 20px 10px;animation:up .28s ease;}
+.section.active{display:block;}
+@keyframes up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.section-title{font-family:'DM Serif Display',serif;font-size:23px;color:var(--navy);margin-bottom:4px;}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.4;}
+
+/* ---- Cartes de sélection (profil, type de demande) ------------------------ */
+.picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.picker-card{
+  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:16px 12px;background:white;
+  text-align:left;cursor:pointer;transition:.15s ease;display:flex;flex-direction:column;gap:6px;
+}
+.picker-card:hover{border-color:var(--border-mid);transform:translateY(-1px);}
+.picker-card.sel{border-color:var(--navy);background:var(--navy);color:white;box-shadow:var(--shadow);}
+.picker-card.sel .picker-desc{color:rgba(255,255,255,.72);}
+.picker-icon{font-size:26px;}
+.picker-label{font-size:13px;font-weight:700;}
+.picker-desc{font-size:11px;color:var(--muted);line-height:1.35;}
+
+.subtoggle{display:flex;gap:8px;margin-top:16px;}
+.subtoggle button{
+  flex:1;padding:11px;border-radius:var(--radius-s);border:1.5px solid var(--border);background:white;
+  font-size:13px;font-weight:700;color:var(--text-mid);
+}
+.subtoggle button.sel{background:var(--navy);border-color:var(--navy);color:white;}
+
+/* ---- Champs de formulaire -------------------------------------------------- */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px;color:var(--text-mid);}
+.field .optional-tag{text-transform:none;font-weight:400;color:var(--muted);}
+.field input,.field textarea{
+  width:100%;border:1.5px solid var(--border);border-radius:var(--radius-s);padding:14px;
+  font-size:15px;outline:none;background:white;transition:border-color .15s;
+}
+.field input:focus,.field textarea:focus{border-color:var(--navy-soft);}
+.field textarea{resize:none;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px;}
+
+.field-err,.grid-err{
+  display:none;color:var(--error);font-size:11.5px;font-weight:600;margin-top:6px;
+  padding:9px 10px;background:var(--error-bg);border-radius:8px;
+}
+.show{display:block;}
+
+/* ---- Groupes de prestations (multi-sélection) ------------------------------ */
+.service-group{margin-bottom:18px;}
+.service-group-title{
+  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gold);
+  margin-bottom:9px;display:flex;align-items:center;gap:6px;
+}
+.service-group-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.cat-card{
+  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:13px 8px;background:white;
+  text-align:center;cursor:pointer;transition:.15s ease;position:relative;
+}
+.cat-card:hover{transform:translateY(-1px);}
+.cat-card.sel{border-color:var(--navy);background:var(--navy);color:white;}
+.cat-card.sel::before{
+  content:'✓';position:absolute;top:5px;right:6px;font-size:10px;font-weight:800;color:var(--gold-light);
+}
+.cat-icon{font-size:20px;display:block;margin-bottom:6px;}
+.cat-label{font-size:10.5px;font-weight:700;line-height:1.2;}
+
+/* ---- Type de demande (ponctuel / récurrent) --------------------------------- */
+.demand-type{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.demand-card{
+  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:14px;background:white;cursor:pointer;transition:.15s;
+}
+.demand-card.sel{border-color:var(--gold);background:var(--gold-pale);}
+.demand-icon{font-size:20px;margin-bottom:6px;}
+.demand-title{font-size:12.5px;font-weight:800;color:var(--navy);}
+.demand-sub{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.3;}
+
+.freq-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.freq-row .cat-card{padding:11px 6px;}
+
+/* ---- Urgence ---------------------------------------------------------------- */
+.urg-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.urg-card{border:1.5px solid var(--border);border-radius:var(--radius-m);padding:12px;text-align:center;cursor:pointer;background:white;transition:.15s;}
+.urg-card.sel{transform:scale(1.02);}
+.urg-dot{width:10px;height:10px;border-radius:50%;display:block;margin:0 auto 5px;}
+.urg-card.sel[data-u="faible"]{border-color:var(--urg-l);background:#f0f9f5;}
+.urg-card.sel[data-u="modere"]{border-color:var(--urg-m);background:#fff9f2;}
+.urg-card.sel[data-u="urgent"]{border-color:var(--urg-h);background:#fff5f5;}
+
+/* ---- Photos ------------------------------------------------------------------ */
+.file-btn{
+  display:flex;align-items:center;gap:8px;border:1.5px dashed var(--border-mid);border-radius:var(--radius-s);
+  padding:13px;font-size:13px;font-weight:600;color:var(--text-mid);background:white;width:100%;justify-content:center;
+}
+#preview-wrap{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px;}
+.preview-item{position:relative;flex-shrink:0;}
+.preview-img{width:76px;height:76px;object-fit:cover;border-radius:var(--radius-s);border:1px solid var(--border);display:block;}
+.preview-remove{
+  position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--navy);color:white;
+  border:2px solid var(--cream);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
+}
+
+/* ---- Navigation basse -------------------------------------------------------- */
+.nav-wrap{padding:18px 20px;display:flex;gap:10px;background:var(--cream);}
+.btn{flex:1;padding:16px;border-radius:var(--radius-s);border:none;font-weight:700;font-size:14.5px;transition:.15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--navy);color:white;box-shadow:0 8px 20px rgba(14,33,64,.18);}
+.btn-primary:disabled{background:var(--muted);box-shadow:none;cursor:not-allowed;}
+.btn-back{background:white;border:1.5px solid var(--border);color:var(--muted);flex:0 0 56px;}
+
+/* ---- Récapitulatif ------------------------------------------------------------ */
+.summary{border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;background:white;margin-bottom:14px;}
+.summary-block-title{
+  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--gold);
+  padding:12px 16px 6px;display:flex;justify-content:space-between;align-items:center;
+}
+.summary-block-title button{background:none;border:none;color:var(--navy-soft);font-size:11px;font-weight:700;text-decoration:underline;padding:0;}
+.sum-row{display:flex;padding:9px 16px;border-top:1px solid var(--border);font-size:13px;gap:10px;}
+.sum-k{width:118px;flex-shrink:0;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;padding-top:1px;}
+.sum-v{font-weight:600;color:var(--navy);flex:1;word-break:break-word;}
+
+/* ---- Confirmation -------------------------------------------------------------- */
+.confirm-wrap{text-align:center;padding:26px 20px 10px;}
+.confirm-badge{
+  width:82px;height:82px;background:linear-gradient(135deg,var(--success),#28a36a);color:white;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:34px;
+  box-shadow:0 10px 30px rgba(26,122,82,.25);
+}
+.confirm-wrap h2{font-family:'DM Serif Display',serif;font-size:27px;color:var(--navy);margin-bottom:10px;}
+.confirm-wrap p{color:var(--text-mid);line-height:1.6;font-size:15px;max-width:320px;margin:0 auto;}
+.ref-box{margin-top:24px;background:white;border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;}
+.ref-box .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.ref-box .val{font-weight:800;color:var(--navy);font-size:19px;letter-spacing:.01em;}
+.confirm-note{
+  margin-top:18px;background:var(--gold-pale);border-radius:var(--radius-s);padding:13px 16px;
+  font-size:12.5px;color:#6b4f1a;text-align:left;line-height:1.5;
+}
+
+/* ---- Toast d'erreur globale ----------------------------------------------------- */
+#global-error{
+  display:none;margin:0 20px 16px;background:var(--error-bg);color:var(--error);border-radius:var(--radius-s);
+  padding:12px 14px;font-size:12.5px;font-weight:600;
+}
+
+@media (min-width:520px){
+  body{max-width:520px;margin:0 auto;box-shadow:0 0 60px rgba(14,33,64,.08);}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">E3</div>
+      <div class="brand-name">Entreprise 3</div>
+    </div>
+    <h1 class="header-title" id="header-title">Faire une<br><em>demande</em></h1>
+    <div class="profile-chip">
+      <span class="chip-dot" aria-hidden="true"></span>
+      <span id="header-profile-label">Sélectionnez votre profil</span>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap" aria-hidden="true">
+  <div class="step-track">
+    <div class="step-node active"><div class="sn-circle">1</div><div class="sn-label">Profil</div></div>
+    <div class="step-node"><div class="sn-circle">2</div><div class="sn-label">Lieu</div></div>
+    <div class="step-node"><div class="sn-circle">3</div><div class="sn-label">Besoin</div></div>
+    <div class="step-node"><div class="sn-circle">4</div><div class="sn-label">Contact</div></div>
+  </div>
+</div>
+
+<p id="global-error" role="alert"></p>
+
+<form id="wizard-form" novalidate>
+
+<!-- ÉTAPE 1 — PROFIL -->
+<section class="section active" id="s1" aria-labelledby="s1-title">
+  <h2 class="section-title" id="s1-title">Qui êtes-vous ?</h2>
+  <p class="section-sub">Choisissez votre profil pour adapter les prestations proposées.</p>
+
+  <div class="picker-grid" id="profile-grid" role="radiogroup" aria-label="Profil"></div>
+
+  <div class="subtoggle" id="particulier-toggle" hidden role="radiogroup" aria-label="Vous êtes">
+    <button type="button" data-v="proprietaire" onclick="pickOccupant(this)">Propriétaire</button>
+    <button type="button" data-v="locataire" onclick="pickOccupant(this)">Locataire</button>
+  </div>
+
+  <p class="grid-err" id="err-profile">Veuillez sélectionner un profil pour continuer.</p>
+</section>
+
+<!-- ÉTAPE 2 — LIEU -->
+<section class="section" id="s2" aria-labelledby="s2-title">
+  <h2 class="section-title" id="s2-title">Localisation</h2>
+  <p class="section-sub" id="sub-lieu">Précisez l'adresse concernée par la demande.</p>
+
+  <div class="field" id="field-nomsite">
+    <label for="nom_site" id="label-nomsite">Nom de la copropriété / résidence</label>
+    <input type="text" id="nom_site" placeholder="Ex : Résidence Les Tilleuls" autocomplete="organization" />
+  </div>
+
+  <div class="field">
+    <label for="adresse_lieu">Adresse</label>
+    <input type="text" id="adresse_lieu" placeholder="12 rue de la République" autocomplete="street-address" />
+    <p class="field-err" id="err-adresse">Merci de renseigner l'adresse.</p>
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <label for="code_postal">Code postal</label>
+      <input type="text" id="code_postal" inputmode="numeric" placeholder="75011" pattern="[0-9]{5}" />
+      <p class="field-err" id="err-cp">Code postal invalide.</p>
+    </div>
+    <div class="field">
+      <label for="ville">Ville</label>
+      <input type="text" id="ville" placeholder="Paris" />
+      <p class="field-err" id="err-ville">Merci d'indiquer la ville.</p>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="complement_lieu" id="label-complement">Bâtiment / étage / porte / lot <span class="optional-tag">(facultatif)</span></label>
+    <input type="text" id="complement_lieu" placeholder="Ex : Bâtiment B, 3ème étage, Lot 42" />
+  </div>
+</section>
+
+<!-- ÉTAPE 3 — BESOIN -->
+<section class="section" id="s3" aria-labelledby="s3-title">
+  <h2 class="section-title" id="s3-title">De quoi avez-vous besoin ?</h2>
+  <p class="section-sub">Sélectionnez un ou plusieurs services, ponctuels ou récurrents.</p>
+
+  <div class="demand-type" id="demand-type" role="radiogroup" aria-label="Type de demande">
+    <div class="demand-card sel" data-v="ponctuel" onclick="pickDemandType(this)" role="radio" aria-checked="true" tabindex="0">
+      <div class="demand-icon">⚡</div>
+      <div class="demand-title">Intervention ponctuelle</div>
+      <div class="demand-sub">Dépannage, réparation, besoin immédiat</div>
+    </div>
+    <div class="demand-card" data-v="recurrent" onclick="pickDemandType(this)" role="radio" aria-checked="false" tabindex="0">
+      <div class="demand-icon">🔁</div>
+      <div class="demand-title">Contrat d'entretien</div>
+      <div class="demand-sub">Prestation régulière (nettoyage, espaces verts...)</div>
+    </div>
+  </div>
+
+  <div id="prestations-container"></div>
+  <p class="grid-err" id="err-cat">Choisissez au moins une prestation.</p>
+
+  <div id="urgence-wrap" class="field" style="margin-top:6px;">
+    <label>Niveau d'urgence</label>
+    <div class="urg-row" id="urg-choices">
+      <div class="urg-card sel" data-u="faible" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-l)"></span><div class="cat-label">Faible</div></div>
+      <div class="urg-card" data-u="modere" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-m)"></span><div class="cat-label">Modéré</div></div>
+      <div class="urg-card" data-u="urgent" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-h)"></span><div class="cat-label">Urgent</div></div>
+    </div>
+  </div>
+
+  <div id="frequence-wrap" class="field" hidden>
+    <label>Fréquence souhaitée</label>
+    <div class="freq-row" id="freq-choices">
+      <div class="cat-card" data-f="hebdomadaire" onclick="pickFreq(this)"><span class="cat-label">Hebdo</span></div>
+      <div class="cat-card" data-f="mensuelle" onclick="pickFreq(this)"><span class="cat-label">Mensuelle</span></div>
+      <div class="cat-card" data-f="trimestrielle" onclick="pickFreq(this)"><span class="cat-label">Trimestre</span></div>
+    </div>
+    <label for="date_debut" style="margin-top:12px;">Démarrage souhaité <span class="optional-tag">(facultatif)</span></label>
+    <input type="date" id="date_debut" />
+  </div>
+
+  <div class="field" id="field-surface">
+    <label for="surface_m2">Surface approximative en m² <span class="optional-tag">(facultatif)</span></label>
+    <input type="number" id="surface_m2" min="0" inputmode="numeric" placeholder="Ex : 350" />
+  </div>
+
+  <div class="field">
+    <label for="desc">Description</label>
+    <textarea id="desc" rows="4" maxlength="600" placeholder="Détaillez votre besoin : nature du problème, fréquence souhaitée, contraintes d'accès..."></textarea>
+    <p class="char-count"><span id="desc-count">0</span>/600</p>
+    <p class="field-err" id="err-desc">Merci de décrire votre besoin.</p>
+  </div>
+
+  <div class="field">
+    <label for="photos">Photos <span class="optional-tag">(jusqu'à 3, facultatif)</span></label>
+    <label class="file-btn" for="photos">📷 Ajouter des photos</label>
+    <input type="file" id="photos" accept="image/*" capture="environment" multiple hidden />
+    <div id="preview-wrap"></div>
+  </div>
+</section>
+
+<!-- ÉTAPE 4 — CONTACT -->
+<section class="section" id="s4" aria-labelledby="s4-title">
+  <h2 class="section-title" id="s4-title">Vos coordonnées</h2>
+  <p class="section-sub">Pour vous transmettre un devis ou vous mettre en relation avec un artisan.</p>
+
+  <div class="field-row">
+    <div class="field">
+      <label for="prenom">Prénom</label>
+      <input type="text" id="prenom" autocomplete="given-name" />
+    </div>
+    <div class="field">
+      <label for="nom">Nom</label>
+      <input type="text" id="nom" autocomplete="family-name" />
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="tel">Téléphone direct</label>
+    <input type="tel" id="tel" placeholder="06 00 00 00 00" autocomplete="tel" />
+  </div>
+
+  <div class="field">
+    <label for="email">E-mail <span id="email-optional-tag" class="optional-tag">(facultatif)</span></label>
+    <input type="email" id="email" placeholder="contact@domaine.com" autocomplete="email" />
+  </div>
+
+  <p class="grid-err" id="err-contact">Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.</p>
+</section>
+
+<!-- ÉTAPE 5 — RÉCAPITULATIF -->
+<section class="section" id="s5" aria-labelledby="s5-title">
+  <h2 class="section-title" id="s5-title">Vérifiez votre demande</h2>
+  <p class="section-sub">Relisez les informations avant l'envoi.</p>
+  <div id="summary"></div>
+</section>
+
+<!-- ÉTAPE 6 — CONFIRMATION -->
+<section class="section" id="s6">
+  <div class="confirm-wrap">
+    <div class="confirm-badge" aria-hidden="true">✓</div>
+    <h2>Demande transmise</h2>
+    <p>Votre dossier a bien été envoyé à notre réseau d'artisans et prestataires en Île-de-France.</p>
+    <div class="ref-box">
+      <div class="lbl">Référence du dossier</div>
+      <div class="val" id="ticket-number">—</div>
+    </div>
+    <p class="confirm-note" id="confirm-note"></p>
+    <button type="button" class="btn btn-primary" style="margin:26px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
+  </div>
+</section>
+
+<div class="nav-wrap" id="nav-wrap">
+  <button type="button" class="btn btn-back" id="btn-back" onclick="prevStep()" style="display:none" aria-label="Étape précédente">←</button>
+  <button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer</button>
+</div>
+
+</form>
+
+<script>
+/* =========================================================================
+   CONFIGURATION SUPABASE (même projet que l'espace artisan)
+   ========================================================================= */
+const SUPABASE_URL = 'https://nyowrqutvwrgpcwvyeup.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55b3dycXV0dndyZ3Bjd3Z5ZXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDE1MzUsImV4cCI6MjA5NDA3NzUzNX0.fl3MNDrEJOpH5JMHvKCJQDNfQZ1V4sZKEPWUai8MKf8';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* =========================================================================
+   RÉFÉRENTIEL PROFILS
+   ========================================================================= */
+const PROFILES = [
+  { v:'syndic_copro',      icon:'🏢', label:'Syndic de copropriété', desc:'Parties communes, résidences', profil_demandeur:'gestionnaire' },
+  { v:'agence_immo',       icon:'🗝️', label:'Agence immobilière',    desc:'Biens en gestion, remise en état', profil_demandeur:'gestionnaire' },
+  { v:'commerce',          icon:'🏬', label:'Commerce / Boutique',    desc:'Magasin, restaurant, local pro', profil_demandeur:'gestionnaire' },
+  { v:'bureau_entreprise', icon:'🏛️', label:'Bureau / Entreprise',    desc:'Locaux professionnels', profil_demandeur:'gestionnaire' },
+  { v:'ecole',             icon:'🏫', label:'École / Établissement',  desc:'Scolaire, périscolaire', profil_demandeur:'gestionnaire' },
+  { v:'particulier',       icon:'🏠', label:'Particulier',            desc:'Logement personnel', profil_demandeur:null },
+];
+
+/* =========================================================================
+   RÉFÉRENTIEL DES PRESTATIONS (groupées)
+   ========================================================================= */
+const SERVICE_GROUPS = {
+  technique:  { label:'Dépannage & maintenance technique', items:[
+    {v:'plomberie', l:'Plomberie', i:'💧'}, {v:'electricite', l:'Électricité', i:'⚡'},
+    {v:'chauffage', l:'Chauffage / Clim', i:'🔥'}, {v:'serrurerie', l:'Serrurerie', i:'🔑'},
+    {v:'ascenseur', l:'Ascenseur', i:'🛗'}, {v:'interphone', l:'Interphone', i:'📟'},
+    {v:'vitrerie', l:'Vitrerie', i:'🪟'},
+  ]},
+  entretien:  { label:'Entretien courant & propreté', items:[
+    {v:'menage', l:'Ménage / Nettoyage', i:'🧹'}, {v:'nettoyage_vitrine', l:'Nettoyage vitrines', i:'✨'},
+    {v:'espaces_verts', l:'Espaces verts', i:'🌳'}, {v:'desherbage', l:'Désherbage', i:'🌿'},
+  ]},
+  nuisibles:  { label:'Nuisibles & hygiène', items:[
+    {v:'deratisation', l:'Dératisation', i:'🐀'}, {v:'desinsectisation', l:'Désinsectisation', i:'🪳'},
+    {v:'desinfection', l:'Désinfection', i:'🧴'}, {v:'debarras', l:'Débarras', i:'🗑️'},
+  ]},
+  travaux:    { label:'Travaux & rénovation', items:[
+    {v:'peinture', l:'Peinture / Sols', i:'🎨'}, {v:'renovation', l:'Rénovation', i:'🔨'},
+    {v:'agencement', l:'Agencement local', i:'🏗️'},
+  ]},
+  securite:   { label:'Sécurité', items:[
+    {v:'camera', l:'Vidéosurveillance', i:'📷'}, {v:'controle_acces', l:'Contrôle d\'accès', i:'🔐'},
+    {v:'incendie', l:'Sécurité incendie', i:'🧯'},
+  ]},
+  autre:      { label:'Autre besoin', items:[{v:'autre', l:'Autre', i:'❓'}] },
+};
+
+// Ordre des groupes affichés selon le profil (les plus pertinents en premier)
+const PROFILE_GROUP_ORDER = {
+  syndic_copro:      ['entretien','nuisibles','technique','securite','travaux','autre'],
+  agence_immo:       ['entretien','travaux','technique','nuisibles','autre'],
+  commerce:          ['entretien','securite','technique','travaux','nuisibles','autre'],
+  bureau_entreprise: ['entretien','securite','technique','nuisibles','travaux','autre'],
+  ecole:             ['entretien','nuisibles','securite','technique','travaux','autre'],
+  particulier:       ['technique','entretien','nuisibles','travaux','autre'],
+};
+
+const HEADER_TITLES = {
+  syndic_copro:'Demande pour<br><em>votre copropriété</em>',
+  agence_immo:'Demande pour<br><em>votre agence</em>',
+  commerce:'Demande pour<br><em>votre commerce</em>',
+  bureau_entreprise:'Demande pour<br><em>vos locaux</em>',
+  ecole:'Demande pour<br><em>votre établissement</em>',
+  particulier:'Faire une<br><em>demande</em>',
+};
+const NOMSITE_LABELS = {
+  syndic_copro:'Nom de la copropriété / résidence',
+  agence_immo:"Nom de l'agence",
+  commerce:'Enseigne du commerce',
+  bureau_entreprise:"Nom de l'entreprise",
+  ecole:"Nom de l'établissement",
+};
+const COMPLEMENT_LABELS = {
+  syndic_copro:'Bâtiment / étage / porte / lot',
+  agence_immo:'Étage / local / référence bien',
+  commerce:'Étage / local commercial',
+  bureau_entreprise:'Bâtiment / étage / bureau',
+  ecole:'Bâtiment / salle / accès',
+  particulier:"Étage / n° d'appartement / interphone",
+};
+
+/* =========================================================================
+   ÉTAT
+   ========================================================================= */
+let step = 1;
+const TOTAL_NODES = 4;
+let photoFiles = [];
+let selectedPrestations = new Set();
+let data = {
+  profile:null, occupant:null,
+  demandType:'ponctuel', urgence:'faible', frequence:null,
+};
+
+/* =========================================================================
+   ÉTAPE 1 — PROFIL
+   ========================================================================= */
+(function initProfiles() {
+  const grid = document.getElementById('profile-grid');
+  grid.innerHTML = PROFILES.map(p => `
+    <button type="button" class="picker-card" data-v="${p.v}" role="radio" aria-checked="false" onclick="selectProfile('${p.v}', this)">
+      <span class="picker-icon" aria-hidden="true">${p.icon}</span>
+      <span class="picker-label">${p.label}</span>
+      <span class="picker-desc">${p.desc}</span>
+    </button>`).join('');
+})();
+
+function selectProfile(value, el) {
+  document.querySelectorAll('#profile-grid .picker-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
+  el.classList.add('sel'); el.setAttribute('aria-checked','true');
+  data.profile = value;
+  document.getElementById('err-profile').classList.remove('show');
+
+  const meta = PROFILES.find(p => p.v === value);
+  document.getElementById('header-profile-label').textContent = meta.label;
+  document.getElementById('header-title').innerHTML = HEADER_TITLES[value];
+
+  const particulierToggle = document.getElementById('particulier-toggle');
+  particulierToggle.hidden = value !== 'particulier';
+  if (value !== 'particulier') data.occupant = null;
+
+  document.getElementById('label-nomsite').textContent = NOMSITE_LABELS[value] || "Nom (facultatif)";
+  document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
+  document.getElementById('label-complement').innerHTML = `${COMPLEMENT_LABELS[value] || 'Complément'} <span class="optional-tag">(facultatif)</span>`;
+
+  document.getElementById('sub-lieu').textContent = value === 'particulier'
+    ? 'Indiquez l\'adresse de votre logement.'
+    : "Indiquez l'adresse exacte de l'intervention.";
+
+  renderPrestations();
+}
+
+function pickOccupant(el) {
+  document.querySelectorAll('#particulier-toggle button').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  data.occupant = el.dataset.v;
+}
+
+/* =========================================================================
+   ÉTAPE 3 — PRESTATIONS, TYPE DE DEMANDE, URGENCE/FRÉQUENCE
+   ========================================================================= */
+function pickDemandType(el) {
+  document.querySelectorAll('#demand-type .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
+  el.classList.add('sel'); el.setAttribute('aria-checked','true');
+  data.demandType = el.dataset.v;
+  document.getElementById('urgence-wrap').hidden = data.demandType !== 'ponctuel';
+  document.getElementById('frequence-wrap').hidden = data.demandType !== 'recurrent';
+}
+document.querySelectorAll('#demand-type .demand-card').forEach(card => {
+  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
+});
+
+function pickUrg(el) {
+  document.querySelectorAll('#urg-choices .urg-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  data.urgence = el.dataset.u;
+}
+function pickFreq(el) {
+  document.querySelectorAll('#freq-choices .cat-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  data.frequence = el.dataset.f;
+}
+
+function renderPrestations() {
+  const order = PROFILE_GROUP_ORDER[data.profile] || Object.keys(SERVICE_GROUPS);
+  const container = document.getElementById('prestations-container');
+  container.innerHTML = order.map(groupId => {
+    const group = SERVICE_GROUPS[groupId];
+    return `
+    <div class="service-group">
+      <div class="service-group-title">${group.label}</div>
+      <div class="cat-grid">
+        ${group.items.map(it => `
+          <button type="button" class="cat-card ${selectedPrestations.has(it.v) ? 'sel' : ''}" data-v="${it.v}" aria-pressed="${selectedPrestations.has(it.v)}" onclick="togglePrestation('${it.v}', this)">
+            <span class="cat-icon" aria-hidden="true">${it.i}</span>
+            <span class="cat-label">${it.l}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePrestation(value, el) {
+  if (selectedPrestations.has(value)) { selectedPrestations.delete(value); el.classList.remove('sel'); el.setAttribute('aria-pressed','false'); }
+  else { selectedPrestations.add(value); el.classList.add('sel'); el.setAttribute('aria-pressed','true'); }
+  document.getElementById('err-cat').classList.remove('show');
+}
+
+/* Compteur de caractères de la description */
+const descField = document.getElementById('desc');
+descField.addEventListener('input', () => { document.getElementById('desc-count').textContent = descField.value.length; });
+
+/* =========================================================================
+   PHOTOS
+   ========================================================================= */
+document.getElementById('photos').addEventListener('change', (e) => {
+  const remaining = 3 - photoFiles.length;
+  Array.from(e.target.files).slice(0, remaining).forEach(file => {
+    photoFiles.push({ file, url: URL.createObjectURL(file) });
+  });
+  e.target.value = '';
+  renderPreviews();
+});
+function renderPreviews() {
+  const wrap = document.getElementById('preview-wrap');
+  wrap.innerHTML = photoFiles.map((p, i) => `
+    <div class="preview-item">
+      <img src="${p.url}" class="preview-img" alt="Photo ${i + 1}" />
+      <button type="button" class="preview-remove" aria-label="Supprimer la photo ${i + 1}" onclick="removePhoto(${i})">✕</button>
+    </div>`).join('');
+}
+function removePhoto(i) { photoFiles.splice(i, 1); renderPreviews(); }
+
+/* =========================================================================
+   VALIDATION PAR ÉTAPE
+   ========================================================================= */
+function clearErrors() { document.querySelectorAll('.grid-err,.field-err').forEach(e => e.classList.remove('show')); }
+
+function validateStep() {
+  clearErrors();
+  if (step === 1) {
+    if (!data.profile) { document.getElementById('err-profile').classList.add('show'); return false; }
+    return true;
+  }
+  if (step === 2) {
+    let ok = true;
+    if (!document.getElementById('adresse_lieu').value.trim()) { document.getElementById('err-adresse').classList.add('show'); ok = false; }
+    if (!/^[0-9]{5}$/.test(document.getElementById('code_postal').value.trim())) { document.getElementById('err-cp').classList.add('show'); ok = false; }
+    if (!document.getElementById('ville').value.trim()) { document.getElementById('err-ville').classList.add('show'); ok = false; }
+    return ok;
+  }
+  if (step === 3) {
+    let ok = true;
+    if (selectedPrestations.size === 0) { document.getElementById('err-cat').classList.add('show'); ok = false; }
+    if (!descField.value.trim()) { document.getElementById('err-desc').classList.add('show'); ok = false; }
+    return ok;
+  }
+  if (step === 4) {
+    const prenom = document.getElementById('prenom').value.trim();
+    const nom = document.getElementById('nom').value.trim();
+    const tel = document.getElementById('tel').value.trim().replace(/\s/g, '');
+    const email = document.getElementById('email').value.trim();
+    const telRegex = /^(0|\+33)[1-9][0-9]{8}$/;
+    const emailRequired = data.profile !== 'particulier';
+    const emailOk = emailRequired ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) : (email === '' \vert{}\vert{} /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    if (!prenom || !nom || !telRegex.test(tel) || !emailOk) { document.getElementById('err-contact').classList.add('show'); return false; }
+    return true;
+  }
+  return true;
+}
+
+/* =========================================================================
+   NAVIGATION
+   ========================================================================= */
+function nextStep() {
+  if (step <= 4 && !validateStep()) return;
+  if (step === 4) buildSummary();
+  if (step === 5) { submitDemand(); return; }
+  step++;
+  showStep();
+}
+function prevStep() { step--; showStep(); }
+function goToStep(n) { step = n; showStep(); }
+
+function showStep() {
+  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i + 1 === step));
+  document.querySelectorAll('.step-node').forEach((n, i) => {
+    const idx = i + 1;
+    n.classList.toggle('active', idx === Math.min(step, TOTAL_NODES));
+    n.classList.toggle('done', idx < step && step <= TOTAL_NODES + 1);
+  });
+  document.getElementById('btn-back').style.display = (step > 1 && step < 6) ? 'flex' : 'none';
+  document.getElementById('btn-next').textContent = step === 5 ? 'Confirmer la demande' : 'Continuer';
+  document.getElementById('nav-wrap').style.display = step === 6 ? 'none' : 'flex';
+  document.getElementById('email-optional-tag').style.display = data.profile === 'particulier' ? 'inline' : 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const title = document.querySelector(`.section.active .section-title`);
+  if (title) title.setAttribute('tabindex', '-1'), title.focus({ preventScroll: true });
+}
+
+/* =========================================================================
+   RÉCAPITULATIF
+   ========================================================================= */
+function buildSummary() {
+  const profileMeta = PROFILES.find(p => p.v === data.profile);
+  const prestaLabels = Array.from(selectedPrestations).map(v => {
+    for (const g of Object.values(SERVICE_GROUPS)) { const found = g.items.find(i => i.v === v); if (found) return found.l; }
+    return v;
+  });
+
+  const blocks = [
+    { title:'Profil', step:1, rows:[
+      ['Type', profileMeta.label + (data.occupant ? ` (${data.occupant === 'proprietaire' ? 'Propriétaire' : 'Locataire'})` : '')],
+    ]},
+    { title:'Lieu', step:2, rows:[
+      ['Nom du site', document.getElementById('nom_site').value || '—'],
+      ['Adresse', document.getElementById('adresse_lieu').value],
+      ['Ville', `${document.getElementById('code_postal').value} ${document.getElementById('ville').value}`],
+      ['Complément', document.getElementById('complement_lieu').value || '—'],
+    ]},
+    { title:'Besoin', step:3, rows:[
+      ['Prestations', prestaLabels.join(', ')],
+      ['Type de demande', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
+      ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
+        : [['Fréquence', data.frequence ? { hebdomadaire:'Hebdomadaire', mensuelle:'Mensuelle', trimestrielle:'Trimestrielle' }[data.frequence] : 'Non précisée']]),
+      ['Surface', document.getElementById('surface_m2').value ? document.getElementById('surface_m2').value + ' m²' : '—'],
+      ['Description', document.getElementById('desc').value],
+      ['Photos', photoFiles.length ? `${photoFiles.length} photo(s)` : 'Aucune'],
+    ]},
+    { title:'Contact', step:4, rows:[
+      ['Nom', `${document.getElementById('prenom').value} ${document.getElementById('nom').value}`],
+      ['Téléphone', document.getElementById('tel').value],
+      ['E-mail', document.getElementById('email').value || '—'],
+    ]},
+  ];
+
+  document.getElementById('summary').innerHTML = blocks.map(b => `
+    <div class="summary">
+      <div class="summary-block-title">
+        <span>${b.title}</span>
+        <button type="button" onclick="goToStep(${b.step})">Modifier</button>
+      </div>
+      ${b.rows.map(r => `<div class="sum-row"><div class="sum-k">${r[0]}</div><div class="sum-v">${r[1]}</div></div>`).join('')}
+    </div>`).join('');
+}
+
+/* =========================================================================
+   ENVOI DE LA DEMANDE
+   ========================================================================= */
+async function submitDemand() {
+  const btn = document.getElementById('btn-next');
+  const errorBox = document.getElementById('global-error');
+  errorBox.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+
+  try {
+    const prestations = Array.from(selectedPrestations);
+    const profileMeta = PROFILES.find(p => p.v === data.profile);
+    const profilDemandeur = data.profile === 'particulier' ? (data.occupant || 'proprietaire') : profileMeta.profil_demandeur;
+
+    // 1. Upload des photos
+    const photoPaths = [];
+    for (const [i, p] of photoFiles.entries()) {
+      const path = `${crypto.randomUUID()}-${i}-${p.file.name}`;
+      const { error } = await sb.storage.from('intervention-photos').upload(path, p.file);
+      if (error) throw error;
+      photoPaths.push(path);
+    }
+
+    // 2. Insertion de la demande
+    const payload = {
+      zone: 'parties_communes',
+      adresse: document.getElementById('adresse_lieu').value,
+      code_postal: document.getElementById('code_postal').value,
+      ville: document.getElementById('ville').value,
+      etage: document.getElementById('complement_lieu').value || null,
+      categorie: prestations[0] || 'autre',
+      urgence: data.demandType === 'ponctuel' ? data.urgence : 'faible',
+      description: document.getElementById('desc').value,
+      photos: photoPaths,
+      profil_demandeur: profilDemandeur,
+      nom: document.getElementById('nom').value,
+      prenom: document.getElementById('prenom').value,
+      telephone: document.getElementById('tel').value,
+      email: document.getElementById('email').value || null,
+      profil_structure: data.profile,
+      nom_site: document.getElementById('nom_site').value || null,
+      prestations: prestations,
+      type_demande: data.demandType,
+      frequence: data.demandType === 'recurrent' ? data.frequence : null,
+      date_debut_souhaitee: document.getElementById('date_debut').value || null,
+      surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
+    };
+
+    const { data: inserted, error } = await sb.from('interventions').insert(payload).select('reference').single();
+    if (error) throw error;
+
+    document.getElementById('ticket-number').textContent = inserted.reference;
+    document.getElementById('confirm-note').textContent = data.demandType === 'recurrent'
+      ? "Vous recevrez une proposition de devis pour un contrat d'entretien sous 48h."
+      : (data.urgence === 'urgent'
+        ? 'Un artisan disponible va être notifié immédiatement.'
+        : 'Un artisan de notre réseau va prendre contact avec vous prochainement.');
+
+    step = 6;
+    showStep();
+  } catch (err) {
+    console.error(err);
+    errorBox.textContent = "Impossible d'envoyer votre demande pour le moment (base de données non configurée ou indisponible). Réessayez dans un instant.";
+    errorBox.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Confirmer la demande';
+  }
+}
+
+/* =========================================================================
+   RÉINITIALISATION
+   ========================================================================= */
+function resetForm() {
+  step = 1;
+  photoFiles = [];
+  selectedPrestations = new Set();
+  data = { profile:null, occupant:null, demandType:'ponctuel', urgence:'faible', frequence:null };
+  document.getElementById('wizard-form').reset();
+  document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card,#particulier-toggle button').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
+  document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
+  document.querySelector('.urg-card[data-u="faible"]').classList.add('sel');
+  document.getElementById('urgence-wrap').hidden = false;
+  document.getElementById('frequence-wrap').hidden = true;
+  document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
+  document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
+  document.getElementById('prestations-container').innerHTML = '';
+  document.getElementById('preview-wrap').innerHTML = '';
+  document.getElementById('desc-count').textContent = '0';
+  document.getElementById('global-error').style.display = 'none';
+  const btn = document.getElementById('btn-next');
+  btn.disabled = false; btn.textContent = 'Continuer';
+  showStep();
+}
+
+showStep();
+</script>
+</body>
+</html>
