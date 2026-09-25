@@ -693,7 +693,7 @@ function validateStep() {
     const email = document.getElementById('email').value.trim();
     const telRegex = /^(0|\+33)[1-9][0-9]{8}$/;
     const emailRequired = data.profile !== 'particulier';
-    const emailOk = emailRequired ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) : (email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    const emailOk = emailRequired ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) : (email === '' \vert{}\vert{} /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
     if (!prenom || !nom || !telRegex.test(tel) || !emailOk) { document.getElementById('err-contact').classList.add('show'); return false; }
     return true;
   }
@@ -815,7 +815,6 @@ async function submitDemand() {
       prenom: document.getElementById('prenom').value,
       telephone: document.getElementById('tel').value,
       email: document.getElementById('email').value || null,
-      // Colonnes complémentaires (voir ALTER TABLE fourni séparément)
       profil_structure: data.profile,
       nom_site: document.getElementById('nom_site').value || null,
       prestations: prestations,
