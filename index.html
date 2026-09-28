@@ -3,1751 +3,1191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Entreprise 3 — Faire une demande</title>
+<title>Entreprise 3 — Espace Artisan</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+/* =========================================================================
+   ENTREPRISE 3 — DESIGN SYSTEM
+   Bleu marine / crème / or — Fraunces (titres) + Inter (texte)
+   ========================================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root{
-  --cream:#faf7f2;
-  --cream-dark:#f2ece0;
-  --navy:#0e2140;
-  --navy-mid:#1a3a6b;
-  --navy-soft:#2558a8;
-  --gold:#c9963a;
-  --gold-light:#f0c060;
-  --gold-pale:#fbeecb;
-  --text:#1a2332;
-  --text-mid:#3d4f66;
-  --muted:#8896a8;
-  --border:#e0d8cc;
-  --border-mid:#c8bfb0;
-  --white:#ffffff;
-  --success:#1a7a52;
-  --success-bg:#eaf6f0;
-  --error:#c0322a;
-  --error-bg:#fdf0ef;
-  --urg-h:#c0322a;
-  --urg-m:#b06020;
-  --urg-l:#1a7a52;
-  --radius-s:10px;
+  --navy-950:#0a1729;
+  --navy-900:#0e1f3d;
+  --navy-700:#16305a;
+  --navy-500:#2c4d80;
+  --cream-100:#f7f2e7;
+  --cream-200:#efe6d2;
+  --gold-500:#b8935a;
+  --gold-400:#cdac78;
+  --gold-100:#f1e2c6;
+  --ink:#16213a;
+  --muted:#667088;
+  --border:#e3d9c4;
+  --success:#2f6b4f;
+  --success-bg:#e7f2ec;
+  --warning:#b8863a;
+  --warning-bg:#f6ecdb;
+  --danger:#a3372f;
+  --danger-bg:#f7e5e3;
+  --radius-s:8px;
   --radius-m:14px;
   --radius-l:22px;
-  --shadow:0 10px 28px rgba(14,33,64,.08);
+  --shadow-card:0 2px 16px rgba(14,31,61,.08);
+  --shadow-modal:0 -12px 40px rgba(10,23,41,.25);
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{scroll-padding-top:1rem;}
+*{box-sizing:border-box;}
+html,body{height:100%;}
 body{
-  font-family:'DM Sans',sans-serif;
-  background:var(--cream);
-  color:var(--text);
-  min-height:100dvh;
-  overflow-x:hidden;
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:var(--cream-100);
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
 }
+h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0;color:var(--navy-950);}
+p{margin:0;line-height:1.5;}
 button{font-family:inherit;cursor:pointer;}
-input,textarea,select{font-family:inherit;font-size:inherit;}
-:focus-visible{outline:2.5px solid var(--navy-soft);outline-offset:2px;}
+input,select,textarea{font-family:inherit;font-size:inherit;}
+:focus-visible{outline:2px solid var(--gold-500);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
 
-/* ---- En-tête ---------------------------------------------------------- */
-.header{
-  background:linear-gradient(135deg,#0e2140,#1a3a6b 65%,#204a86);
-  padding:calc(env(safe-area-inset-top,0px) + 20px) 20px 28px;
-  position:relative;
-  overflow:hidden;
+/* ---- Boutons -------------------------------------------------------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+  border:none;border-radius:var(--radius-s);padding:.85em 1.3em;
+  font-weight:700;font-size:.92rem;transition:transform .1s ease, opacity .15s ease;
 }
-.header::after{
-  content:'';
-  position:absolute;bottom:-1px;left:0;right:0;height:26px;
-  background:var(--cream);border-radius:26px 26px 0 0;
-}
-.header-inner{position:relative;z-index:1;}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
-.brand-mark{
-  width:36px;height:36px;background:var(--gold);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:15px;flex-shrink:0;
-}
-.brand-name{color:white;font-weight:700;font-size:15px;}
-.header-title{font-family:'DM Serif Display',serif;color:white;font-size:29px;line-height:1.12;transition:opacity .2s;}
-.header-title em{font-style:italic;color:var(--gold-light);}
-.profile-chip{
-  display:inline-flex;align-items:center;gap:7px;background:rgba(201,150,58,.18);
-  border:1px solid rgba(201,150,58,.32);border-radius:100px;padding:6px 13px;
-  font-size:12px;font-weight:700;color:var(--gold-light);margin-top:15px;transition:all .2s;
-}
-.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite;flex-shrink:0;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* ---- Fil d'étapes -------------------------------------------------------- */
-.progress-wrap{padding:18px 20px 0;}
-.step-track{display:flex;align-items:center;}
-.step-node{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;}
-.step-node::after{
-  content:'';position:absolute;top:12px;left:calc(50% + 13px);right:calc(-50% + 13px);
-  height:1.5px;background:var(--border-mid);transition:background .25s;
-}
-.step-node:last-child::after{display:none;}
-.step-node.done::after{background:var(--navy-soft);}
-.sn-circle{
-  width:25px;height:25px;border-radius:50%;border:1.5px solid var(--border-mid);background:var(--cream);
-  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted);
-  z-index:1;transition:all .2s;
-}
-.step-node.active .sn-circle{background:var(--navy);border-color:var(--navy);color:white;transform:scale(1.08);}
-.step-node.done .sn-circle{background:var(--navy-soft);border-color:var(--navy-soft);color:white;}
-.sn-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:5px;}
-.step-node.active .sn-label{color:var(--navy);}
-
-/* ---- Sections ------------------------------------------------------------ */
-.section{display:none;padding:22px 20px 10px;animation:up .28s ease;}
-.section.active{display:block;}
-@keyframes up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.section-title{font-family:'DM Serif Display',serif;font-size:23px;color:var(--navy);margin-bottom:4px;}
-.section-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.4;}
-
-/* ---- Cartes de sélection (profil, type de demande) ------------------------ */
-.picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.picker-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:16px 12px;background:white;
-  text-align:left;cursor:pointer;transition:.15s ease;display:flex;flex-direction:column;gap:6px;
-}
-.picker-card:hover{border-color:var(--border-mid);transform:translateY(-1px);}
-.picker-card.sel{border-color:var(--navy);background:var(--navy);color:white;box-shadow:var(--shadow);}
-.picker-card.sel .picker-desc{color:rgba(255,255,255,.72);}
-.picker-icon{font-size:26px;}
-.picker-label{font-size:13px;font-weight:700;}
-.picker-desc{font-size:11px;color:var(--muted);line-height:1.35;}
-
-.subtoggle{display:flex;gap:8px;margin-top:16px;}
-.subtoggle button{
-  flex:1;padding:11px;border-radius:var(--radius-s);border:1.5px solid var(--border);background:white;
-  font-size:13px;font-weight:700;color:var(--text-mid);
-}
-.subtoggle button.sel{background:var(--navy);border-color:var(--navy);color:white;}
-
-/* ---- Champs de formulaire -------------------------------------------------- */
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px;color:var(--text-mid);}
-.field .optional-tag{text-transform:none;font-weight:400;color:var(--muted);}
-.field input,.field textarea{
-  width:100%;border:1.5px solid var(--border);border-radius:var(--radius-s);padding:14px;
-  font-size:15px;outline:none;background:white;transition:border-color .15s;
-}
-.field input:focus,.field textarea:focus{border-color:var(--navy-soft);}
-.field textarea{resize:none;}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px;}
-
-.field-err,.grid-err{
-  display:none;color:var(--error);font-size:11.5px;font-weight:600;margin-top:6px;
-  padding:9px 10px;background:var(--error-bg);border-radius:8px;
-}
-.show{display:block;}
-
-/* ---- Groupes de prestations (multi-sélection) ------------------------------ */
-.service-group{margin-bottom:18px;}
-.service-group-title{
-  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gold);
-  margin-bottom:9px;display:flex;align-items:center;gap:6px;
-}
-.service-group-title::after{content:'';flex:1;height:1px;background:var(--border);}
-.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.cat-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:13px 8px;background:white;
-  text-align:center;cursor:pointer;transition:.15s ease;position:relative;
-}
-.cat-card:hover{transform:translateY(-1px);}
-.cat-card.sel{border-color:var(--navy);background:var(--navy);color:white;}
-.cat-card.sel::before{
-  content:'✓';position:absolute;top:5px;right:6px;font-size:10px;font-weight:800;color:var(--gold-light);
-}
-.cat-icon{font-size:20px;display:block;margin-bottom:6px;}
-.cat-label{font-size:10.5px;font-weight:700;line-height:1.2;}
-
-/* ---- Type de demande (ponctuel / récurrent) --------------------------------- */
-.demand-type{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
-.demand-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:14px;background:white;cursor:pointer;transition:.15s;
-}
-.demand-card.sel{border-color:var(--gold);background:var(--gold-pale);}
-.demand-icon{font-size:20px;margin-bottom:6px;}
-.demand-title{font-size:12.5px;font-weight:800;color:var(--navy);}
-.demand-sub{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.3;}
-
-.freq-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
-.freq-row .cat-card{padding:11px 6px;}
-
-/* ---- Urgence ---------------------------------------------------------------- */
-.urg-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.urg-card{border:1.5px solid var(--border);border-radius:var(--radius-m);padding:12px;text-align:center;cursor:pointer;background:white;transition:.15s;}
-.urg-card.sel{transform:scale(1.02);}
-.urg-dot{width:10px;height:10px;border-radius:50%;display:block;margin:0 auto 5px;}
-.urg-card.sel[data-u="faible"]{border-color:var(--urg-l);background:#f0f9f5;}
-.urg-card.sel[data-u="modere"]{border-color:var(--urg-m);background:#fff9f2;}
-.urg-card.sel[data-u="urgent"]{border-color:var(--urg-h);background:#fff5f5;}
-
-/* ---- Photos ------------------------------------------------------------------ */
-.file-btn{
-  display:flex;align-items:center;gap:8px;border:1.5px dashed var(--border-mid);border-radius:var(--radius-s);
-  padding:13px;font-size:13px;font-weight:600;color:var(--text-mid);background:white;width:100%;justify-content:center;
-}
-#preview-wrap{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px;}
-.preview-item{position:relative;flex-shrink:0;}
-.preview-img{width:76px;height:76px;object-fit:cover;border-radius:var(--radius-s);border:1px solid var(--border);display:block;}
-.preview-remove{
-  position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--navy);color:white;
-  border:2px solid var(--cream);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
-}
-
-/* ---- Navigation basse -------------------------------------------------------- */
-.nav-wrap{padding:18px 20px;display:flex;gap:10px;background:var(--cream);}
-.btn{flex:1;padding:16px;border-radius:var(--radius-s);border:none;font-weight:700;font-size:14.5px;transition:.15s;
-  display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn:active{transform:scale(.98);}
-.btn-primary{background:var(--navy);color:white;box-shadow:0 8px 20px rgba(14,33,64,.18);}
-.btn-primary:disabled{background:var(--muted);box-shadow:none;cursor:not-allowed;}
-.btn-back{background:white;border:1.5px solid var(--border);color:var(--muted);flex:0 0 56px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-block{width:100%;}
+.btn-sm{padding:.5em 1em;font-size:.8rem;}
+.btn-primary{background:var(--navy-950);color:var(--cream-100);}
+.btn-primary:hover{background:var(--navy-700);}
+.btn-gold{background:var(--gold-500);color:var(--navy-950);box-shadow:0 4px 14px rgba(184,147,90,.35);}
+.btn-gold:hover{background:var(--gold-400);}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--navy-950);}
+.btn-ghost:hover{background:var(--cream-200);}
+.btn-danger-outline{background:var(--danger-bg);color:var(--danger);}
+.btn-success{background:var(--success);color:#fff;}
 
-/* ---- Récapitulatif ------------------------------------------------------------ */
-.summary{border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;background:white;margin-bottom:14px;}
-.summary-block-title{
-  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--gold);
-  padding:12px 16px 6px;display:flex;justify-content:space-between;align-items:center;
+/* ---- Champs de formulaire -------------------------------------------- */
+.field{margin-bottom:1.1rem;}
+.field label{display:block;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.03em;color:var(--navy-700);margin-bottom:.4em;}
+.field input,.field select,.field textarea{
+  width:100%;padding:.8em .9em;border:1.5px solid var(--border);border-radius:var(--radius-s);
+  background:#fff;color:var(--ink);transition:border-color .15s ease;
 }
-.summary-block-title button{background:none;border:none;color:var(--navy-soft);font-size:11px;font-weight:700;text-decoration:underline;padding:0;}
-.sum-row{display:flex;padding:9px 16px;border-top:1px solid var(--border);font-size:13px;gap:10px;}
-.sum-k{width:118px;flex-shrink:0;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;padding-top:1px;}
-.sum-v{font-weight:600;color:var(--navy);flex:1;word-break:break-word;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold-500);}
+.field .hint{font-size:.75rem;color:var(--muted);margin-top:.35em;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+fieldset{border:none;padding:0;margin:0 0 1.4rem;}
+legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem;color:var(--navy-900);
+  padding-bottom:.5rem;border-bottom:1.5px solid var(--border);margin-bottom:1rem;}
 
-/* ---- Confirmation -------------------------------------------------------------- */
-.confirm-wrap{text-align:center;padding:26px 20px 10px;}
-.confirm-badge{
-  width:82px;height:82px;background:linear-gradient(135deg,var(--success),#28a36a);color:white;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:34px;
-  box-shadow:0 10px 30px rgba(26,122,82,.25);
-}
-.confirm-wrap h2{font-family:'DM Serif Display',serif;font-size:27px;color:var(--navy);margin-bottom:10px;}
-.confirm-wrap p{color:var(--text-mid);line-height:1.6;font-size:15px;max-width:320px;margin:0 auto;}
-.ref-box{margin-top:24px;background:white;border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;}
-.ref-box .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
-.ref-box .val{font-weight:800;color:var(--navy);font-size:19px;letter-spacing:.01em;}
-.confirm-note{
-  margin-top:18px;background:var(--gold-pale);border-radius:var(--radius-s);padding:13px 16px;
-  font-size:12.5px;color:#6b4f1a;text-align:left;line-height:1.5;
-}
+/* ---- Chips -------------------------------------------------------- */
+.chip-group{display:flex;flex-wrap:wrap;gap:.5rem;}
+.chip{padding:.55em 1em;border-radius:999px;border:1.5px solid var(--border);background:#fff;
+  font-size:.85rem;font-weight:600;color:var(--ink);}
+.chip.is-selected{background:var(--navy-950);border-color:var(--navy-950);color:var(--cream-100);}
 
-/* ---- Toast d'erreur globale ----------------------------------------------------- */
-#global-error{
-  display:none;margin:0 20px 16px;background:var(--error-bg);color:var(--error);border-radius:var(--radius-s);
-  padding:12px 14px;font-size:12.5px;font-weight:600;
+/* =========================================================================
+   ÉCRANS D'AUTHENTIFICATION
+   ========================================================================= */
+.auth-screen{
+  position:fixed;inset:0;z-index:100;
+  background:
+    radial-gradient(circle at 15% 0%, var(--navy-700), var(--navy-950) 60%);
+  display:flex;align-items:center;justify-content:center;
+  padding:2rem 1.1rem;overflow-y:auto;
 }
+.auth-screen[hidden]{display:none;}
+.auth-card{
+  width:100%;max-width:430px;background:#fff;border-radius:var(--radius-l);
+  padding:2rem 1.6rem;box-shadow:0 30px 70px rgba(0,0,0,.35);
+  max-height:92vh;overflow-y:auto;
+}
+.brand-row{display:flex;align-items:center;gap:.65rem;margin-bottom:1.4rem;}
+.brand-mark{
+  display:grid;place-items:center;width:38px;height:38px;border-radius:50%;
+  background:var(--gold-500);color:var(--navy-950);font-family:var(--font-display);
+  font-weight:700;font-size:1rem;flex-shrink:0;
+}
+.brand-name{font-family:var(--font-display);font-size:1.25rem;font-weight:600;color:var(--navy-950);}
+.auth-card h1{font-size:1.4rem;margin-bottom:.3rem;}
+.auth-card > p.lead{color:var(--muted);margin-bottom:1.5rem;font-size:.9rem;}
+.form-error{background:var(--danger-bg);color:var(--danger);padding:.75em 1em;border-radius:var(--radius-s);
+  font-size:.82rem;margin-bottom:1rem;font-weight:600;}
+.form-success{background:var(--success-bg);color:var(--success);padding:.75em 1em;border-radius:var(--radius-s);
+  font-size:.82rem;margin-bottom:1rem;font-weight:600;}
+.auth-switch{text-align:center;margin-top:1.3rem;font-size:.85rem;color:var(--muted);}
+.auth-switch button{background:none;border:none;color:var(--gold-500);font-weight:700;padding:0;font-size:inherit;}
+.file-field{border:1.5px dashed var(--border);border-radius:var(--radius-s);padding:.9em;font-size:.8rem;}
+.file-field.has-file{border-color:var(--success);background:var(--success-bg);}
 
-@media (min-width:520px){
-  body{max-width:520px;margin:0 auto;box-shadow:0 0 60px rgba(14,33,64,.08);}
+/* =========================================================================
+   APPLICATION
+   ========================================================================= */
+#app-screen{position:fixed;inset:0;display:none;flex-direction:column;}
+#app-screen.is-active{display:flex;}
+.views{position:relative;flex:1;min-height:0;}
+.view{position:absolute;inset:0;display:none;}
+.view.is-active{display:block;overflow-y:auto;}
+
+/* ---- Barre supérieure -------------------------------------------------- */
+.top-bar{
+  position:absolute;top:0;left:0;right:0;z-index:15;
+  padding:calc(env(safe-area-inset-top,0px) + .7rem) 1rem .7rem;
+  background:#fff;box-shadow:0 2px 14px rgba(14,31,61,.06);
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;
 }
+.top-bar .brand-row{margin:0;}
+.top-bar .brand-name{font-size:1.05rem;}
+.status-pill{font-size:.7rem;font-weight:700;padding:.3em .7em;border-radius:999px;white-space:nowrap;}
+.status-pill--valide{background:var(--success-bg);color:var(--success);}
+.status-pill--en_attente{background:var(--warning-bg);color:var(--warning);}
+.status-pill--refuse{background:var(--danger-bg);color:var(--danger);}
+
+/* ---- Bandeau vérification ---------------------------------------------- */
+.verify-banner{
+  position:absolute;top:64px;left:0;right:0;z-index:14;
+  background:var(--warning-bg);color:#6b4f22;font-size:.8rem;font-weight:600;
+  padding:.6rem 1rem;text-align:center;
+}
+.verify-banner[hidden]{display:none;}
+
+/* ---- Vue carte ----------------------------------------------------------- */
+#map{position:absolute;inset:0;z-index:0;}
+.map-toolbar{
+  position:absolute;left:1rem;right:1rem;z-index:6;
+  display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.2rem;
+}
+.map-toolbar::-webkit-scrollbar{display:none;}
+.map-toolbar .chip{background:#fff;box-shadow:var(--shadow-card);white-space:nowrap;flex-shrink:0;}
+.locate-btn{
+  position:absolute;z-index:6;width:44px;height:44px;border-radius:50%;
+  background:#fff;box-shadow:var(--shadow-card);border:none;display:grid;place-items:center;font-size:1.1rem;
+}
+.marker-pin{width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+  display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.3);border:2.5px solid #fff;}
+.marker-pin span{transform:rotate(45deg);font-size:1.05rem;}
+.marker-pin--faible{background:var(--success);}
+.marker-pin--modere{background:var(--warning);}
+.marker-pin--urgent{background:var(--danger);}
+.marker-pin--mine{background:var(--navy-950);}
+
+/* ---- Bottom sheet -------------------------------------------------------- */
+.bottom-sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:5;
+  background:#fff;border-radius:var(--radius-l) var(--radius-l) 0 0;
+  box-shadow:var(--shadow-modal);
+  max-height:46%;display:flex;flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  touch-action:pan-y;
+}
+.bottom-sheet__handle{width:38px;height:4px;background:var(--border);border-radius:999px;margin:.65rem auto .3rem;}
+.bottom-sheet__header{display:flex;align-items:center;justify-content:space-between;padding:.35rem 1.25rem .7rem;}
+.bottom-sheet__header h2{font-size:1.05rem;}
+.badge-count{background:var(--gold-500);color:var(--navy-950);font-weight:800;font-size:.72rem;
+  padding:.18em .6em;border-radius:999px;}
+.chantier-list{overflow-y:auto;padding:0 1.1rem .8rem;}
+.empty-state{color:var(--muted);text-align:center;padding:2rem 1rem;font-size:.88rem;}
+.chantier-card{
+  display:flex;align-items:center;gap:.8rem;padding:.85rem .2rem;
+  border-bottom:1px solid var(--border);border:none;background:none;width:100%;text-align:left;
+}
+.chantier-card__icon{width:42px;height:42px;border-radius:var(--radius-s);background:var(--cream-200);
+  display:grid;place-items:center;font-size:1.15rem;flex-shrink:0;}
+.chantier-card__info{flex:1;min-width:0;}
+.chantier-card__title{font-weight:700;font-size:.9rem;margin:0 0 .1rem;}
+.chantier-card__meta{font-size:.76rem;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.urgence-tag{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;
+  padding:.22em .55em;border-radius:6px;flex-shrink:0;}
+.urgence-tag--faible{background:var(--success-bg);color:var(--success);}
+.urgence-tag--modere{background:var(--warning-bg);color:var(--warning);}
+.urgence-tag--urgent{background:var(--danger-bg);color:var(--danger);}
+.statut-tag{font-size:.64rem;font-weight:800;padding:.22em .55em;border-radius:6px;flex-shrink:0;
+  background:var(--cream-200);color:var(--navy-900);}
+
+/* ---- Vue "Mes missions" -------------------------------------------------- */
+.page{padding:calc(env(safe-area-inset-top,0px) + 4.6rem) 1.1rem 2rem;}
+.page h1{font-size:1.4rem;margin-bottom:1rem;}
+.tab-filter{display:flex;gap:.5rem;margin-bottom:1.1rem;overflow-x:auto;}
+.tab-filter button{
+  border:1.5px solid var(--border);background:#fff;border-radius:999px;
+  padding:.5em 1em;font-size:.8rem;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0;
+}
+.tab-filter button.is-active{background:var(--navy-950);border-color:var(--navy-950);color:var(--cream-100);}
+.mission-item{
+  background:#fff;border-radius:var(--radius-m);padding:1rem;margin-bottom:.8rem;
+  box-shadow:var(--shadow-card);border:none;width:100%;text-align:left;
+}
+.mission-item__top{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.4rem;}
+.mission-item__title{font-weight:700;font-size:.92rem;}
+.mission-item__addr{font-size:.8rem;color:var(--muted);}
+
+/* ---- Vue profil ------------------------------------------------------- */
+.profile-card{background:#fff;border-radius:var(--radius-m);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-card);}
+.profile-card h3{font-size:.95rem;margin-bottom:.9rem;}
+.profile-row{display:flex;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.profile-row:last-child{border-bottom:none;}
+.profile-row dt{color:var(--muted);}
+.profile-row dd{margin:0;font-weight:700;text-align:right;}
+.spec-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.3rem;}
+.spec-tag{background:var(--cream-200);color:var(--navy-900);font-size:.72rem;font-weight:700;padding:.25em .65em;border-radius:6px;}
+
+/* ---- Navigation basse ---------------------------------------------------- */
+.nav-bar{
+  height:64px;background:#fff;border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;align-items:center;
+  padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0;z-index:20;
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:.2rem;
+  background:none;border:none;color:var(--muted);font-size:.68rem;font-weight:700;padding:.4rem .8rem;
+}
+.nav-item svg{width:21px;height:21px;fill:currentColor;}
+.nav-item.is-active{color:var(--gold-500);}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--danger);position:relative;top:-14px;left:10px;display:none;}
+.nav-item .dot.show{display:block;}
+
+/* =========================================================================
+   MODALE MISSION
+   ========================================================================= */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;background:rgba(10,23,41,.6);
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.modal-overlay[hidden]{display:none;}
+@media (min-width:640px){.modal-overlay{align-items:center;}}
+.modal{
+  position:relative;background:#fff;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;
+  border-radius:var(--radius-l) var(--radius-l) 0 0;padding:1.6rem;
+  padding-bottom:calc(1.6rem + env(safe-area-inset-bottom,0px));
+  animation:slideUp .22s ease-out;
+}
+@media (min-width:640px){.modal{border-radius:var(--radius-l);}}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal__close{position:absolute;top:1rem;right:1rem;width:32px;height:32px;border-radius:50%;
+  border:none;background:var(--cream-200);font-size:.9rem;color:var(--navy-950);}
+.modal__title{font-size:1.3rem;margin-bottom:.3rem;padding-right:2rem;}
+.modal__meta{display:flex;gap:.5rem;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted);}
+.modal__section{margin-bottom:1.2rem;}
+.modal__section h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem;font-weight:700;}
+.modal__photos{display:flex;gap:.6rem;flex-wrap:wrap;}
+.modal__photos img{width:88px;height:88px;object-fit:cover;border-radius:var(--radius-s);}
+.action-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.8rem;}
+.btn-action{padding:.8em;border-radius:var(--radius-s);text-align:center;font-size:.8rem;font-weight:700;
+  text-decoration:none;display:flex;align-items:center;justify-content:center;gap:.4rem;
+  border:1.5px solid var(--border);background:#fff;color:var(--navy-950);}
+.btn-call{background:var(--success);color:#fff;border:none;}
+.btn-mail{background:var(--navy-950);color:var(--cream-100);border:none;}
+.progress-steps{display:flex;align-items:center;gap:.3rem;margin-bottom:1.2rem;}
+.progress-steps .seg{flex:1;height:5px;border-radius:999px;background:var(--border);}
+.progress-steps .seg.done{background:var(--gold-500);}
+.photo-zone{border:1.5px dashed var(--gold-500);background:var(--gold-100);padding:.9rem;border-radius:var(--radius-s);margin-bottom:1rem;}
+.photo-zone h5{font-size:.78rem;color:#6b4f22;margin-bottom:.5rem;font-weight:700;}
+.photo-zone input{font-size:.78rem;width:100%;}
+
+/* =========================================================================
+   TOASTS
+   ========================================================================= */
+#toast-region{position:fixed;top:calc(env(safe-area-inset-top,0px) + 1rem);left:1rem;right:1rem;
+  z-index:500;display:flex;flex-direction:column;gap:.5rem;align-items:center;pointer-events:none;}
+.toast{
+  background:var(--navy-950);color:var(--cream-100);padding:.75em 1.1em;border-radius:var(--radius-s);
+  font-size:.85rem;font-weight:600;box-shadow:0 10px 28px rgba(0,0,0,.25);max-width:420px;
+  display:flex;align-items:center;gap:.5em;animation:toast-in .2s ease-out;
+}
+.toast--success{background:var(--success);}
+.toast--error{background:var(--danger);}
+@keyframes toast-in{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:none;}}
+
+/* ---- Skeleton loading ---------------------------------------------------- */
+.skeleton{background:linear-gradient(90deg,var(--cream-200) 25%,#fff 37%,var(--cream-200) 63%);
+  background-size:400% 100%;animation:skeleton-loading 1.4s ease infinite;border-radius:var(--radius-s);}
+@keyframes skeleton-loading{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
+
+@media (max-width:360px){.field-row{grid-template-columns:1fr;}.action-grid-2{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-inner">
-    <div class="brand">
-      <div class="brand-mark" aria-hidden="true">E3</div>
-      <div class="brand-name">Entreprise 3</div>
-    </div>
-    <h1 class="header-title" id="header-title">Faire une<br><em>demande</em></h1>
-    <div class="profile-chip">
-      <span class="chip-dot" aria-hidden="true"></span>
-      <span id="header-profile-label">Sélectionnez votre profil</span>
-    </div>
+<div id="toast-region" role="status" aria-live="polite"></div>
+
+<!-- =====================================================================
+     CONNEXION
+     ===================================================================== -->
+<div id="login-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
+    <h1>Espace artisan</h1>
+    <p class="lead">Connectez-vous pour accéder aux chantiers disponibles en Île-de-France.</p>
+    <p class="form-error" id="login-error" hidden></p>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">E-mail professionnel</label>
+        <input type="email" id="login-email" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="login-pass">Mot de passe</label>
+        <input type="password" id="login-pass" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="login-btn">Se connecter</button>
+    </form>
+    <button type="button" class="btn btn-ghost btn-block" style="margin-top:.7rem;" onclick="lancerModeDemo()">🧪 Essayer en mode démo (sans Supabase)</button>
+    <p class="auth-switch">Pas encore de compte ? <button type="button" onclick="afficherEcran('register')">S'inscrire avec un code partenaire</button></p>
   </div>
 </div>
 
-<div class="progress-wrap" aria-hidden="true">
-  <div class="step-track">
-    <div class="step-node active"><div class="sn-circle">1</div><div class="sn-label">Profil</div></div>
-    <div class="step-node"><div class="sn-circle">2</div><div class="sn-label">Lieu</div></div>
-    <div class="step-node"><div class="sn-circle">3</div><div class="sn-label">Besoin</div></div>
-    <div class="step-node"><div class="sn-circle">4</div><div class="sn-label">Contact</div></div>
+<!-- =====================================================================
+     INSCRIPTION
+     ===================================================================== -->
+<div id="register-screen" class="auth-screen" hidden>
+  <div class="auth-card">
+    <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
+    <h1>Rejoindre le réseau</h1>
+    <p class="lead">Votre dossier sera vérifié avant validation de votre accès aux chantiers.</p>
+    <p class="form-error" id="register-error" hidden></p>
+
+    <form id="register-form">
+      <fieldset>
+        <legend>Accès partenaire</legend>
+        <div class="field">
+          <label for="reg-code">Code d'accès partenaire</label>
+          <input type="text" id="reg-code" required placeholder="ENTREPRISE3" />
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Identifiants</legend>
+        <div class="field">
+          <label for="reg-email">E-mail</label>
+          <input type="email" id="reg-email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="reg-pass">Mot de passe</label>
+          <input type="password" id="reg-pass" required minlength="8" autocomplete="new-password" />
+          <p class="hint">8 caractères minimum.</p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Entreprise</legend>
+        <div class="field">
+          <label for="reg-company">Nom de l'entreprise</label>
+          <input type="text" id="reg-company" required />
+        </div>
+        <div class="field">
+          <label for="reg-gerant">Nom du gérant</label>
+          <input type="text" id="reg-gerant" required />
+        </div>
+        <div class="field">
+          <label for="reg-tel">Téléphone</label>
+          <input type="tel" id="reg-tel" required />
+        </div>
+        <div class="field">
+          <label for="reg-siret">SIRET <span style="font-weight:400;">(facultatif)</span></label>
+          <input type="text" id="reg-siret" inputmode="numeric" pattern="[0-9]{14}" />
+        </div>
+        <div class="field">
+          <label>Spécialités</label>
+          <div class="chip-group" id="reg-specialites"></div>
+        </div>
+        <div class="field">
+          <label for="reg-zones">Zone d'intervention (départements)</label>
+          <input type="text" id="reg-zones" placeholder="75, 92, 93" required />
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Dossier de vérification</legend>
+        <div class="field">
+          <label for="doc-identite">Pièce d'identité du gérant</label>
+          <input type="file" id="doc-identite" class="file-field" accept="image/*,application/pdf" required />
+        </div>
+        <div class="field">
+          <label for="doc-decennale">Attestation d'assurance décennale</label>
+          <input type="file" id="doc-decennale" class="file-field" accept="image/*,application/pdf" required />
+        </div>
+        <div class="field">
+          <label for="doc-rcpro">Attestation RC Pro</label>
+          <input type="file" id="doc-rcpro" class="file-field" accept="image/*,application/pdf" required />
+        </div>
+        <div class="field">
+          <label for="doc-kbis">Extrait Kbis / justificatif d'activité</label>
+          <input type="file" id="doc-kbis" class="file-field" accept="image/*,application/pdf" required />
+        </div>
+      </fieldset>
+
+      <button type="submit" class="btn btn-gold btn-block" id="register-btn">Envoyer mon dossier</button>
+    </form>
+    <p class="auth-switch">Déjà inscrit ? <button type="button" onclick="afficherEcran('login')">Se connecter</button></p>
   </div>
 </div>
 
-<p id="global-error" role="alert"></p>
+<!-- =====================================================================
+     APPLICATION
+     ===================================================================== -->
+<div id="app-screen">
 
-<form id="wizard-form" novalidate>
+  <div class="views">
 
-<!-- ÉTAPE 1 — PROFIL -->
-<section class="section active" id="s1" aria-labelledby="s1-title">
-  <h2 class="section-title" id="s1-title">Qui êtes-vous ?</h2>
-  <p class="section-sub">Choisissez votre profil pour adapter les prestations proposées.</p>
+    <!-- VUE CARTE ------------------------------------------------------ -->
+    <section id="view-map" class="view is-active">
+      <div class="top-bar">
+        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
+        <span class="status-pill" id="verif-pill">—</span>
+      </div>
+      <p class="verify-banner" id="verify-banner" hidden></p>
 
-  <div class="picker-grid" id="profile-grid" role="radiogroup" aria-label="Profil"></div>
+      <div id="map"></div>
+      <div class="map-toolbar" style="top:76px;" id="category-toolbar"></div>
+      <button class="locate-btn" style="right:1rem; bottom:calc(46% + 1rem);" id="locate-btn" title="Me localiser" aria-label="Centrer la carte sur ma position">📍</button>
 
-  <div class="subtoggle" id="particulier-toggle" hidden role="radiogroup" aria-label="Vous êtes">
-    <button type="button" data-v="proprietaire" onclick="pickOccupant(this)">Propriétaire</button>
-    <button type="button" data-v="locataire" onclick="pickOccupant(this)">Locataire</button>
+      <section class="bottom-sheet" id="bottom-sheet" aria-label="Liste des chantiers disponibles">
+        <div class="bottom-sheet__handle"></div>
+        <div class="bottom-sheet__header">
+          <h2>Chantiers disponibles</h2>
+          <span class="badge-count" id="chantiers-count">0</span>
+        </div>
+        <div class="chantier-list" id="chantier-list"></div>
+      </section>
+    </section>
+
+    <!-- VUE MES MISSIONS ------------------------------------------------ -->
+    <section id="view-missions" class="view">
+      <div class="top-bar">
+        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Mes missions</span></div>
+      </div>
+      <div class="page">
+        <div class="tab-filter" id="missions-filter">
+          <button data-filter="actif" class="is-active">En cours</button>
+          <button data-filter="termine">Terminées</button>
+          <button data-filter="tous">Toutes</button>
+        </div>
+        <div id="missions-list"></div>
+      </div>
+    </section>
+
+    <!-- VUE PROFIL -------------------------------------------------------- -->
+    <section id="view-profile" class="view">
+      <div class="top-bar">
+        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Mon profil</span></div>
+        <button class="btn btn-ghost btn-sm" id="logout-btn">Déconnexion</button>
+      </div>
+      <div class="page" id="profile-page"></div>
+    </section>
+
   </div>
 
-  <p class="grid-err" id="err-profile">Veuillez sélectionner un profil pour continuer.</p>
-</section>
-
-<!-- ÉTAPE 2 — LIEU -->
-<section class="section" id="s2" aria-labelledby="s2-title">
-  <h2 class="section-title" id="s2-title">Localisation</h2>
-  <p class="section-sub" id="sub-lieu">Précisez l'adresse concernée par la demande.</p>
-
-  <div class="field" id="field-nomsite">
-    <label for="nom_site" id="label-nomsite">Nom de la copropriété / résidence</label>
-    <input type="text" id="nom_site" placeholder="Ex : Résidence Les Tilleuls" autocomplete="organization" />
-  </div>
-
-  <div class="field">
-    <label for="adresse_lieu">Adresse</label>
-    <input type="text" id="adresse_lieu" placeholder="12 rue de la République" autocomplete="street-address" />
-    <p class="field-err" id="err-adresse">Merci de renseigner l'adresse.</p>
-  </div>
-
-  <div class="field-row">
-    <div class="field">
-      <label for="code_postal">Code postal</label>
-      <input type="text" id="code_postal" inputmode="numeric" placeholder="75011" pattern="[0-9]{5}" />
-      <p class="field-err" id="err-cp">Code postal invalide.</p>
-    </div>
-    <div class="field">
-      <label for="ville">Ville</label>
-      <input type="text" id="ville" placeholder="Paris" />
-      <p class="field-err" id="err-ville">Merci d'indiquer la ville.</p>
-    </div>
-  </div>
-
-  <div class="field">
-    <label for="complement_lieu" id="label-complement">Bâtiment / étage / porte / lot <span class="optional-tag">(facultatif)</span></label>
-    <input type="text" id="complement_lieu" placeholder="Ex : Bâtiment B, 3ème étage, Lot 42" />
-  </div>
-</section>
-
-<!-- ÉTAPE 3 — BESOIN -->
-<section class="section" id="s3" aria-labelledby="s3-title">
-  <h2 class="section-title" id="s3-title">De quoi avez-vous besoin ?</h2>
-  <p class="section-sub">Sélectionnez un ou plusieurs services, ponctuels ou récurrents.</p>
-
-  <div class="demand-type" id="demand-type" role="radiogroup" aria-label="Type de demande">
-    <div class="demand-card sel" data-v="ponctuel" onclick="pickDemandType(this)" role="radio" aria-checked="true" tabindex="0">
-      <div class="demand-icon">⚡</div>
-      <div class="demand-title">Intervention ponctuelle</div>
-      <div class="demand-sub">Dépannage, réparation, besoin immédiat</div>
-    </div>
-    <div class="demand-card" data-v="recurrent" onclick="pickDemandType(this)" role="radio" aria-checked="false" tabindex="0">
-      <div class="demand-icon">🔁</div>
-      <div class="demand-title">Contrat d'entretien</div>
-      <div class="demand-sub">Prestation régulière (nettoyage, espaces verts...)</div>
-    </div>
-  </div>
-
-  <div id="prestations-container"></div>
-  <p class="grid-err" id="err-cat">Choisissez au moins une prestation.</p>
-
-  <div id="urgence-wrap" class="field" style="margin-top:6px;">
-    <label>Niveau d'urgence</label>
-    <div class="urg-row" id="urg-choices">
-      <div class="urg-card sel" data-u="faible" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-l)"></span><div class="cat-label">Faible</div></div>
-      <div class="urg-card" data-u="modere" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-m)"></span><div class="cat-label">Modéré</div></div>
-      <div class="urg-card" data-u="urgent" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-h)"></span><div class="cat-label">Urgent</div></div>
-    </div>
-  </div>
-
-  <div id="frequence-wrap" class="field" hidden>
-    <label>Fréquence souhaitée</label>
-    <div class="freq-row" id="freq-choices">
-      <div class="cat-card" data-f="hebdomadaire" onclick="pickFreq(this)"><span class="cat-label">Hebdo</span></div>
-      <div class="cat-card" data-f="mensuelle" onclick="pickFreq(this)"><span class="cat-label">Mensuelle</span></div>
-      <div class="cat-card" data-f="trimestrielle" onclick="pickFreq(this)"><span class="cat-label">Trimestre</span></div>
-    </div>
-    <label for="date_debut" style="margin-top:12px;">Démarrage souhaité <span class="optional-tag">(facultatif)</span></label>
-    <input type="date" id="date_debut" />
-  </div>
-
-  <div class="field" id="field-surface">
-    <label for="surface_m2">Surface approximative en m² <span class="optional-tag">(facultatif)</span></label>
-    <input type="number" id="surface_m2" min="0" inputmode="numeric" placeholder="Ex : 350" />
-  </div>
-
-  <div class="field">
-    <label for="desc">Description</label>
-    <textarea id="desc" rows="4" maxlength="600" placeholder="Détaillez votre besoin : nature du problème, fréquence souhaitée, contraintes d'accès..."></textarea>
-    <p class="char-count"><span id="desc-count">0</span>/600</p>
-    <p class="field-err" id="err-desc">Merci de décrire votre besoin.</p>
-  </div>
-
-  <div class="field">
-    <label for="photos">Photos <span class="optional-tag">(jusqu'à 3, facultatif)</span></label>
-    <label class="file-btn" for="photos">📷 Ajouter des photos</label>
-    <input type="file" id="photos" accept="image/*" capture="environment" multiple hidden />
-    <div id="preview-wrap"></div>
-  </div>
-</section>
-
-<!-- ÉTAPE 4 — CONTACT -->
-<section class="section" id="s4" aria-labelledby="s4-title">
-  <h2 class="section-title" id="s4-title">Vos coordonnées</h2>
-  <p class="section-sub">Pour vous transmettre un devis ou vous mettre en relation avec un artisan.</p>
-
-  <div class="field-row">
-    <div class="field">
-      <label for="prenom">Prénom</label>
-      <input type="text" id="prenom" autocomplete="given-name" />
-    </div>
-    <div class="field">
-      <label for="nom">Nom</label>
-      <input type="text" id="nom" autocomplete="family-name" />
-    </div>
-  </div>
-
-  <div class="field">
-    <label for="tel">Téléphone direct</label>
-    <input type="tel" id="tel" placeholder="06 00 00 00 00" autocomplete="tel" />
-  </div>
-
-  <div class="field">
-    <label for="email">E-mail <span id="email-optional-tag" class="optional-tag">(facultatif)</span></label>
-    <input type="email" id="email" placeholder="contact@domaine.com" autocomplete="email" />
-  </div>
-
-  <p class="grid-err" id="err-contact">Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.</p>
-</section>
-
-<!-- ÉTAPE 5 — RÉCAPITULATIF -->
-<section class="section" id="s5" aria-labelledby="s5-title">
-  <h2 class="section-title" id="s5-title">Vérifiez votre demande</h2>
-  <p class="section-sub">Relisez les informations avant l'envoi.</p>
-  <div id="summary"></div>
-</section>
-
-<!-- ÉTAPE 6 — CONFIRMATION -->
-<section class="section" id="s6">
-  <div class="confirm-wrap">
-    <div class="confirm-badge" aria-hidden="true">✓</div>
-    <h2>Demande transmise</h2>
-    <p>Votre dossier a bien été envoyé à notre réseau d'artisans et prestataires en Île-de-France.</p>
-    <div class="ref-box">
-      <div class="lbl">Référence du dossier</div>
-      <div class="val" id="ticket-number">—</div>
-    </div>
-    <p class="confirm-note" id="confirm-note"></p>
-    <button type="button" class="btn btn-primary" style="margin:26px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
-  </div>
-</section>
-
-<div class="nav-wrap" id="nav-wrap">
-  <button type="button" class="btn btn-back" id="btn-back" onclick="prevStep()" style="display:none" aria-label="Étape précédente">←</button>
-  <button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer</button>
+  <!-- NAVIGATION BASSE -->
+  <nav class="nav-bar" aria-label="Navigation principale">
+    <button class="nav-item is-active" data-view="map" aria-current="page">
+      <svg viewBox="0 0 24 24"><path d="M12 2.1L1 12h3v9h7v-6h2v6h7v-9h3L12 2.1zm0 2.9l6 5.4v7.6h-3v-6H9v6H6v-7.6l6-5.4z"/></svg>
+      Chantiers
+    </button>
+    <button class="nav-item" data-view="missions">
+      <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+      Missions<span class="dot" id="missions-dot"></span>
+    </button>
+    <button class="nav-item" data-view="profile">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Profil
+    </button>
+  </nav>
 </div>
 
-</form>
+<!-- =====================================================================
+     MODALE DÉTAIL MISSION
+     ===================================================================== -->
+<div class="modal-overlay" id="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal__close" id="modal-close" aria-label="Fermer">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* =========================================================================
-   CONFIGURATION SUPABASE (même projet que l'espace artisan)
+   CONFIGURATION SUPABASE
    ========================================================================= */
 const SUPABASE_URL = 'https://yqjeqcomrubelahrvizd.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_hKaiVb_fWBPRgESxpwWNCA_iAN9acMe';
+const CODE_PARTENAIRE = 'ENTREPRISE3';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* =========================================================================
-   RÉFÉRENTIEL PROFILS
-   ========================================================================= */
-const PROFILES = [
-  { v:'syndic_copro',      icon:'🏢', label:'Syndic de copropriété', desc:'Parties communes, résidences', profil_demandeur:'gestionnaire' },
-  { v:'agence_immo',       icon:'🗝️', label:'Agence immobilière',    desc:'Biens en gestion, remise en état', profil_demandeur:'gestionnaire' },
-  { v:'commerce',          icon:'🏬', label:'Commerce / Boutique',    desc:'Magasin, restaurant, local pro', profil_demandeur:'gestionnaire' },
-  { v:'bureau_entreprise', icon:'🏛️', label:'Bureau / Entreprise',    desc:'Locaux professionnels', profil_demandeur:'gestionnaire' },
-  { v:'ecole',             icon:'🏫', label:'École / Établissement',  desc:'Scolaire, périscolaire', profil_demandeur:'gestionnaire' },
-  { v:'particulier',       icon:'🏠', label:'Particulier',            desc:'Logement personnel', profil_demandeur:null },
+const CATEGORIES = [
+  { value:'plomberie', label:'Plomberie', icone:'🔧' },
+  { value:'electricite', label:'Électricité', icone:'⚡' },
+  { value:'chauffage', label:'Chauffage', icone:'🔥' },
+  { value:'ascenseur', label:'Ascenseur', icone:'🛗' },
+  { value:'interphone', label:'Interphone', icone:'📞' },
+  { value:'portes', label:'Portes', icone:'🚪' },
+  { value:'camera', label:'Caméra', icone:'📷' },
+  { value:'proprete', label:'Propreté', icone:'🧹' },
+  { value:'serrurerie', label:'Serrurerie', icone:'🔑' },
+  { value:'renovation', label:'Rénovation', icone:'🏗️' },
+  { value:'deratisation', label:'Dératisation', icone:'🐀' },
+  { value:'autre', label:'Autre', icone:'✨' },
 ];
-
-/* =========================================================================
-   RÉFÉRENTIEL DES PRESTATIONS (groupées)
-   ========================================================================= */
-const SERVICE_GROUPS = {
-  technique:  { label:'Dépannage & maintenance technique', items:[
-    {v:'plomberie', l:'Plomberie', i:'💧'}, {v:'electricite', l:'Électricité', i:'⚡'},
-    {v:'chauffage', l:'Chauffage / Clim', i:'🔥'}, {v:'serrurerie', l:'Serrurerie', i:'🔑'},
-    {v:'ascenseur', l:'Ascenseur', i:'🛗'}, {v:'interphone', l:'Interphone', i:'📟'},
-    {v:'vitrerie', l:'Vitrerie', i:'🪟'},
-  ]},
-  entretien:  { label:'Entretien courant & propreté', items:[
-    {v:'menage', l:'Ménage / Nettoyage', i:'🧹'}, {v:'nettoyage_vitrine', l:'Nettoyage vitrines', i:'✨'},
-    {v:'espaces_verts', l:'Espaces verts', i:'🌳'}, {v:'desherbage', l:'Désherbage', i:'🌿'},
-  ]},
-  nuisibles:  { label:'Nuisibles & hygiène', items:[
-    {v:'deratisation', l:'Dératisation', i:'🐀'}, {v:'desinsectisation', l:'Désinsectisation', i:'🪳'},
-    {v:'desinfection', l:'Désinfection', i:'🧴'}, {v:'debarras', l:'Débarras', i:'🗑️'},
-  ]},
-  travaux:    { label:'Travaux & rénovation', items:[
-    {v:'peinture', l:'Peinture / Sols', i:'🎨'}, {v:'renovation', l:'Rénovation', i:'🔨'},
-    {v:'agencement', l:'Agencement local', i:'🏗️'},
-  ]},
-  securite:   { label:'Sécurité', items:[
-    {v:'camera', l:'Vidéosurveillance', i:'📷'}, {v:'controle_acces', l:'Contrôle d\'accès', i:'🔐'},
-    {v:'incendie', l:'Sécurité incendie', i:'🧯'},
-  ]},
-  autre:      { label:'Autre besoin', items:[{v:'autre', l:'Autre', i:'❓'}] },
+const URGENCES = {
+  faible:{ label:'Faible' }, modere:{ label:'Modéré' }, urgent:{ label:'Urgent' }
 };
-
-// Ordre des groupes affichés selon le profil (les plus pertinents en premier)
-const PROFILE_GROUP_ORDER = {
-  syndic_copro:      ['entretien','nuisibles','technique','securite','travaux','autre'],
-  agence_immo:       ['entretien','travaux','technique','nuisibles','autre'],
-  commerce:          ['entretien','securite','technique','travaux','nuisibles','autre'],
-  bureau_entreprise: ['entretien','securite','technique','nuisibles','travaux','autre'],
-  ecole:             ['entretien','nuisibles','securite','technique','travaux','autre'],
-  particulier:       ['technique','entretien','nuisibles','travaux','autre'],
-};
-
-const HEADER_TITLES = {
-  syndic_copro:'Demande pour<br><em>votre copropriété</em>',
-  agence_immo:'Demande pour<br><em>votre agence</em>',
-  commerce:'Demande pour<br><em>votre commerce</em>',
-  bureau_entreprise:'Demande pour<br><em>vos locaux</em>',
-  ecole:'Demande pour<br><em>votre établissement</em>',
-  particulier:'Faire une<br><em>demande</em>',
-};
-const NOMSITE_LABELS = {
-  syndic_copro:'Nom de la copropriété / résidence',
-  agence_immo:"Nom de l'agence",
-  commerce:'Enseigne du commerce',
-  bureau_entreprise:"Nom de l'entreprise",
-  ecole:"Nom de l'établissement",
-};
-const COMPLEMENT_LABELS = {
-  syndic_copro:'Bâtiment / étage / porte / lot',
-  agence_immo:'Étage / local / référence bien',
-  commerce:'Étage / local commercial',
-  bureau_entreprise:'Bâtiment / étage / bureau',
-  ecole:'Bâtiment / salle / accès',
-  particulier:"Étage / n° d'appartement / interphone",
+const STATUTS = {
+  nouveau:'Disponible', assigne:'Assignée', en_cours:'En cours', termine:'Terminée', annule:'Annulée'
 };
 
 /* =========================================================================
-   ÉTAT
+   TOASTS
    ========================================================================= */
-let step = 1;
-const TOTAL_NODES = 4;
-let photoFiles = [];
-let selectedPrestations = new Set();
-let data = {
-  profile:null, occupant:null,
-  demandType:'ponctuel', urgence:'faible', frequence:null,
-};
+function toast(message, type = 'info') {
+  const region = document.getElementById('toast-region');
+  const el = document.createElement('div');
+  el.className = `toast toast--${type}`;
+  el.textContent = message;
+  region.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; setTimeout(() => el.remove(), 250); }, 3200);
+}
 
 /* =========================================================================
-   ÉTAPE 1 — PROFIL
+   ÉTAT GLOBAL
    ========================================================================= */
-(function initProfiles() {
-  const grid = document.getElementById('profile-grid');
-  grid.innerHTML = PROFILES.map(p => `
-    <button type="button" class="picker-card" data-v="${p.v}" role="radio" aria-checked="false" onclick="selectProfile('${p.v}', this)">
-      <span class="picker-icon" aria-hidden="true">${p.icon}</span>
-      <span class="picker-label">${p.label}</span>
-      <span class="picker-desc">${p.desc}</span>
-    </button>`).join('');
+let DEMO_MODE = false;
+let currentArtisan = null;
+let map = null;
+
+/* ---- Données de démonstration (aucun Supabase requis) ------------------- */
+const MOCK_ARTISAN = {
+  id: 'demo-artisan',
+  nom_entreprise: 'Bati Rénov 92 (démo)',
+  nom_gerant: 'Alex Martin',
+  telephone: '06 12 34 56 78',
+  email: 'demo@entreprise3.fr',
+  siret: null,
+  specialites: ['plomberie', 'electricite'],
+  zones_intervention: ['75', '92', '93'],
+  statut_verification: 'valide',
+};
+const MOCK_INTERVENTIONS = [
+  { id:'demo-1', reference:'GD-2026-0001', zone:'parties_communes', adresse:'12 rue des Lilas', code_postal:'75011', ville:'Paris', etage:null, porte:null, latitude:48.8589, longitude:2.3800, categorie:'plomberie', urgence:'urgent', description:"Fuite d'eau importante dans la cage d'escalier, niveau RDC.", photos:[], profil_demandeur:'gestionnaire', nom:'Martin', prenom:'Claire', telephone:'0612345678', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
+  { id:'demo-2', reference:'GD-2026-0002', zone:'appartement', adresse:'45 avenue Jean Jaurès', code_postal:'93500', ville:'Pantin', etage:'3', porte:'B', latitude:48.8958, longitude:2.4014, categorie:'electricite', urgence:'modere', description:'Disjoncteur qui saute régulièrement dans la cuisine.', photos:[], profil_demandeur:'locataire', nom:'Nguyen', prenom:'Paul', telephone:'0623456789', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
+  { id:'demo-3', reference:'GD-2026-0003', zone:'exterieur', adresse:'8 place de la Mairie', code_postal:'92300', ville:'Levallois-Perret', etage:null, porte:null, latitude:48.8938, longitude:2.2870, categorie:'serrurerie', urgence:'faible', description:'Porte du local vélo qui ferme mal, gond à resserrer.', photos:[], profil_demandeur:'proprietaire', nom:'Dubois', prenom:'Sophie', telephone:'0634567890', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
+];
+let markers = new Map();
+let userMarker = null;
+let userPosition = null;
+let interventions = [];
+let missions = [];
+let categorieFiltre = null;
+let missionsFiltre = 'actif';
+
+/* =========================================================================
+   NAVIGATION AUTH <-> APP
+   ========================================================================= */
+function afficherEcran(mode) {
+  document.getElementById('login-screen').hidden = mode !== 'login';
+  document.getElementById('register-screen').hidden = mode !== 'register';
+}
+
+// Chips de spécialités à l'inscription
+const selectedSpecialites = new Set();
+(function initSpecialitesChips() {
+  const container = document.getElementById('reg-specialites');
+  container.innerHTML = CATEGORIES.filter(c => c.value !== 'autre').map(c =>
+    `<button type="button" class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`
+  ).join('');
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    btn.classList.toggle('is-selected');
+    btn.classList.contains('is-selected') ? selectedSpecialites.add(btn.dataset.value) : selectedSpecialites.delete(btn.dataset.value);
+  });
 })();
 
-function selectProfile(value, el) {
-  document.querySelectorAll('#profile-grid .picker-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.profile = value;
-  document.getElementById('err-profile').classList.remove('show');
-
-  const meta = PROFILES.find(p => p.v === value);
-  document.getElementById('header-profile-label').textContent = meta.label;
-  document.getElementById('header-title').innerHTML = HEADER_TITLES[value];
-
-  const particulierToggle = document.getElementById('particulier-toggle');
-  particulierToggle.hidden = value !== 'particulier';
-  if (value !== 'particulier') data.occupant = null;
-
-  document.getElementById('label-nomsite').textContent = NOMSITE_LABELS[value] || "Nom (facultatif)";
-  document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
-  document.getElementById('label-complement').innerHTML = `${COMPLEMENT_LABELS[value] || 'Complément'} <span class="optional-tag">(facultatif)</span>`;
-
-  document.getElementById('sub-lieu').textContent = value === 'particulier'
-    ? 'Indiquez l\'adresse de votre logement.'
-    : "Indiquez l'adresse exacte de l'intervention.";
-
-  renderPrestations();
-}
-
-function pickOccupant(el) {
-  document.querySelectorAll('#particulier-toggle button').forEach(b => b.classList.remove('sel'));
-  el.classList.add('sel');
-  data.occupant = el.dataset.v;
-}
-
 /* =========================================================================
-   ÉTAPE 3 — PRESTATIONS, TYPE DE DEMANDE, URGENCE/FRÉQUENCE
+   CONNEXION
    ========================================================================= */
-function pickDemandType(el) {
-  document.querySelectorAll('#demand-type .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.demandType = el.dataset.v;
-  document.getElementById('urgence-wrap').hidden = data.demandType !== 'ponctuel';
-  document.getElementById('frequence-wrap').hidden = data.demandType !== 'recurrent';
-}
-document.querySelectorAll('#demand-type .demand-card').forEach(card => {
-  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  errorEl.hidden = true;
+  btn.disabled = true; btn.textContent = 'Connexion…';
+
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-pass').value;
+
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    errorEl.textContent = 'Identifiants invalides. Vérifiez votre e-mail et mot de passe.';
+    errorEl.hidden = false;
+    btn.disabled = false; btn.textContent = 'Se connecter';
+    return;
+  }
+  await lancerApplication();
 });
 
-function pickUrg(el) {
-  document.querySelectorAll('#urg-choices .urg-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  data.urgence = el.dataset.u;
-}
-function pickFreq(el) {
-  document.querySelectorAll('#freq-choices .cat-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  data.frequence = el.dataset.f;
-}
-
-function renderPrestations() {
-  const order = PROFILE_GROUP_ORDER[data.profile] || Object.keys(SERVICE_GROUPS);
-  const container = document.getElementById('prestations-container');
-  container.innerHTML = order.map(groupId => {
-    const group = SERVICE_GROUPS[groupId];
-    return `
-    <div class="service-group">
-      <div class="service-group-title">${group.label}</div>
-      <div class="cat-grid">
-        ${group.items.map(it => `
-          <button type="button" class="cat-card ${selectedPrestations.has(it.v) ? 'sel' : ''}" data-v="${it.v}" aria-pressed="${selectedPrestations.has(it.v)}" onclick="togglePrestation('${it.v}', this)">
-            <span class="cat-icon" aria-hidden="true">${it.i}</span>
-            <span class="cat-label">${it.l}</span>
-          </button>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function togglePrestation(value, el) {
-  if (selectedPrestations.has(value)) { selectedPrestations.delete(value); el.classList.remove('sel'); el.setAttribute('aria-pressed','false'); }
-  else { selectedPrestations.add(value); el.classList.add('sel'); el.setAttribute('aria-pressed','true'); }
-  document.getElementById('err-cat').classList.remove('show');
-}
-
-/* Compteur de caractères de la description */
-const descField = document.getElementById('desc');
-descField.addEventListener('input', () => { document.getElementById('desc-count').textContent = descField.value.length; });
-
 /* =========================================================================
-   PHOTOS
+   INSCRIPTION
    ========================================================================= */
-document.getElementById('photos').addEventListener('change', (e) => {
-  const remaining = 3 - photoFiles.length;
-  Array.from(e.target.files).slice(0, remaining).forEach(file => {
-    photoFiles.push({ file, url: URL.createObjectURL(file) });
-  });
-  e.target.value = '';
-  renderPreviews();
-});
-function renderPreviews() {
-  const wrap = document.getElementById('preview-wrap');
-  wrap.innerHTML = photoFiles.map((p, i) => `
-    <div class="preview-item">
-      <img src="${p.url}" class="preview-img" alt="Photo ${i + 1}" />
-      <button type="button" class="preview-remove" aria-label="Supprimer la photo ${i + 1}" onclick="removePhoto(${i})">✕</button>
-    </div>`).join('');
-}
-function removePhoto(i) { photoFiles.splice(i, 1); renderPreviews(); }
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('register-error');
+  const btn = document.getElementById('register-btn');
+  errorEl.hidden = true;
 
-/* =========================================================================
-   VALIDATION PAR ÉTAPE
-   ========================================================================= */
-function clearErrors() { document.querySelectorAll('.grid-err,.field-err').forEach(e => e.classList.remove('show')); }
-
-function validateStep() {
-  clearErrors();
-  if (step === 1) {
-    if (!data.profile) { document.getElementById('err-profile').classList.add('show'); return false; }
-    return true;
+  if (document.getElementById('reg-code').value.trim().toUpperCase() !== CODE_PARTENAIRE) {
+    errorEl.textContent = "Code d'accès partenaire invalide.";
+    errorEl.hidden = false;
+    return;
   }
-  if (step === 2) {
-    let ok = true;
-    if (!document.getElementById('adresse_lieu').value.trim()) { document.getElementById('err-adresse').classList.add('show'); ok = false; }
-    if (!/^[0-9]{5}$/.test(document.getElementById('code_postal').value.trim())) { document.getElementById('err-cp').classList.add('show'); ok = false; }
-    if (!document.getElementById('ville').value.trim()) { document.getElementById('err-ville').classList.add('show'); ok = false; }
-    return ok;
+  if (selectedSpecialites.size === 0) {
+    errorEl.textContent = 'Sélectionnez au moins une spécialité.';
+    errorEl.hidden = false;
+    return;
   }
-  if (step === 3) {
-    let ok = true;
-    if (selectedPrestations.size === 0) { document.getElementById('err-cat').classList.add('show'); ok = false; }
-    if (!descField.value.trim()) { document.getElementById('err-desc').classList.add('show'); ok = false; }
-    return ok;
-  }
-  if (step === 4) {
-    const prenom = document.getElementById('prenom').value.trim();
-    const nom = document.getElementById('nom').value.trim();
-    const tel = document.getElementById('tel').value.trim().replace(/\s/g, '');
-    const email = document.getElementById('email').value.trim();
-    const telRegex = /^(0|\+33)[1-9][0-9]{8}$/;
-    const emailRequired = data.profile !== 'particulier';
-    const emailOk = emailRequired ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) : (email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
-    if (!prenom || !nom || !telRegex.test(tel) || !emailOk) { document.getElementById('err-contact').classList.add('show'); return false; }
-    return true;
-  }
-  return true;
-}
 
-/* =========================================================================
-   NAVIGATION
-   ========================================================================= */
-function nextStep() {
-  if (step <= 4 && !validateStep()) return;
-  if (step === 4) buildSummary();
-  if (step === 5) { submitDemand(); return; }
-  step++;
-  showStep();
-}
-function prevStep() { step--; showStep(); }
-function goToStep(n) { step = n; showStep(); }
-
-function showStep() {
-  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i + 1 === step));
-  document.querySelectorAll('.step-node').forEach((n, i) => {
-    const idx = i + 1;
-    n.classList.toggle('active', idx === Math.min(step, TOTAL_NODES));
-    n.classList.toggle('done', idx < step && step <= TOTAL_NODES + 1);
-  });
-  document.getElementById('btn-back').style.display = (step > 1 && step < 6) ? 'flex' : 'none';
-  document.getElementById('btn-next').textContent = step === 5 ? 'Confirmer la demande' : 'Continuer';
-  document.getElementById('nav-wrap').style.display = step === 6 ? 'none' : 'flex';
-  document.getElementById('email-optional-tag').style.display = data.profile === 'particulier' ? 'inline' : 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  const title = document.querySelector(`.section.active .section-title`);
-  if (title) title.setAttribute('tabindex', '-1'), title.focus({ preventScroll: true });
-}
-
-/* =========================================================================
-   RÉCAPITULATIF
-   ========================================================================= */
-function buildSummary() {
-  const profileMeta = PROFILES.find(p => p.v === data.profile);
-  const prestaLabels = Array.from(selectedPrestations).map(v => {
-    for (const g of Object.values(SERVICE_GROUPS)) { const found = g.items.find(i => i.v === v); if (found) return found.l; }
-    return v;
-  });
-
-  const blocks = [
-    { title:'Profil', step:1, rows:[
-      ['Type', profileMeta.label + (data.occupant ? ` (${data.occupant === 'proprietaire' ? 'Propriétaire' : 'Locataire'})` : '')],
-    ]},
-    { title:'Lieu', step:2, rows:[
-      ['Nom du site', document.getElementById('nom_site').value || '—'],
-      ['Adresse', document.getElementById('adresse_lieu').value],
-      ['Ville', `${document.getElementById('code_postal').value} ${document.getElementById('ville').value}`],
-      ['Complément', document.getElementById('complement_lieu').value || '—'],
-    ]},
-    { title:'Besoin', step:3, rows:[
-      ['Prestations', prestaLabels.join(', ')],
-      ['Type de demande', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
-      ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
-        : [['Fréquence', data.frequence ? { hebdomadaire:'Hebdomadaire', mensuelle:'Mensuelle', trimestrielle:'Trimestrielle' }[data.frequence] : 'Non précisée']]),
-      ['Surface', document.getElementById('surface_m2').value ? document.getElementById('surface_m2').value + ' m²' : '—'],
-      ['Description', document.getElementById('desc').value],
-      ['Photos', photoFiles.length ? `${photoFiles.length} photo(s)` : 'Aucune'],
-    ]},
-    { title:'Contact', step:4, rows:[
-      ['Nom', `${document.getElementById('prenom').value} ${document.getElementById('nom').value}`],
-      ['Téléphone', document.getElementById('tel').value],
-      ['E-mail', document.getElementById('email').value || '—'],
-    ]},
-  ];
-
-  document.getElementById('summary').innerHTML = blocks.map(b => `
-    <div class="summary">
-      <div class="summary-block-title">
-        <span>${b.title}</span>
-        <button type="button" onclick="goToStep(${b.step})">Modifier</button>
-      </div>
-      ${b.rows.map(r => `<div class="sum-row"><div class="sum-k">${r[0]}</div><div class="sum-v">${r[1]}</div></div>`).join('')}
-    </div>`).join('');
-}
-
-/* =========================================================================
-   ENVOI DE LA DEMANDE
-   ========================================================================= */
-async function submitDemand() {
-  const btn = document.getElementById('btn-next');
-  const errorBox = document.getElementById('global-error');
-  errorBox.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Envoi en cours…';
+  btn.disabled = true; btn.textContent = 'Envoi en cours…';
 
   try {
-    const prestations = Array.from(selectedPrestations);
-    const profileMeta = PROFILES.find(p => p.v === data.profile);
-    const profilDemandeur = data.profile === 'particulier' ? (data.occupant || 'proprietaire') : profileMeta.profil_demandeur;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-pass').value;
 
-    // 1. Upload des photos
-    const photoPaths = [];
-    for (const [i, p] of photoFiles.entries()) {
-      const path = `${crypto.randomUUID()}-${i}-${p.file.name}`;
-      const { error } = await sb.storage.from('intervention-photos').upload(path, p.file);
-      if (error) throw error;
-      photoPaths.push(path);
+    const { data: signUpData, error: signUpError } = await sb.auth.signUp({ email, password });
+    if (signUpError) throw signUpError;
+    const artisanId = signUpData.user.id;
+
+    const zones = document.getElementById('reg-zones').value.split(',').map(z => z.trim()).filter(Boolean);
+
+    const { error: profileError } = await sb.from('artisans').insert({
+      id: artisanId,
+      code_partenaire: CODE_PARTENAIRE,
+      nom_entreprise: document.getElementById('reg-company').value,
+      nom_gerant: document.getElementById('reg-gerant').value,
+      telephone: document.getElementById('reg-tel').value,
+      email,
+      siret: document.getElementById('reg-siret').value || null,
+      specialites: Array.from(selectedSpecialites),
+      zones_intervention: zones,
+    });
+    if (profileError) throw profileError;
+
+    const documentFields = [
+      ['doc-identite', 'piece_identite'],
+      ['doc-decennale', 'assurance_decennale'],
+      ['doc-rcpro', 'rc_pro'],
+      ['doc-kbis', 'kbis'],
+    ];
+    for (const [inputId, typeDocument] of documentFields) {
+      const file = document.getElementById(inputId).files[0];
+      if (!file) continue;
+      const path = `${artisanId}/${typeDocument}-${Date.now()}-${file.name}`;
+      const { error: uploadError } = await sb.storage.from('artisan-documents').upload(path, file);
+      if (uploadError) throw uploadError;
+      await sb.from('artisan_documents').insert({ artisan_id: artisanId, type_document: typeDocument, chemin_fichier: path });
     }
 
-    // 2. Insertion de la demande
-    const payload = {
-      zone: 'parties_communes',
-      adresse: document.getElementById('adresse_lieu').value,
-      code_postal: document.getElementById('code_postal').value,
-      ville: document.getElementById('ville').value,
-      etage: document.getElementById('complement_lieu').value || null,
-      categorie: prestations[0] || 'autre',
-      urgence: data.demandType === 'ponctuel' ? data.urgence : 'faible',
-      description: document.getElementById('desc').value,
-      photos: photoPaths,
-      profil_demandeur: profilDemandeur,
-      nom: document.getElementById('nom').value,
-      prenom: document.getElementById('prenom').value,
-      telephone: document.getElementById('tel').value,
-      email: document.getElementById('email').value || null,
-      // Colonnes complémentaires (voir ALTER TABLE fourni séparément)
-      profil_structure: data.profile,
-      nom_site: document.getElementById('nom_site').value || null,
-      prestations: prestations,
-      type_demande: data.demandType,
-      frequence: data.demandType === 'recurrent' ? data.frequence : null,
-      date_debut_souhaitee: document.getElementById('date_debut').value || null,
-      surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
-    };
-
-    const { data: inserted, error } = await sb.from('interventions').insert(payload).select('reference').single();
-    if (error) throw error;
-
-    document.getElementById('ticket-number').textContent = inserted.reference;
-    document.getElementById('confirm-note').textContent = data.demandType === 'recurrent'
-      ? "Vous recevrez une proposition de devis pour un contrat d'entretien sous 48h."
-      : (data.urgence === 'urgent'
-        ? 'Un artisan disponible va être notifié immédiatement.'
-        : 'Un artisan de notre réseau va prendre contact avec vous prochainement.');
-
-    step = 6;
-    showStep();
+    toast('Dossier envoyé ! Vous serez notifié dès sa validation.', 'success');
+    await lancerApplication();
   } catch (err) {
     console.error(err);
-    errorBox.textContent = "Impossible d'envoyer votre demande pour le moment (base de données non configurée ou indisponible). Réessayez dans un instant.";
-    errorBox.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Confirmer la demande';
+    errorEl.textContent = err.message || "Une erreur est survenue lors de l'inscription.";
+    errorEl.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Envoyer mon dossier';
+  }
+});
+
+/* =========================================================================
+   LANCEMENT DE L'APPLICATION
+   ========================================================================= */
+function lancerModeDemo() {
+  DEMO_MODE = true;
+  currentArtisan = { ...MOCK_ARTISAN };
+  interventions = MOCK_INTERVENTIONS.map(i => ({ ...i }));
+  missions = [];
+  demarrerApplication();
+  toast('Mode démo activé — aucune donnée n\'est envoyée à Supabase.', 'success');
+}
+
+async function lancerApplication() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { afficherEcran('login'); return; }
+
+  const { data: artisan, error } = await sb.from('artisans').select('*').eq('id', session.user.id).single();
+  if (error || !artisan) {
+    toast("Impossible de charger votre profil. Vérifiez que Supabase est configuré (schema.sql exécuté), ou utilisez le mode démo.", 'error');
+    afficherEcran('login');
+    return;
+  }
+  currentArtisan = artisan;
+  await demarrerApplication();
+}
+
+async function demarrerApplication() {
+
+  document.getElementById('login-screen').hidden = true;
+  document.getElementById('register-screen').hidden = true;
+  document.getElementById('app-screen').classList.add('is-active');
+
+  const pill = document.getElementById('verif-pill');
+  pill.textContent = DEMO_MODE ? '🧪 Mode démo' : currentArtisan.statut_verification === 'valide' ? '✓ Compte validé'
+    : currentArtisan.statut_verification === 'refuse' ? 'Dossier refusé' : 'En vérification';
+  pill.className = `status-pill status-pill--${DEMO_MODE ? 'valide' : currentArtisan.statut_verification}`;
+
+  const banner = document.getElementById('verify-banner');
+  if (!DEMO_MODE && currentArtisan.statut_verification !== 'valide') {
+    banner.hidden = false;
+    banner.textContent = currentArtisan.statut_verification === 'refuse'
+      ? "Votre dossier n'a pas été validé. Contactez le support pour plus d'informations."
+      : "Votre dossier est en cours de vérification. Vous aurez accès aux chantiers dès sa validation.";
+  } else {
+    banner.hidden = true;
+  }
+
+  initCategoryToolbar();
+  initMap();
+  renderProfile();
+
+  if (DEMO_MODE) {
+    renderMarkers();
+    renderChantierList();
+    renderMissionsList();
+  } else {
+    await chargerChantiers();
+    await chargerMesMissions();
+    subscribeRealtime();
+  }
+  localiserArtisan();
+}
+
+/* =========================================================================
+   NAVIGATION ENTRE VUES
+   ========================================================================= */
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.view;
+    document.querySelectorAll('.nav-item').forEach(b => { b.classList.toggle('is-active', b === btn); b.removeAttribute('aria-current'); });
+    btn.setAttribute('aria-current', 'page');
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('is-active', v.id === `view-${target}`));
+    if (target === 'map' && map) setTimeout(() => map.invalidateSize(), 50);
+    if (target === 'missions') renderMissionsList();
+  });
+});
+
+/* =========================================================================
+   CARTE
+   ========================================================================= */
+function initMap() {
+  map = L.map('map', { zoomControl: false }).setView([48.8566, 2.3522], 11);
+  L.control.zoom({ position: 'bottomleft' }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
+}
+
+function initCategoryToolbar() {
+  const toolbar = document.getElementById('category-toolbar');
+  toolbar.innerHTML = `<button class="chip is-selected" data-value="">Toutes</button>` +
+    CATEGORIES.map(c => `<button class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`).join('');
+  toolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    toolbar.querySelectorAll('.chip').forEach(c => c.classList.remove('is-selected'));
+    btn.classList.add('is-selected');
+    categorieFiltre = btn.dataset.value || null;
+    renderMarkers();
+    renderChantierList();
+  });
+}
+
+function markerIcon(urgence, mine = false) {
+  const cls = mine ? 'mine' : urgence;
+  const symbol = urgence === 'urgent' ? '!' : '•';
+  return L.divIcon({ className: '', html: `<div class="marker-pin marker-pin--${cls}"><span>${symbol}</span></div>`, iconSize:[36,36], iconAnchor:[18,36] });
+}
+
+function distanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function localiserArtisan() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition((pos) => {
+    userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (userMarker) map.removeLayer(userMarker);
+    userMarker = L.circleMarker([userPosition.lat, userPosition.lng], { radius: 8, color:'#fff', weight:3, fillColor:'#2c4d80', fillOpacity:1 }).addTo(map);
+    renderChantierList();
+  }, () => { /* géolocalisation refusée : on continue sans */ }, { enableHighAccuracy: true, timeout: 8000 });
+}
+document.getElementById('locate-btn').addEventListener('click', () => {
+  if (userPosition) map.setView([userPosition.lat, userPosition.lng], 13);
+  else localiserArtisan();
+});
+
+/* =========================================================================
+   CHARGEMENT DES CHANTIERS DISPONIBLES
+   ========================================================================= */
+async function chargerChantiers() {
+  const list = document.getElementById('chantier-list');
+  list.innerHTML = `<div class="skeleton" style="height:64px;margin-bottom:.6rem;"></div>`.repeat(3);
+
+  const { data, error } = await sb.from('interventions').select('*').eq('statut', 'nouveau').order('created_at', { ascending: false });
+  if (error) { toast('Impossible de charger les chantiers.', 'error'); interventions = []; }
+  else interventions = data || [];
+
+  renderMarkers();
+  renderChantierList();
+}
+
+function filteredInterventions() {
+  let list = interventions;
+  if (categorieFiltre) list = list.filter(i => i.categorie === categorieFiltre);
+  if (userPosition) {
+    list = list.map(i => ({ ...i, _distance: (i.latitude && i.longitude) ? distanceKm(userPosition.lat, userPosition.lng, i.latitude, i.longitude) : null }));
+    list.sort((a, b) => (a._distance ?? 999) - (b._distance ?? 999));
+  }
+  return list;
+}
+
+function renderMarkers() {
+  markers.forEach(m => map.removeLayer(m));
+  markers.clear();
+  filteredInterventions().filter(i => i.latitude && i.longitude).forEach(i => {
+    const marker = L.marker([i.latitude, i.longitude], { icon: markerIcon(i.urgence) }).addTo(map);
+    marker.on('click', () => ouvrirModaleChantier(i));
+    markers.set(i.id, marker);
+  });
+}
+
+function categorieMeta(value) { return CATEGORIES.find(c => c.value === value) ?? { label: value, icone: '🛠️' }; }
+
+function renderChantierList() {
+  const list = document.getElementById('chantier-list');
+  const filtered = filteredInterventions();
+  document.getElementById('chantiers-count').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<p class="empty-state">Aucun chantier disponible pour ce filtre actuellement.</p>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(i => {
+    const cat = categorieMeta(i.categorie);
+    const dist = i._distance != null ? ` · ${i._distance.toFixed(1)} km` : '';
+    return `
+    <button class="chantier-card" data-id="${i.id}">
+      <span class="chantier-card__icon">${cat.icone}</span>
+      <span class="chantier-card__info">
+        <span class="chantier-card__title">${cat.label}</span>
+        <span class="chantier-card__meta">${i.adresse ?? ''}${i.ville ? ', ' + i.ville : ''}${dist}</span>
+      </span>
+      <span class="urgence-tag urgence-tag--${i.urgence}">${URGENCES[i.urgence]?.label ?? i.urgence}</span>
+    </button>`;
+  }).join('');
+
+  list.querySelectorAll('.chantier-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const i = interventions.find(x => x.id === card.dataset.id);
+      if (i) ouvrirModaleChantier(i);
+    });
+  });
+}
+
+/* =========================================================================
+   MODALE — DÉTAIL D'UN CHANTIER (nouveau -> acceptation)
+   ========================================================================= */
+const overlay = document.getElementById('modal-overlay');
+const modalBody = document.getElementById('modal-body');
+
+async function photoUrl(path) { return sb.storage.from('intervention-photos').getPublicUrl(path).data.publicUrl; }
+
+async function ouvrirModaleChantier(intervention) {
+  const cat = categorieMeta(intervention.categorie);
+  const photos = await Promise.all((intervention.photos || []).map(photoUrl));
+
+  modalBody.innerHTML = `
+    <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
+    <div class="modal__meta">
+      <span class="urgence-tag urgence-tag--${intervention.urgence}">${URGENCES[intervention.urgence]?.label}</span>
+      <span>Réf. ${intervention.reference ?? '—'}</span>
+    </div>
+    <div class="modal__section">
+      <h4>Adresse</h4>
+      <p>${intervention.adresse ?? ''}${intervention.etage ? `, étage ${intervention.etage}` : ''}${intervention.porte ? `, porte ${intervention.porte}` : ''}<br>${intervention.code_postal ?? ''} ${intervention.ville ?? ''}</p>
+    </div>
+    <div class="action-grid-2">
+      <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((intervention.adresse||'')+' '+(intervention.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
+      <a class="btn-action btn-call" href="tel:${intervention.telephone}">📞 Appeler</a>
+    </div>
+    <div class="modal__section">
+      <h4>Description</h4>
+      <p>${intervention.description ?? ''}</p>
+    </div>
+    ${photos.length ? `<div class="modal__section"><h4>Photos</h4><div class="modal__photos">${photos.map(u => `<img src="${u}" alt="Photo du chantier" />`).join('')}</div></div>` : ''}
+    <div class="modal__section">
+      <h4>Demandeur</h4>
+      <p>${intervention.prenom ?? ''} ${intervention.nom ?? ''} · ${intervention.telephone ?? ''}</p>
+    </div>
+    <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' ? 'disabled' : ''}>
+      ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : 'Accepter la mission'}
+    </button>
+  `;
+  document.getElementById('accept-btn')?.addEventListener('click', () => accepterMission(intervention.id));
+  ouvrirOverlay();
+}
+
+function ouvrirOverlay() {
+  overlay.hidden = false;
+  document.getElementById('modal-close').focus();
+}
+function fermerModale() { overlay.hidden = true; modalBody.innerHTML = ''; }
+document.getElementById('modal-close').addEventListener('click', fermerModale);
+overlay.addEventListener('click', (e) => { if (e.target === overlay) fermerModale(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) fermerModale(); });
+
+async function accepterMission(interventionId) {
+  if (DEMO_MODE) {
+    const i = interventions.find(x => x.id === interventionId);
+    if (i) {
+      i.statut = 'assigne';
+      i.artisan_id = currentArtisan.id;
+      i.assigned_at = new Date().toISOString();
+      missions.unshift({ ...i });
+      interventions = interventions.filter(x => x.id !== interventionId);
+    }
+    toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
+    fermerModale();
+    renderMarkers();
+    renderChantierList();
+    renderMissionsList();
+    return;
+  }
+
+  const { error } = await sb.from('interventions')
+    .update({ statut: 'assigne', artisan_id: currentArtisan.id, assigned_at: new Date().toISOString() })
+    .eq('id', interventionId).eq('statut', 'nouveau');
+
+  if (error) {
+    toast("Ce chantier vient d'être pris en charge par un autre artisan.", 'error');
+  } else {
+    toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
+  }
+  fermerModale();
+  await chargerChantiers();
+  await chargerMesMissions();
+}
+
+/* =========================================================================
+   MES MISSIONS (assignées à cet artisan)
+   ========================================================================= */
+async function chargerMesMissions() {
+  const { data, error } = await sb.from('interventions').select('*').eq('artisan_id', currentArtisan.id).order('assigned_at', { ascending: false });
+  if (error) { toast('Impossible de charger vos missions.', 'error'); return; }
+  missions = data || [];
+  const dot = document.getElementById('missions-dot');
+  dot.classList.toggle('show', missions.some(m => m.statut === 'assigne'));
+  renderMissionsList();
+}
+
+document.getElementById('missions-filter').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  document.querySelectorAll('#missions-filter button').forEach(b => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  missionsFiltre = btn.dataset.filter;
+  renderMissionsList();
+});
+
+function renderMissionsList() {
+  const container = document.getElementById('missions-list');
+  let list = missions;
+  if (missionsFiltre === 'actif') list = list.filter(m => ['assigne','en_cours'].includes(m.statut));
+  if (missionsFiltre === 'termine') list = list.filter(m => m.statut === 'termine');
+
+  if (list.length === 0) {
+    container.innerHTML = `<p class="empty-state">Aucune mission dans cette catégorie.</p>`;
+    return;
+  }
+
+  container.innerHTML = list.map(m => {
+    const cat = categorieMeta(m.categorie);
+    return `
+    <button class="mission-item" data-id="${m.id}">
+      <div class="mission-item__top">
+        <span class="mission-item__title">${cat.icone} ${cat.label}</span>
+        <span class="statut-tag">${STATUTS[m.statut] ?? m.statut}</span>
+      </div>
+      <p class="mission-item__addr">${m.adresse ?? ''}${m.ville ? ', ' + m.ville : ''}</p>
+    </button>`;
+  }).join('');
+
+  container.querySelectorAll('.mission-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const m = missions.find(x => x.id === item.dataset.id);
+      if (m) ouvrirModaleMission(m);
+    });
+  });
+}
+
+/* =========================================================================
+   MODALE — SUIVI D'UNE MISSION ASSIGNÉE (progression + clôture photo)
+   ========================================================================= */
+function ouvrirModaleMission(mission) {
+  const cat = categorieMeta(mission.categorie);
+  const steps = ['assigne', 'en_cours', 'termine'];
+  const currentIdx = steps.indexOf(mission.statut);
+
+  modalBody.innerHTML = `
+    <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
+    <div class="modal__meta"><span>Réf. ${mission.reference ?? '—'}</span></div>
+
+    <div class="progress-steps">
+      ${steps.map((s, i) => `<div class="seg ${i <= currentIdx ? 'done' : ''}"></div>`).join('')}
+    </div>
+
+    <div class="modal__section">
+      <h4>Adresse</h4>
+      <p>${mission.adresse ?? ''}${mission.ville ? ', ' + mission.ville : ''}</p>
+    </div>
+    <div class="action-grid-2">
+      <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((mission.adresse||'')+' '+(mission.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
+      <a class="btn-action btn-call" href="tel:${mission.telephone}">📞 Appeler</a>
+    </div>
+    <div class="modal__section">
+      <h4>Description</h4>
+      <p>${mission.description ?? ''}</p>
+    </div>
+
+    ${mission.statut === 'termine' ? `
+      <div class="form-success">✓ Mission clôturée le ${new Date(mission.updated_at).toLocaleDateString('fr-FR')}.</div>
+    ` : mission.statut === 'en_cours' ? `
+      <div class="photo-zone">
+        <h5>📸 Photo de fin de chantier (preuve pour le syndic)</h5>
+        <input type="file" id="photo-fin-input" accept="image/*" />
+      </div>
+      <button class="btn btn-gold btn-block" id="cloturer-btn">Clôturer le chantier</button>
+    ` : `
+      <button class="btn btn-primary btn-block" id="demarrer-btn">Démarrer l'intervention</button>
+    `}
+  `;
+
+  document.getElementById('demarrer-btn')?.addEventListener('click', () => changerStatutMission(mission.id, 'en_cours'));
+  document.getElementById('cloturer-btn')?.addEventListener('click', () => cloturerMission(mission.id));
+  ouvrirOverlay();
+}
+
+async function changerStatutMission(id, statut) {
+  if (DEMO_MODE) {
+    const m = missions.find(x => x.id === id);
+    if (m) m.statut = statut;
+    toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
+    fermerModale();
+    renderMissionsList();
+    return;
+  }
+  const { error } = await sb.from('interventions').update({ statut }).eq('id', id);
+  if (error) { toast('Une erreur est survenue.', 'error'); return; }
+  toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
+  fermerModale();
+  await chargerMesMissions();
+}
+
+async function cloturerMission(id) {
+  const fileInput = document.getElementById('photo-fin-input');
+  const btn = document.getElementById('cloturer-btn');
+  btn.disabled = true; btn.textContent = 'Clôture en cours…';
+
+  if (DEMO_MODE) {
+    const m = missions.find(x => x.id === id);
+    if (m) { m.statut = 'termine'; m.updated_at = new Date().toISOString(); }
+    toast('Chantier clôturé, rapport transmis.', 'success');
+    fermerModale();
+    renderMissionsList();
+    return;
+  }
+
+  try {
+    const updates = { statut: 'termine', updated_at: new Date().toISOString() };
+    if (fileInput?.files[0]) {
+      const file = fileInput.files[0];
+      const path = `preuve-fin/${id}-${Date.now()}-${file.name}`;
+      const { error: uploadError } = await sb.storage.from('intervention-photos').upload(path, file);
+      if (uploadError) throw uploadError;
+      updates.photos_fin = [path];
+    }
+    const { error } = await sb.from('interventions').update(updates).eq('id', id);
+    if (error) throw error;
+
+    toast('Chantier clôturé, rapport transmis.', 'success');
+    fermerModale();
+    await chargerMesMissions();
+  } catch (err) {
+    console.error(err);
+    toast("Erreur lors de la clôture. Réessayez.", 'error');
+    btn.disabled = false; btn.textContent = 'Clôturer le chantier';
   }
 }
 
 /* =========================================================================
-   RÉINITIALISATION
+   PROFIL
    ========================================================================= */
-function resetForm() {
-  step = 1;
-  photoFiles = [];
-  selectedPrestations = new Set();
-  data = { profile:null, occupant:null, demandType:'ponctuel', urgence:'faible', frequence:null };
-  document.getElementById('wizard-form').reset();
-  document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card,#particulier-toggle button').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
-  document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
-  document.querySelector('.urg-card[data-u="faible"]').classList.add('sel');
-  document.getElementById('urgence-wrap').hidden = false;
-  document.getElementById('frequence-wrap').hidden = true;
-  document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
-  document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
-  document.getElementById('prestations-container').innerHTML = '';
-  document.getElementById('preview-wrap').innerHTML = '';
-  document.getElementById('desc-count').textContent = '0';
-  document.getElementById('global-error').style.display = 'none';
-  const btn = document.getElementById('btn-next');
-  btn.disabled = false; btn.textContent = 'Continuer';
-  showStep();
-}
-
-showStep();
-</script>
-</body>
-</html><!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Entreprise 3 — Faire une demande</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
-
-:root{
-  --cream:#faf7f2;
-  --cream-dark:#f2ece0;
-  --navy:#0e2140;
-  --navy-mid:#1a3a6b;
-  --navy-soft:#2558a8;
-  --gold:#c9963a;
-  --gold-light:#f0c060;
-  --gold-pale:#fbeecb;
-  --text:#1a2332;
-  --text-mid:#3d4f66;
-  --muted:#8896a8;
-  --border:#e0d8cc;
-  --border-mid:#c8bfb0;
-  --white:#ffffff;
-  --success:#1a7a52;
-  --success-bg:#eaf6f0;
-  --error:#c0322a;
-  --error-bg:#fdf0ef;
-  --urg-h:#c0322a;
-  --urg-m:#b06020;
-  --urg-l:#1a7a52;
-  --radius-s:10px;
-  --radius-m:14px;
-  --radius-l:22px;
-  --shadow:0 10px 28px rgba(14,33,64,.08);
-}
-
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{scroll-padding-top:1rem;}
-body{
-  font-family:'DM Sans',sans-serif;
-  background:var(--cream);
-  color:var(--text);
-  min-height:100dvh;
-  overflow-x:hidden;
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-button{font-family:inherit;cursor:pointer;}
-input,textarea,select{font-family:inherit;font-size:inherit;}
-:focus-visible{outline:2.5px solid var(--navy-soft);outline-offset:2px;}
-@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
-
-/* ---- En-tête ---------------------------------------------------------- */
-.header{
-  background:linear-gradient(135deg,#0e2140,#1a3a6b 65%,#204a86);
-  padding:calc(env(safe-area-inset-top,0px) + 20px) 20px 28px;
-  position:relative;
-  overflow:hidden;
-}
-.header::after{
-  content:'';
-  position:absolute;bottom:-1px;left:0;right:0;height:26px;
-  background:var(--cream);border-radius:26px 26px 0 0;
-}
-.header-inner{position:relative;z-index:1;}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
-.brand-mark{
-  width:36px;height:36px;background:var(--gold);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:15px;flex-shrink:0;
-}
-.brand-name{color:white;font-weight:700;font-size:15px;}
-.header-title{font-family:'DM Serif Display',serif;color:white;font-size:29px;line-height:1.12;transition:opacity .2s;}
-.header-title em{font-style:italic;color:var(--gold-light);}
-.profile-chip{
-  display:inline-flex;align-items:center;gap:7px;background:rgba(201,150,58,.18);
-  border:1px solid rgba(201,150,58,.32);border-radius:100px;padding:6px 13px;
-  font-size:12px;font-weight:700;color:var(--gold-light);margin-top:15px;transition:all .2s;
-}
-.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite;flex-shrink:0;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* ---- Fil d'étapes -------------------------------------------------------- */
-.progress-wrap{padding:18px 20px 0;}
-.step-track{display:flex;align-items:center;}
-.step-node{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;}
-.step-node::after{
-  content:'';position:absolute;top:12px;left:calc(50% + 13px);right:calc(-50% + 13px);
-  height:1.5px;background:var(--border-mid);transition:background .25s;
-}
-.step-node:last-child::after{display:none;}
-.step-node.done::after{background:var(--navy-soft);}
-.sn-circle{
-  width:25px;height:25px;border-radius:50%;border:1.5px solid var(--border-mid);background:var(--cream);
-  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted);
-  z-index:1;transition:all .2s;
-}
-.step-node.active .sn-circle{background:var(--navy);border-color:var(--navy);color:white;transform:scale(1.08);}
-.step-node.done .sn-circle{background:var(--navy-soft);border-color:var(--navy-soft);color:white;}
-.sn-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:5px;}
-.step-node.active .sn-label{color:var(--navy);}
-
-/* ---- Sections ------------------------------------------------------------ */
-.section{display:none;padding:22px 20px 10px;animation:up .28s ease;}
-.section.active{display:block;}
-@keyframes up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.section-title{font-family:'DM Serif Display',serif;font-size:23px;color:var(--navy);margin-bottom:4px;}
-.section-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.4;}
-
-/* ---- Cartes de sélection (profil, type de demande) ------------------------ */
-.picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.picker-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:16px 12px;background:white;
-  text-align:left;cursor:pointer;transition:.15s ease;display:flex;flex-direction:column;gap:6px;
-}
-.picker-card:hover{border-color:var(--border-mid);transform:translateY(-1px);}
-.picker-card.sel{border-color:var(--navy);background:var(--navy);color:white;box-shadow:var(--shadow);}
-.picker-card.sel .picker-desc{color:rgba(255,255,255,.72);}
-.picker-icon{font-size:26px;}
-.picker-label{font-size:13px;font-weight:700;}
-.picker-desc{font-size:11px;color:var(--muted);line-height:1.35;}
-
-.subtoggle{display:flex;gap:8px;margin-top:16px;}
-.subtoggle button{
-  flex:1;padding:11px;border-radius:var(--radius-s);border:1.5px solid var(--border);background:white;
-  font-size:13px;font-weight:700;color:var(--text-mid);
-}
-.subtoggle button.sel{background:var(--navy);border-color:var(--navy);color:white;}
-
-/* ---- Champs de formulaire -------------------------------------------------- */
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px;color:var(--text-mid);}
-.field .optional-tag{text-transform:none;font-weight:400;color:var(--muted);}
-.field input,.field textarea{
-  width:100%;border:1.5px solid var(--border);border-radius:var(--radius-s);padding:14px;
-  font-size:15px;outline:none;background:white;transition:border-color .15s;
-}
-.field input:focus,.field textarea:focus{border-color:var(--navy-soft);}
-.field textarea{resize:none;}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px;}
-
-.field-err,.grid-err{
-  display:none;color:var(--error);font-size:11.5px;font-weight:600;margin-top:6px;
-  padding:9px 10px;background:var(--error-bg);border-radius:8px;
-}
-.show{display:block;}
-
-/* ---- Groupes de prestations (multi-sélection) ------------------------------ */
-.service-group{margin-bottom:18px;}
-.service-group-title{
-  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gold);
-  margin-bottom:9px;display:flex;align-items:center;gap:6px;
-}
-.service-group-title::after{content:'';flex:1;height:1px;background:var(--border);}
-.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.cat-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:13px 8px;background:white;
-  text-align:center;cursor:pointer;transition:.15s ease;position:relative;
-}
-.cat-card:hover{transform:translateY(-1px);}
-.cat-card.sel{border-color:var(--navy);background:var(--navy);color:white;}
-.cat-card.sel::before{
-  content:'✓';position:absolute;top:5px;right:6px;font-size:10px;font-weight:800;color:var(--gold-light);
-}
-.cat-icon{font-size:20px;display:block;margin-bottom:6px;}
-.cat-label{font-size:10.5px;font-weight:700;line-height:1.2;}
-
-/* ---- Type de demande (ponctuel / récurrent) --------------------------------- */
-.demand-type{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
-.demand-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:14px;background:white;cursor:pointer;transition:.15s;
-}
-.demand-card.sel{border-color:var(--gold);background:var(--gold-pale);}
-.demand-icon{font-size:20px;margin-bottom:6px;}
-.demand-title{font-size:12.5px;font-weight:800;color:var(--navy);}
-.demand-sub{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.3;}
-
-.freq-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
-.freq-row .cat-card{padding:11px 6px;}
-
-/* ---- Urgence ---------------------------------------------------------------- */
-.urg-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.urg-card{border:1.5px solid var(--border);border-radius:var(--radius-m);padding:12px;text-align:center;cursor:pointer;background:white;transition:.15s;}
-.urg-card.sel{transform:scale(1.02);}
-.urg-dot{width:10px;height:10px;border-radius:50%;display:block;margin:0 auto 5px;}
-.urg-card.sel[data-u="faible"]{border-color:var(--urg-l);background:#f0f9f5;}
-.urg-card.sel[data-u="modere"]{border-color:var(--urg-m);background:#fff9f2;}
-.urg-card.sel[data-u="urgent"]{border-color:var(--urg-h);background:#fff5f5;}
-
-/* ---- Photos ------------------------------------------------------------------ */
-.file-btn{
-  display:flex;align-items:center;gap:8px;border:1.5px dashed var(--border-mid);border-radius:var(--radius-s);
-  padding:13px;font-size:13px;font-weight:600;color:var(--text-mid);background:white;width:100%;justify-content:center;
-}
-#preview-wrap{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px;}
-.preview-item{position:relative;flex-shrink:0;}
-.preview-img{width:76px;height:76px;object-fit:cover;border-radius:var(--radius-s);border:1px solid var(--border);display:block;}
-.preview-remove{
-  position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--navy);color:white;
-  border:2px solid var(--cream);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
-}
-
-/* ---- Navigation basse -------------------------------------------------------- */
-.nav-wrap{padding:18px 20px;display:flex;gap:10px;background:var(--cream);}
-.btn{flex:1;padding:16px;border-radius:var(--radius-s);border:none;font-weight:700;font-size:14.5px;transition:.15s;
-  display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn:active{transform:scale(.98);}
-.btn-primary{background:var(--navy);color:white;box-shadow:0 8px 20px rgba(14,33,64,.18);}
-.btn-primary:disabled{background:var(--muted);box-shadow:none;cursor:not-allowed;}
-.btn-back{background:white;border:1.5px solid var(--border);color:var(--muted);flex:0 0 56px;}
-
-/* ---- Récapitulatif ------------------------------------------------------------ */
-.summary{border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;background:white;margin-bottom:14px;}
-.summary-block-title{
-  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--gold);
-  padding:12px 16px 6px;display:flex;justify-content:space-between;align-items:center;
-}
-.summary-block-title button{background:none;border:none;color:var(--navy-soft);font-size:11px;font-weight:700;text-decoration:underline;padding:0;}
-.sum-row{display:flex;padding:9px 16px;border-top:1px solid var(--border);font-size:13px;gap:10px;}
-.sum-k{width:118px;flex-shrink:0;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;padding-top:1px;}
-.sum-v{font-weight:600;color:var(--navy);flex:1;word-break:break-word;}
-
-/* ---- Confirmation -------------------------------------------------------------- */
-.confirm-wrap{text-align:center;padding:26px 20px 10px;}
-.confirm-badge{
-  width:82px;height:82px;background:linear-gradient(135deg,var(--success),#28a36a);color:white;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:34px;
-  box-shadow:0 10px 30px rgba(26,122,82,.25);
-}
-.confirm-wrap h2{font-family:'DM Serif Display',serif;font-size:27px;color:var(--navy);margin-bottom:10px;}
-.confirm-wrap p{color:var(--text-mid);line-height:1.6;font-size:15px;max-width:320px;margin:0 auto;}
-.ref-box{margin-top:24px;background:white;border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;}
-.ref-box .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
-.ref-box .val{font-weight:800;color:var(--navy);font-size:19px;letter-spacing:.01em;}
-.confirm-note{
-  margin-top:18px;background:var(--gold-pale);border-radius:var(--radius-s);padding:13px 16px;
-  font-size:12.5px;color:#6b4f1a;text-align:left;line-height:1.5;
-}
-
-/* ---- Toast d'erreur globale ----------------------------------------------------- */
-#global-error{
-  display:none;margin:0 20px 16px;background:var(--error-bg);color:var(--error);border-radius:var(--radius-s);
-  padding:12px 14px;font-size:12.5px;font-weight:600;
-}
-
-@media (min-width:520px){
-  body{max-width:520px;margin:0 auto;box-shadow:0 0 60px rgba(14,33,64,.08);}
-}
-</style>
-</head>
-<body>
-
-<div class="header">
-  <div class="header-inner">
-    <div class="brand">
-      <div class="brand-mark" aria-hidden="true">E3</div>
-      <div class="brand-name">Entreprise 3</div>
+function renderProfile() {
+  const a = currentArtisan;
+  document.getElementById('profile-page').innerHTML = `
+    <div class="profile-card">
+      <h3>${a.nom_entreprise}</h3>
+      <dl>
+        <div class="profile-row"><dt>Gérant</dt><dd>${a.nom_gerant}</dd></div>
+        <div class="profile-row"><dt>Téléphone</dt><dd>${a.telephone}</dd></div>
+        <div class="profile-row"><dt>E-mail</dt><dd>${a.email}</dd></div>
+        <div class="profile-row"><dt>SIRET</dt><dd>${a.siret ?? '—'}</dd></div>
+        <div class="profile-row"><dt>Zones</dt><dd>${(a.zones_intervention||[]).join(', ') || '—'}</dd></div>
+      </dl>
+      <div class="spec-tags">
+        ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone} ${categorieMeta(s).label}</span>`).join('')}
+      </div>
     </div>
-    <h1 class="header-title" id="header-title">Faire une<br><em>demande</em></h1>
-    <div class="profile-chip">
-      <span class="chip-dot" aria-hidden="true"></span>
-      <span id="header-profile-label">Sélectionnez votre profil</span>
+    <div class="profile-card">
+      <h3>Statut du dossier</h3>
+      <span class="status-pill status-pill--${a.statut_verification}">${a.statut_verification === 'valide' ? '✓ Validé' : a.statut_verification === 'refuse' ? 'Refusé' : 'En vérification'}</span>
     </div>
-  </div>
-</div>
+  `;
+}
 
-<div class="progress-wrap" aria-hidden="true">
-  <div class="step-track">
-    <div class="step-node active"><div class="sn-circle">1</div><div class="sn-label">Profil</div></div>
-    <div class="step-node"><div class="sn-circle">2</div><div class="sn-label">Lieu</div></div>
-    <div class="step-node"><div class="sn-circle">3</div><div class="sn-label">Besoin</div></div>
-    <div class="step-node"><div class="sn-circle">4</div><div class="sn-label">Contact</div></div>
-  </div>
-</div>
-
-<p id="global-error" role="alert"></p>
-
-<form id="wizard-form" novalidate>
-
-<!-- ÉTAPE 1 — PROFIL -->
-<section class="section active" id="s1" aria-labelledby="s1-title">
-  <h2 class="section-title" id="s1-title">Qui êtes-vous ?</h2>
-  <p class="section-sub">Choisissez votre profil pour adapter les prestations proposées.</p>
-
-  <div class="picker-grid" id="profile-grid" role="radiogroup" aria-label="Profil"></div>
-
-  <div class="subtoggle" id="particulier-toggle" hidden role="radiogroup" aria-label="Vous êtes">
-    <button type="button" data-v="proprietaire" onclick="pickOccupant(this)">Propriétaire</button>
-    <button type="button" data-v="locataire" onclick="pickOccupant(this)">Locataire</button>
-  </div>
-
-  <p class="grid-err" id="err-profile">Veuillez sélectionner un profil pour continuer.</p>
-</section>
-
-<!-- ÉTAPE 2 — LIEU -->
-<section class="section" id="s2" aria-labelledby="s2-title">
-  <h2 class="section-title" id="s2-title">Localisation</h2>
-  <p class="section-sub" id="sub-lieu">Précisez l'adresse concernée par la demande.</p>
-
-  <div class="field" id="field-nomsite">
-    <label for="nom_site" id="label-nomsite">Nom de la copropriété / résidence</label>
-    <input type="text" id="nom_site" placeholder="Ex : Résidence Les Tilleuls" autocomplete="organization" />
-  </div>
-
-  <div class="field">
-    <label for="adresse_lieu">Adresse</label>
-    <input type="text" id="adresse_lieu" placeholder="12 rue de la République" autocomplete="street-address" />
-    <p class="field-err" id="err-adresse">Merci de renseigner l'adresse.</p>
-  </div>
-
-  <div class="field-row">
-    <div class="field">
-      <label for="code_postal">Code postal</label>
-      <input type="text" id="code_postal" inputmode="numeric" placeholder="75011" pattern="[0-9]{5}" />
-      <p class="field-err" id="err-cp">Code postal invalide.</p>
-    </div>
-    <div class="field">
-      <label for="ville">Ville</label>
-      <input type="text" id="ville" placeholder="Paris" />
-      <p class="field-err" id="err-ville">Merci d'indiquer la ville.</p>
-    </div>
-  </div>
-
-  <div class="field">
-    <label for="complement_lieu" id="label-complement">Bâtiment / étage / porte / lot <span class="optional-tag">(facultatif)</span></label>
-    <input type="text" id="complement_lieu" placeholder="Ex : Bâtiment B, 3ème étage, Lot 42" />
-  </div>
-</section>
-
-<!-- ÉTAPE 3 — BESOIN -->
-<section class="section" id="s3" aria-labelledby="s3-title">
-  <h2 class="section-title" id="s3-title">De quoi avez-vous besoin ?</h2>
-  <p class="section-sub">Sélectionnez un ou plusieurs services, ponctuels ou récurrents.</p>
-
-  <div class="demand-type" id="demand-type" role="radiogroup" aria-label="Type de demande">
-    <div class="demand-card sel" data-v="ponctuel" onclick="pickDemandType(this)" role="radio" aria-checked="true" tabindex="0">
-      <div class="demand-icon">⚡</div>
-      <div class="demand-title">Intervention ponctuelle</div>
-      <div class="demand-sub">Dépannage, réparation, besoin immédiat</div>
-    </div>
-    <div class="demand-card" data-v="recurrent" onclick="pickDemandType(this)" role="radio" aria-checked="false" tabindex="0">
-      <div class="demand-icon">🔁</div>
-      <div class="demand-title">Contrat d'entretien</div>
-      <div class="demand-sub">Prestation régulière (nettoyage, espaces verts...)</div>
-    </div>
-  </div>
-
-  <div id="prestations-container"></div>
-  <p class="grid-err" id="err-cat">Choisissez au moins une prestation.</p>
-
-  <div id="urgence-wrap" class="field" style="margin-top:6px;">
-    <label>Niveau d'urgence</label>
-    <div class="urg-row" id="urg-choices">
-      <div class="urg-card sel" data-u="faible" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-l)"></span><div class="cat-label">Faible</div></div>
-      <div class="urg-card" data-u="modere" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-m)"></span><div class="cat-label">Modéré</div></div>
-      <div class="urg-card" data-u="urgent" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-h)"></span><div class="cat-label">Urgent</div></div>
-    </div>
-  </div>
-
-  <div id="frequence-wrap" class="field" hidden>
-    <label>Fréquence souhaitée</label>
-    <div class="freq-row" id="freq-choices">
-      <div class="cat-card" data-f="hebdomadaire" onclick="pickFreq(this)"><span class="cat-label">Hebdo</span></div>
-      <div class="cat-card" data-f="mensuelle" onclick="pickFreq(this)"><span class="cat-label">Mensuelle</span></div>
-      <div class="cat-card" data-f="trimestrielle" onclick="pickFreq(this)"><span class="cat-label">Trimestre</span></div>
-    </div>
-    <label for="date_debut" style="margin-top:12px;">Démarrage souhaité <span class="optional-tag">(facultatif)</span></label>
-    <input type="date" id="date_debut" />
-  </div>
-
-  <div class="field" id="field-surface">
-    <label for="surface_m2">Surface approximative en m² <span class="optional-tag">(facultatif)</span></label>
-    <input type="number" id="surface_m2" min="0" inputmode="numeric" placeholder="Ex : 350" />
-  </div>
-
-  <div class="field">
-    <label for="desc">Description</label>
-    <textarea id="desc" rows="4" maxlength="600" placeholder="Détaillez votre besoin : nature du problème, fréquence souhaitée, contraintes d'accès..."></textarea>
-    <p class="char-count"><span id="desc-count">0</span>/600</p>
-    <p class="field-err" id="err-desc">Merci de décrire votre besoin.</p>
-  </div>
-
-  <div class="field">
-    <label for="photos">Photos <span class="optional-tag">(jusqu'à 3, facultatif)</span></label>
-    <label class="file-btn" for="photos">📷 Ajouter des photos</label>
-    <input type="file" id="photos" accept="image/*" capture="environment" multiple hidden />
-    <div id="preview-wrap"></div>
-  </div>
-</section>
-
-<!-- ÉTAPE 4 — CONTACT -->
-<section class="section" id="s4" aria-labelledby="s4-title">
-  <h2 class="section-title" id="s4-title">Vos coordonnées</h2>
-  <p class="section-sub">Pour vous transmettre un devis ou vous mettre en relation avec un artisan.</p>
-
-  <div class="field-row">
-    <div class="field">
-      <label for="prenom">Prénom</label>
-      <input type="text" id="prenom" autocomplete="given-name" />
-    </div>
-    <div class="field">
-      <label for="nom">Nom</label>
-      <input type="text" id="nom" autocomplete="family-name" />
-    </div>
-  </div>
-
-  <div class="field">
-    <label for="tel">Téléphone direct</label>
-    <input type="tel" id="tel" placeholder="06 00 00 00 00" autocomplete="tel" />
-  </div>
-
-  <div class="field">
-    <label for="email">E-mail <span id="email-optional-tag" class="optional-tag">(facultatif)</span></label>
-    <input type="email" id="email" placeholder="contact@domaine.com" autocomplete="email" />
-  </div>
-
-  <p class="grid-err" id="err-contact">Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.</p>
-</section>
-
-<!-- ÉTAPE 5 — RÉCAPITULATIF -->
-<section class="section" id="s5" aria-labelledby="s5-title">
-  <h2 class="section-title" id="s5-title">Vérifiez votre demande</h2>
-  <p class="section-sub">Relisez les informations avant l'envoi.</p>
-  <div id="summary"></div>
-</section>
-
-<!-- ÉTAPE 6 — CONFIRMATION -->
-<section class="section" id="s6">
-  <div class="confirm-wrap">
-    <div class="confirm-badge" aria-hidden="true">✓</div>
-    <h2>Demande transmise</h2>
-    <p>Votre dossier a bien été envoyé à notre réseau d'artisans et prestataires en Île-de-France.</p>
-    <div class="ref-box">
-      <div class="lbl">Référence du dossier</div>
-      <div class="val" id="ticket-number">—</div>
-    </div>
-    <p class="confirm-note" id="confirm-note"></p>
-    <button type="button" class="btn btn-primary" style="margin:26px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
-  </div>
-</section>
-
-<div class="nav-wrap" id="nav-wrap">
-  <button type="button" class="btn btn-back" id="btn-back" onclick="prevStep()" style="display:none" aria-label="Étape précédente">←</button>
-  <button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer</button>
-</div>
-
-</form>
-
-<script>
-/* =========================================================================
-   CONFIGURATION SUPABASE (même projet que l'espace artisan)
-   ========================================================================= */
-const SUPABASE_URL = 'https://yqjeqcomrubelahrvizd.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_hKaiVb_fWBPRgESxpwWNCA_iAN9acMe';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  window.location.reload();
+});
 
 /* =========================================================================
-   RÉFÉRENTIEL PROFILS
+   TEMPS RÉEL
    ========================================================================= */
-const PROFILES = [
-  { v:'syndic_copro',      icon:'🏢', label:'Syndic de copropriété', desc:'Parties communes, résidences', profil_demandeur:'gestionnaire' },
-  { v:'agence_immo',       icon:'🗝️', label:'Agence immobilière',    desc:'Biens en gestion, remise en état', profil_demandeur:'gestionnaire' },
-  { v:'commerce',          icon:'🏬', label:'Commerce / Boutique',    desc:'Magasin, restaurant, local pro', profil_demandeur:'gestionnaire' },
-  { v:'bureau_entreprise', icon:'🏛️', label:'Bureau / Entreprise',    desc:'Locaux professionnels', profil_demandeur:'gestionnaire' },
-  { v:'ecole',             icon:'🏫', label:'École / Établissement',  desc:'Scolaire, périscolaire', profil_demandeur:'gestionnaire' },
-  { v:'particulier',       icon:'🏠', label:'Particulier',            desc:'Logement personnel', profil_demandeur:null },
-];
+function subscribeRealtime() {
+  sb.channel('interventions-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'interventions' }, () => {
+      chargerChantiers();
+      chargerMesMissions();
+    })
+    .subscribe();
+}
 
 /* =========================================================================
-   RÉFÉRENTIEL DES PRESTATIONS (groupées)
+   INITIALISATION — reprise de session existante
    ========================================================================= */
-const SERVICE_GROUPS = {
-  technique:  { label:'Dépannage & maintenance technique', items:[
-    {v:'plomberie', l:'Plomberie', i:'💧'}, {v:'electricite', l:'Électricité', i:'⚡'},
-    {v:'chauffage', l:'Chauffage / Clim', i:'🔥'}, {v:'serrurerie', l:'Serrurerie', i:'🔑'},
-    {v:'ascenseur', l:'Ascenseur', i:'🛗'}, {v:'interphone', l:'Interphone', i:'📟'},
-    {v:'vitrerie', l:'Vitrerie', i:'🪟'},
-  ]},
-  entretien:  { label:'Entretien courant & propreté', items:[
-    {v:'menage', l:'Ménage / Nettoyage', i:'🧹'}, {v:'nettoyage_vitrine', l:'Nettoyage vitrines', i:'✨'},
-    {v:'espaces_verts', l:'Espaces verts', i:'🌳'}, {v:'desherbage', l:'Désherbage', i:'🌿'},
-  ]},
-  nuisibles:  { label:'Nuisibles & hygiène', items:[
-    {v:'deratisation', l:'Dératisation', i:'🐀'}, {v:'desinsectisation', l:'Désinsectisation', i:'🪳'},
-    {v:'desinfection', l:'Désinfection', i:'🧴'}, {v:'debarras', l:'Débarras', i:'🗑️'},
-  ]},
-  travaux:    { label:'Travaux & rénovation', items:[
-    {v:'peinture', l:'Peinture / Sols', i:'🎨'}, {v:'renovation', l:'Rénovation', i:'🔨'},
-    {v:'agencement', l:'Agencement local', i:'🏗️'},
-  ]},
-  securite:   { label:'Sécurité', items:[
-    {v:'camera', l:'Vidéosurveillance', i:'📷'}, {v:'controle_acces', l:'Contrôle d\'accès', i:'🔐'},
-    {v:'incendie', l:'Sécurité incendie', i:'🧯'},
-  ]},
-  autre:      { label:'Autre besoin', items:[{v:'autre', l:'Autre', i:'❓'}] },
-};
-
-// Ordre des groupes affichés selon le profil (les plus pertinents en premier)
-const PROFILE_GROUP_ORDER = {
-  syndic_copro:      ['entretien','nuisibles','technique','securite','travaux','autre'],
-  agence_immo:       ['entretien','travaux','technique','nuisibles','autre'],
-  commerce:          ['entretien','securite','technique','travaux','nuisibles','autre'],
-  bureau_entreprise: ['entretien','securite','technique','nuisibles','travaux','autre'],
-  ecole:             ['entretien','nuisibles','securite','technique','travaux','autre'],
-  particulier:       ['technique','entretien','nuisibles','travaux','autre'],
-};
-
-const HEADER_TITLES = {
-  syndic_copro:'Demande pour<br><em>votre copropriété</em>',
-  agence_immo:'Demande pour<br><em>votre agence</em>',
-  commerce:'Demande pour<br><em>votre commerce</em>',
-  bureau_entreprise:'Demande pour<br><em>vos locaux</em>',
-  ecole:'Demande pour<br><em>votre établissement</em>',
-  particulier:'Faire une<br><em>demande</em>',
-};
-const NOMSITE_LABELS = {
-  syndic_copro:'Nom de la copropriété / résidence',
-  agence_immo:"Nom de l'agence",
-  commerce:'Enseigne du commerce',
-  bureau_entreprise:"Nom de l'entreprise",
-  ecole:"Nom de l'établissement",
-};
-const COMPLEMENT_LABELS = {
-  syndic_copro:'Bâtiment / étage / porte / lot',
-  agence_immo:'Étage / local / référence bien',
-  commerce:'Étage / local commercial',
-  bureau_entreprise:'Bâtiment / étage / bureau',
-  ecole:'Bâtiment / salle / accès',
-  particulier:"Étage / n° d'appartement / interphone",
-};
-
-/* =========================================================================
-   ÉTAT
-   ========================================================================= */
-let step = 1;
-const TOTAL_NODES = 4;
-let photoFiles = [];
-let selectedPrestations = new Set();
-let data = {
-  profile:null, occupant:null,
-  demandType:'ponctuel', urgence:'faible', frequence:null,
-};
-
-/* =========================================================================
-   ÉTAPE 1 — PROFIL
-   ========================================================================= */
-(function initProfiles() {
-  const grid = document.getElementById('profile-grid');
-  grid.innerHTML = PROFILES.map(p => `
-    <button type="button" class="picker-card" data-v="${p.v}" role="radio" aria-checked="false" onclick="selectProfile('${p.v}', this)">
-      <span class="picker-icon" aria-hidden="true">${p.icon}</span>
-      <span class="picker-label">${p.label}</span>
-      <span class="picker-desc">${p.desc}</span>
-    </button>`).join('');
+(async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await lancerApplication();
 })();
-
-function selectProfile(value, el) {
-  document.querySelectorAll('#profile-grid .picker-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.profile = value;
-  document.getElementById('err-profile').classList.remove('show');
-
-  const meta = PROFILES.find(p => p.v === value);
-  document.getElementById('header-profile-label').textContent = meta.label;
-  document.getElementById('header-title').innerHTML = HEADER_TITLES[value];
-
-  const particulierToggle = document.getElementById('particulier-toggle');
-  particulierToggle.hidden = value !== 'particulier';
-  if (value !== 'particulier') data.occupant = null;
-
-  document.getElementById('label-nomsite').textContent = NOMSITE_LABELS[value] || "Nom (facultatif)";
-  document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
-  document.getElementById('label-complement').innerHTML = `${COMPLEMENT_LABELS[value] || 'Complément'} <span class="optional-tag">(facultatif)</span>`;
-
-  document.getElementById('sub-lieu').textContent = value === 'particulier'
-    ? 'Indiquez l\'adresse de votre logement.'
-    : "Indiquez l'adresse exacte de l'intervention.";
-
-  renderPrestations();
-}
-
-function pickOccupant(el) {
-  document.querySelectorAll('#particulier-toggle button').forEach(b => b.classList.remove('sel'));
-  el.classList.add('sel');
-  data.occupant = el.dataset.v;
-}
-
-/* =========================================================================
-   ÉTAPE 3 — PRESTATIONS, TYPE DE DEMANDE, URGENCE/FRÉQUENCE
-   ========================================================================= */
-function pickDemandType(el) {
-  document.querySelectorAll('#demand-type .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.demandType = el.dataset.v;
-  document.getElementById('urgence-wrap').hidden = data.demandType !== 'ponctuel';
-  document.getElementById('frequence-wrap').hidden = data.demandType !== 'recurrent';
-}
-document.querySelectorAll('#demand-type .demand-card').forEach(card => {
-  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
-});
-
-function pickUrg(el) {
-  document.querySelectorAll('#urg-choices .urg-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  data.urgence = el.dataset.u;
-}
-function pickFreq(el) {
-  document.querySelectorAll('#freq-choices .cat-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  data.frequence = el.dataset.f;
-}
-
-function renderPrestations() {
-  const order = PROFILE_GROUP_ORDER[data.profile] || Object.keys(SERVICE_GROUPS);
-  const container = document.getElementById('prestations-container');
-  container.innerHTML = order.map(groupId => {
-    const group = SERVICE_GROUPS[groupId];
-    return `
-    <div class="service-group">
-      <div class="service-group-title">${group.label}</div>
-      <div class="cat-grid">
-        ${group.items.map(it => `
-          <button type="button" class="cat-card ${selectedPrestations.has(it.v) ? 'sel' : ''}" data-v="${it.v}" aria-pressed="${selectedPrestations.has(it.v)}" onclick="togglePrestation('${it.v}', this)">
-            <span class="cat-icon" aria-hidden="true">${it.i}</span>
-            <span class="cat-label">${it.l}</span>
-          </button>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function togglePrestation(value, el) {
-  if (selectedPrestations.has(value)) { selectedPrestations.delete(value); el.classList.remove('sel'); el.setAttribute('aria-pressed','false'); }
-  else { selectedPrestations.add(value); el.classList.add('sel'); el.setAttribute('aria-pressed','true'); }
-  document.getElementById('err-cat').classList.remove('show');
-}
-
-/* Compteur de caractères de la description */
-const descField = document.getElementById('desc');
-descField.addEventListener('input', () => { document.getElementById('desc-count').textContent = descField.value.length; });
-
-/* =========================================================================
-   PHOTOS
-   ========================================================================= */
-document.getElementById('photos').addEventListener('change', (e) => {
-  const remaining = 3 - photoFiles.length;
-  Array.from(e.target.files).slice(0, remaining).forEach(file => {
-    photoFiles.push({ file, url: URL.createObjectURL(file) });
-  });
-  e.target.value = '';
-  renderPreviews();
-});
-function renderPreviews() {
-  const wrap = document.getElementById('preview-wrap');
-  wrap.innerHTML = photoFiles.map((p, i) => `
-    <div class="preview-item">
-      <img src="${p.url}" class="preview-img" alt="Photo ${i + 1}" />
-      <button type="button" class="preview-remove" aria-label="Supprimer la photo ${i + 1}" onclick="removePhoto(${i})">✕</button>
-    </div>`).join('');
-}
-function removePhoto(i) { photoFiles.splice(i, 1); renderPreviews(); }
-
-/* =========================================================================
-   VALIDATION PAR ÉTAPE
-   ========================================================================= */
-function clearErrors() { document.querySelectorAll('.grid-err,.field-err').forEach(e => e.classList.remove('show')); }
-
-function validateStep() {
-  clearErrors();
-  if (step === 1) {
-    if (!data.profile) { document.getElementById('err-profile').classList.add('show'); return false; }
-    return true;
-  }
-  if (step === 2) {
-    let ok = true;
-    if (!document.getElementById('adresse_lieu').value.trim()) { document.getElementById('err-adresse').classList.add('show'); ok = false; }
-    if (!/^[0-9]{5}$/.test(document.getElementById('code_postal').value.trim())) { document.getElementById('err-cp').classList.add('show'); ok = false; }
-    if (!document.getElementById('ville').value.trim()) { document.getElementById('err-ville').classList.add('show'); ok = false; }
-    return ok;
-  }
-  if (step === 3) {
-    let ok = true;
-    if (selectedPrestations.size === 0) { document.getElementById('err-cat').classList.add('show'); ok = false; }
-    if (!descField.value.trim()) { document.getElementById('err-desc').classList.add('show'); ok = false; }
-    return ok;
-  }
-  if (step === 4) {
-    const prenom = document.getElementById('prenom').value.trim();
-    const nom = document.getElementById('nom').value.trim();
-    const tel = document.getElementById('tel').value.trim().replace(/\s/g, '');
-    const email = document.getElementById('email').value.trim();
-    const telRegex = /^(0|\+33)[1-9][0-9]{8}$/;
-    const emailRequired = data.profile !== 'particulier';
-    const emailOk = emailRequired ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) : (email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
-    if (!prenom || !nom || !telRegex.test(tel) || !emailOk) { document.getElementById('err-contact').classList.add('show'); return false; }
-    return true;
-  }
-  return true;
-}
-
-/* =========================================================================
-   NAVIGATION
-   ========================================================================= */
-function nextStep() {
-  if (step <= 4 && !validateStep()) return;
-  if (step === 4) buildSummary();
-  if (step === 5) { submitDemand(); return; }
-  step++;
-  showStep();
-}
-function prevStep() { step--; showStep(); }
-function goToStep(n) { step = n; showStep(); }
-
-function showStep() {
-  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i + 1 === step));
-  document.querySelectorAll('.step-node').forEach((n, i) => {
-    const idx = i + 1;
-    n.classList.toggle('active', idx === Math.min(step, TOTAL_NODES));
-    n.classList.toggle('done', idx < step && step <= TOTAL_NODES + 1);
-  });
-  document.getElementById('btn-back').style.display = (step > 1 && step < 6) ? 'flex' : 'none';
-  document.getElementById('btn-next').textContent = step === 5 ? 'Confirmer la demande' : 'Continuer';
-  document.getElementById('nav-wrap').style.display = step === 6 ? 'none' : 'flex';
-  document.getElementById('email-optional-tag').style.display = data.profile === 'particulier' ? 'inline' : 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  const title = document.querySelector(`.section.active .section-title`);
-  if (title) title.setAttribute('tabindex', '-1'), title.focus({ preventScroll: true });
-}
-
-/* =========================================================================
-   RÉCAPITULATIF
-   ========================================================================= */
-function buildSummary() {
-  const profileMeta = PROFILES.find(p => p.v === data.profile);
-  const prestaLabels = Array.from(selectedPrestations).map(v => {
-    for (const g of Object.values(SERVICE_GROUPS)) { const found = g.items.find(i => i.v === v); if (found) return found.l; }
-    return v;
-  });
-
-  const blocks = [
-    { title:'Profil', step:1, rows:[
-      ['Type', profileMeta.label + (data.occupant ? ` (${data.occupant === 'proprietaire' ? 'Propriétaire' : 'Locataire'})` : '')],
-    ]},
-    { title:'Lieu', step:2, rows:[
-      ['Nom du site', document.getElementById('nom_site').value || '—'],
-      ['Adresse', document.getElementById('adresse_lieu').value],
-      ['Ville', `${document.getElementById('code_postal').value} ${document.getElementById('ville').value}`],
-      ['Complément', document.getElementById('complement_lieu').value || '—'],
-    ]},
-    { title:'Besoin', step:3, rows:[
-      ['Prestations', prestaLabels.join(', ')],
-      ['Type de demande', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
-      ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
-        : [['Fréquence', data.frequence ? { hebdomadaire:'Hebdomadaire', mensuelle:'Mensuelle', trimestrielle:'Trimestrielle' }[data.frequence] : 'Non précisée']]),
-      ['Surface', document.getElementById('surface_m2').value ? document.getElementById('surface_m2').value + ' m²' : '—'],
-      ['Description', document.getElementById('desc').value],
-      ['Photos', photoFiles.length ? `${photoFiles.length} photo(s)` : 'Aucune'],
-    ]},
-    { title:'Contact', step:4, rows:[
-      ['Nom', `${document.getElementById('prenom').value} ${document.getElementById('nom').value}`],
-      ['Téléphone', document.getElementById('tel').value],
-      ['E-mail', document.getElementById('email').value || '—'],
-    ]},
-  ];
-
-  document.getElementById('summary').innerHTML = blocks.map(b => `
-    <div class="summary">
-      <div class="summary-block-title">
-        <span>${b.title}</span>
-        <button type="button" onclick="goToStep(${b.step})">Modifier</button>
-      </div>
-      ${b.rows.map(r => `<div class="sum-row"><div class="sum-k">${r[0]}</div><div class="sum-v">${r[1]}</div></div>`).join('')}
-    </div>`).join('');
-}
-
-/* =========================================================================
-   ENVOI DE LA DEMANDE
-   ========================================================================= */
-async function submitDemand() {
-  const btn = document.getElementById('btn-next');
-  const errorBox = document.getElementById('global-error');
-  errorBox.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Envoi en cours…';
-
-  try {
-    const prestations = Array.from(selectedPrestations);
-    const profileMeta = PROFILES.find(p => p.v === data.profile);
-    const profilDemandeur = data.profile === 'particulier' ? (data.occupant || 'proprietaire') : profileMeta.profil_demandeur;
-
-    // 1. Upload des photos
-    const photoPaths = [];
-    for (const [i, p] of photoFiles.entries()) {
-      const path = `${crypto.randomUUID()}-${i}-${p.file.name}`;
-      const { error } = await sb.storage.from('intervention-photos').upload(path, p.file);
-      if (error) throw error;
-      photoPaths.push(path);
-    }
-
-    // 2. Insertion de la demande
-    const payload = {
-      zone: 'parties_communes',
-      adresse: document.getElementById('adresse_lieu').value,
-      code_postal: document.getElementById('code_postal').value,
-      ville: document.getElementById('ville').value,
-      etage: document.getElementById('complement_lieu').value || null,
-      categorie: prestations[0] || 'autre',
-      urgence: data.demandType === 'ponctuel' ? data.urgence : 'faible',
-      description: document.getElementById('desc').value,
-      photos: photoPaths,
-      profil_demandeur: profilDemandeur,
-      nom: document.getElementById('nom').value,
-      prenom: document.getElementById('prenom').value,
-      telephone: document.getElementById('tel').value,
-      email: document.getElementById('email').value || null,
-      // Colonnes complémentaires (voir ALTER TABLE fourni séparément)
-      profil_structure: data.profile,
-      nom_site: document.getElementById('nom_site').value || null,
-      prestations: prestations,
-      type_demande: data.demandType,
-      frequence: data.demandType === 'recurrent' ? data.frequence : null,
-      date_debut_souhaitee: document.getElementById('date_debut').value || null,
-      surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
-    };
-
-    const { data: inserted, error } = await sb.from('interventions').insert(payload).select('reference').single();
-    if (error) throw error;
-
-    document.getElementById('ticket-number').textContent = inserted.reference;
-    document.getElementById('confirm-note').textContent = data.demandType === 'recurrent'
-      ? "Vous recevrez une proposition de devis pour un contrat d'entretien sous 48h."
-      : (data.urgence === 'urgent'
-        ? 'Un artisan disponible va être notifié immédiatement.'
-        : 'Un artisan de notre réseau va prendre contact avec vous prochainement.');
-
-    step = 6;
-    showStep();
-  } catch (err) {
-    console.error(err);
-    errorBox.textContent = "Impossible d'envoyer votre demande pour le moment (base de données non configurée ou indisponible). Réessayez dans un instant.";
-    errorBox.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Confirmer la demande';
-  }
-}
-
-/* =========================================================================
-   RÉINITIALISATION
-   ========================================================================= */
-function resetForm() {
-  step = 1;
-  photoFiles = [];
-  selectedPrestations = new Set();
-  data = { profile:null, occupant:null, demandType:'ponctuel', urgence:'faible', frequence:null };
-  document.getElementById('wizard-form').reset();
-  document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card,#particulier-toggle button').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
-  document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
-  document.querySelector('.urg-card[data-u="faible"]').classList.add('sel');
-  document.getElementById('urgence-wrap').hidden = false;
-  document.getElementById('frequence-wrap').hidden = true;
-  document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
-  document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
-  document.getElementById('prestations-container').innerHTML = '';
-  document.getElementById('preview-wrap').innerHTML = '';
-  document.getElementById('desc-count').textContent = '0';
-  document.getElementById('global-error').style.display = 'none';
-  const btn = document.getElementById('btn-next');
-  btn.disabled = false; btn.textContent = 'Continuer';
-  showStep();
-}
-
-showStep();
 </script>
 </body>
 </html>
