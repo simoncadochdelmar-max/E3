@@ -821,14 +821,23 @@ function distanceKm(lat1, lng1, lat2, lng2) {
 }
 
 function localiserArtisan() {
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation) {
+    toast("La géolocalisation n'est pas supportée par votre navigateur.", "error");
+    return;
+  }
+  toast("Recherche de votre position...", "info");
   navigator.geolocation.getCurrentPosition((pos) => {
     userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
     if (userMarker) map.removeLayer(userMarker);
     userMarker = L.circleMarker([userPosition.lat, userPosition.lng], { radius: 8, color:'#fff', weight:3, fillColor:'#2c4d80', fillOpacity:1 }).addTo(map);
+    map.setView([userPosition.lat, userPosition.lng], 13);
     renderChantierList();
-  }, () => { /* géolocalisation refusée : on continue sans */ }, { enableHighAccuracy: true, timeout: 8000 });
+    toast("Position actualisée avec succès.", "success");
+  }, () => { 
+    toast("Impossible d'obtenir votre position. Vérifiez vos paramètres.", "error"); 
+  }, { enableHighAccuracy: true, timeout: 8000 });
 }
+
 document.getElementById('locate-btn').addEventListener('click', () => {
   if (userPosition) map.setView([userPosition.lat, userPosition.lng], 13);
   else localiserArtisan();
@@ -1154,7 +1163,7 @@ function renderProfile() {
         <div class="profile-row"><dt>Zones</dt><dd>${(a.zones_intervention||[]).join(', ') || '—'}</dd></div>
       </dl>
       <div class="spec-tags">
-        ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone} ${categorieMeta(s).label}</span>`).join('')}
+        ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone}${categorieMeta(s).label}</span>`).join('')}
       </div>
     </div>
     <div class="profile-card">
