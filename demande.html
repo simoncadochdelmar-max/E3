@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Entreprise 3 — Faire une demande</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
 
@@ -245,6 +246,25 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
   padding:12px 14px;font-size:12.5px;font-weight:600;
 }
 
+/* ---- Autocomplétion d'adresse + mini-carte ------------------------------- */
+.ac-wrap{position:relative;}
+.ac-list{position:absolute;left:0;right:0;top:calc(100% - 4px);z-index:30;background:white;border:1.5px solid var(--border);
+  border-radius:var(--radius-s);box-shadow:var(--shadow);list-style:none;overflow:hidden;max-height:260px;overflow-y:auto;margin:0;padding:0;}
+.ac-list[hidden]{display:none;}
+.ac-list li{padding:12px 14px;font-size:13.5px;cursor:pointer;border-bottom:1px solid var(--border);line-height:1.35;}
+.ac-list li:last-child{border-bottom:none;}
+.ac-list li small{display:block;color:var(--muted);font-size:11.5px;}
+.ac-list li[aria-selected="true"],.ac-list li:hover{background:var(--gold-pale);}
+.geo-btn{margin-top:9px;background:none;border:none;color:var(--navy-soft);font-size:12.5px;font-weight:700;padding:4px 0;}
+.geo-msg{margin-top:8px;font-size:12px;color:var(--text-mid);}
+.mini-map{margin-top:10px;height:160px;border-radius:var(--radius-s);border:1.5px solid var(--border);overflow:hidden;}
+.mini-map[hidden]{display:none;}
+.geo-ok{margin-top:8px;font-size:12px;font-weight:700;color:var(--success);background:var(--success-bg);padding:8px 10px;border-radius:8px;}
+.hint-small{font-size:11.5px;color:var(--muted);margin-top:5px;}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--text-mid);line-height:1.45;margin:6px 0 4px;cursor:pointer;}
+.consent input{width:20px;height:20px;margin-top:1px;flex-shrink:0;accent-color:var(--navy);}
+.btn-copy{background:white;border:1.5px solid var(--border);color:var(--navy);margin-top:12px;padding:12px;font-size:13px;width:100%;}
+
 @media (min-width:520px){
   body{max-width:520px;margin:0 auto;box-shadow:0 0 60px rgba(14,33,64,.08);}
 }
@@ -304,9 +324,15 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
     <input type="text" id="nom_site" placeholder="Ex : Résidence Les Tilleuls" autocomplete="organization" />
   </div>
 
-  <div class="field">
+  <div class="field ac-wrap">
     <label for="adresse_lieu">Adresse</label>
-    <input type="text" id="adresse_lieu" placeholder="12 rue de la République" autocomplete="street-address" />
+    <input type="text" id="adresse_lieu" placeholder="Commencez à taper : 12 rue de la Ré…" autocomplete="off"
+           role="combobox" aria-expanded="false" aria-controls="ac-list" aria-autocomplete="list" />
+    <ul id="ac-list" class="ac-list" role="listbox" hidden></ul>
+    <button type="button" class="geo-btn" id="geo-btn">📍 Utiliser ma position actuelle</button>
+    <p class="geo-msg" id="geo-msg" hidden></p>
+    <div id="mini-map" class="mini-map" hidden></div>
+    <p class="geo-ok" id="geo-ok" hidden>✓ Position confirmée — les artisans la verront sur la carte.</p>
     <p class="field-err" id="err-adresse">Merci de renseigner l'adresse.</p>
   </div>
 
@@ -326,6 +352,12 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
   <div class="field">
     <label for="complement_lieu" id="label-complement">Bâtiment / étage / porte / lot <span class="optional-tag">(facultatif)</span></label>
     <input type="text" id="complement_lieu" placeholder="Ex : Bâtiment B, 3ème étage, Lot 42" />
+  </div>
+
+  <div class="field">
+    <label for="acces_info">Accès / contact sur place <span class="optional-tag">(facultatif)</span></label>
+    <input type="text" id="acces_info" placeholder="Ex : digicode 1234A, gardien Mme Leroy, accès 8h-18h" maxlength="200" />
+    <p class="hint-small">Aide l'artisan à intervenir plus vite, sans vous rappeler.</p>
   </div>
 </section>
 
@@ -416,6 +448,11 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
     <input type="email" id="email" placeholder="contact@domaine.com" autocomplete="email" />
   </div>
 
+  <label class="consent">
+    <input type="checkbox" id="consent" />
+    <span>J'accepte d'être contacté par Entreprise 3 et ses artisans partenaires au sujet de cette demande. Mes données ne sont utilisées que pour la traiter.</span>
+  </label>
+
   <p class="grid-err" id="err-contact">Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.</p>
 </section>
 
@@ -437,7 +474,8 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
       <div class="val" id="ticket-number">—</div>
     </div>
     <p class="confirm-note" id="confirm-note"></p>
-    <button type="button" class="btn btn-primary" style="margin:26px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
+    <button type="button" class="btn btn-copy" id="copy-ref" onclick="copyRef()">📋 Copier la référence</button>
+    <button type="button" class="btn btn-primary" style="margin:14px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
   </div>
 </section>
 
@@ -446,7 +484,7 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
   <button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer</button>
 </div>
 
-<p style="text-align:center;font-size:11px;color:#8896a8;padding:6px 0 18px;">Version du formulaire : v3 (16h)</p>
+<p style="text-align:center;font-size:11px;color:#8896a8;padding:6px 0 18px;">Version du formulaire : v4 — adresse intelligente</p>
 </form>
 
 <script>
@@ -645,12 +683,14 @@ descField.addEventListener('input', () => { document.getElementById('desc-count'
 /* =========================================================================
    PHOTOS
    ========================================================================= */
-document.getElementById('photos').addEventListener('change', (e) => {
+document.getElementById('photos').addEventListener('change', async (e) => {
   const remaining = 3 - photoFiles.length;
-  Array.from(e.target.files).slice(0, remaining).forEach(file => {
-    photoFiles.push({ file, url: URL.createObjectURL(file) });
-  });
+  const files = Array.from(e.target.files).slice(0, remaining);
   e.target.value = '';
+  for (const file of files) {
+    const small = await compressImage(file);
+    photoFiles.push({ file: small, url: URL.createObjectURL(small) });
+  }
   renderPreviews();
 });
 function renderPreviews() {
@@ -695,7 +735,15 @@ function validateStep() {
     const telRegex = /^(0|\+33)[1-9][0-9]{8}$/;
     const emailRequired = data.profile !== 'particulier';
     const emailOk = emailRequired ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) : (email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
-    if (!prenom || !nom || !telRegex.test(tel) || !emailOk) { document.getElementById('err-contact').classList.add('show'); return false; }
+    const errBox = document.getElementById('err-contact');
+    if (!prenom || !nom || !telRegex.test(tel) || !emailOk) {
+      errBox.textContent = 'Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.';
+      errBox.classList.add('show'); return false;
+    }
+    if (!document.getElementById('consent').checked) {
+      errBox.textContent = "Merci de cocher la case pour accepter d'être contacté.";
+      errBox.classList.add('show'); return false;
+    }
     return true;
   }
   return true;
@@ -749,6 +797,7 @@ function buildSummary() {
       ['Adresse', document.getElementById('adresse_lieu').value],
       ['Ville', `${document.getElementById('code_postal').value} ${document.getElementById('ville').value}`],
       ['Complément', document.getElementById('complement_lieu').value || '—'],
+      ['Accès sur place', document.getElementById('acces_info').value || '—'],
     ]},
     { title:'Besoin', step:3, rows:[
       ['Prestations', prestaLabels.join(', ')],
@@ -772,7 +821,7 @@ function buildSummary() {
         <span>${b.title}</span>
         <button type="button" onclick="goToStep(${b.step})">Modifier</button>
       </div>
-      ${b.rows.map(r => `<div class="sum-row"><div class="sum-k">${r[0]}</div><div class="sum-v">${r[1]}</div></div>`).join('')}
+      ${b.rows.map(r => `<div class="sum-row"><div class="sum-k">${r[0]}</div><div class="sum-v">${esc(r[1])}</div></div>`).join('')}
     </div>`).join('');
 }
 
@@ -794,7 +843,7 @@ async function submitDemand() {
     // 1. Upload des photos
     const photoPaths = [];
     for (const [i, p] of photoFiles.entries()) {
-      const path = `${crypto.randomUUID()}-${i}-${p.file.name}`;
+      const path = `${crypto.randomUUID()}-${i}-${safeName(p.file.name)}`;
       const { error } = await sb.storage.from('intervention-photos').upload(path, p.file);
       if (error) throw error;
       photoPaths.push(path);
@@ -825,6 +874,14 @@ async function submitDemand() {
       date_debut_souhaitee: document.getElementById('date_debut').value || null,
       surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
     };
+
+    // Coordonnées GPS pour la carte artisan (via sélection ou géocodage de secours)
+    let coords = place;
+    if (!coords) coords = await geocodeText([payload.adresse, payload.code_postal, payload.ville].join(' '));
+    if (coords) { payload.latitude = coords.lat; payload.longitude = coords.lng; }
+
+    const acces = document.getElementById('acces_info').value.trim();
+    if (acces) payload.description += `\n\nAccès / contact sur place : ${acces}`;
 
     // La référence est générée ici : un visiteur anonyme n'a pas le droit de relire la table
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -875,7 +932,145 @@ function resetForm() {
   document.getElementById('global-error').style.display = 'none';
   const btn = document.getElementById('btn-next');
   btn.disabled = false; btn.textContent = 'Continuer';
+  resetAddressState();
   showStep();
+}
+
+/* =========================================================================
+   OUTILS : échappement HTML, noms de fichiers sûrs, compression photo
+   ========================================================================= */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeName = n => String(n || 'photo.jpg').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_').slice(-60);
+
+function compressImage(file, maxSide = 1600, quality = 0.82) {
+  return new Promise((resolve) => {
+    if (!file.type || !file.type.startsWith('image/')) return resolve(file);
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const ratio = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(url);
+        if (!blob || blob.size >= file.size) return resolve(file);
+        resolve(new File([blob], safeName(file.name).replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }));
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+async function copyRef() {
+  const ref = document.getElementById('ticket-number').textContent;
+  const btn = document.getElementById('copy-ref');
+  try { await navigator.clipboard.writeText(ref); btn.textContent = '✓ Référence copiée'; }
+  catch { btn.textContent = 'Sélectionnez et copiez la référence ci-dessus'; }
+}
+
+/* =========================================================================
+   ADRESSE — autocomplétion + géolocalisation + mini-carte de confirmation
+   (Base Adresse Nationale — api-adresse.data.gouv.fr, gratuite, sans clé)
+   ========================================================================= */
+const BAN = 'https://api-adresse.data.gouv.fr';
+let place = null, acItems = [], acIndex = -1, acTimer = null, miniMap = null, miniMarker = null;
+const adrInput = document.getElementById('adresse_lieu');
+const acList = document.getElementById('ac-list');
+
+function closeAc() { acList.hidden = true; adrInput.setAttribute('aria-expanded', 'false'); acIndex = -1; }
+function renderAc() {
+  if (!acItems.length) return closeAc();
+  acList.innerHTML = acItems.map((it, i) =>
+    `<li role="option" id="ac-opt-${i}" data-i="${i}" aria-selected="${i === acIndex}">${esc(it.street)}<small>${esc(it.cp)} ${esc(it.city)}</small></li>`).join('');
+  acList.hidden = false; adrInput.setAttribute('aria-expanded', 'true');
+}
+function showMiniMap(lat, lng) {
+  const el = document.getElementById('mini-map');
+  el.hidden = false;
+  if (!miniMap) {
+    miniMap = L.map('mini-map', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
+  }
+  setTimeout(() => miniMap.invalidateSize(), 50);
+  miniMap.setView([lat, lng], 16);
+  if (miniMarker) miniMap.removeLayer(miniMarker);
+  miniMarker = L.marker([lat, lng]).addTo(miniMap);
+}
+function pickAddress(it) {
+  adrInput.value = it.street;
+  document.getElementById('code_postal').value = it.cp || '';
+  document.getElementById('ville').value = it.city || '';
+  place = { lat: it.lat, lng: it.lng };
+  document.getElementById('geo-ok').hidden = false;
+  document.getElementById('geo-msg').hidden = true;
+  document.getElementById('err-adresse').classList.remove('show');
+  showMiniMap(it.lat, it.lng);
+  closeAc();
+}
+function featureToItem(f) {
+  return { label: f.properties.label, street: f.properties.name || f.properties.label, cp: f.properties.postcode, city: f.properties.city,
+           lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
+}
+async function searchAddress(q) {
+  try {
+    const r = await fetch(`${BAN}/search/?q=${encodeURIComponent(q)}&limit=5&autocomplete=1`);
+    const j = await r.json();
+    acItems = (j.features || []).map(featureToItem); acIndex = -1; renderAc();
+  } catch { closeAc(); }
+}
+adrInput.addEventListener('input', () => {
+  place = null; document.getElementById('geo-ok').hidden = true;
+  clearTimeout(acTimer);
+  const q = adrInput.value.trim();
+  if (q.length < 3) return closeAc();
+  acTimer = setTimeout(() => searchAddress(q), 220);
+});
+adrInput.addEventListener('keydown', (e) => {
+  if (acList.hidden) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); acIndex = Math.min(acIndex + 1, acItems.length - 1); renderAc(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); acIndex = Math.max(acIndex - 1, 0); renderAc(); }
+  else if (e.key === 'Enter' && acIndex >= 0) { e.preventDefault(); pickAddress(acItems[acIndex]); }
+  else if (e.key === 'Escape') closeAc();
+});
+acList.addEventListener('mousedown', (e) => {
+  const li = e.target.closest('li'); if (!li) return;
+  e.preventDefault(); pickAddress(acItems[Number(li.dataset.i)]);
+});
+adrInput.addEventListener('blur', () => setTimeout(closeAc, 150));
+
+document.getElementById('geo-btn').addEventListener('click', () => {
+  const msg = document.getElementById('geo-msg');
+  msg.hidden = false; msg.textContent = 'Localisation en cours…';
+  if (!navigator.geolocation) { msg.textContent = "La géolocalisation n'est pas disponible sur cet appareil."; return; }
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      const r = await fetch(`${BAN}/reverse/?lon=${lng}&lat=${lat}`);
+      const f = (await r.json()).features?.[0];
+      if (!f) { msg.textContent = "Adresse introuvable ici. Saisissez-la manuellement."; return; }
+      const it = featureToItem(f); it.lat = lat; it.lng = lng;
+      pickAddress(it);
+      msg.hidden = true;
+    } catch { msg.textContent = "Impossible de récupérer l'adresse. Saisissez-la manuellement."; }
+  }, () => { msg.textContent = "Autorisation refusée. Saisissez l'adresse manuellement."; }, { enableHighAccuracy: true, timeout: 10000 });
+});
+
+async function geocodeText(q) {
+  try {
+    const r = await fetch(`${BAN}/search/?q=${encodeURIComponent(q)}&limit=1`);
+    const f = (await r.json()).features?.[0];
+    if (f && f.properties.score > 0.45) return { lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
+  } catch {}
+  return null;
+}
+function resetAddressState() {
+  place = null; acItems = []; closeAc();
+  document.getElementById('geo-ok').hidden = true; document.getElementById('geo-msg').hidden = true;
+  document.getElementById('mini-map').hidden = true;
+  const c = document.getElementById('copy-ref'); if (c) c.textContent = '📋 Copier la référence';
 }
 
 showStep();
