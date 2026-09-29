@@ -929,7 +929,7 @@ async function submitDemand() {
       : "Votre demande est transmise au réseau d’artisans. Un artisan intéressé pourra vous contacter ; le prix et les modalités seront convenus directement avec lui.";
     const trackingLink = document.getElementById('tracking-link');
     if (suiviToken) {
-      const suiviUrl = new URL('suivi-devis.html', window.location.href);
+      const suiviUrl = new URL('https://e3-ecru.vercel.app/suivi-devis.html');
       suiviUrl.searchParams.set('reference', payload.reference);
       suiviUrl.searchParams.set('token', suiviToken);
       trackingLink.href = suiviUrl.href;
