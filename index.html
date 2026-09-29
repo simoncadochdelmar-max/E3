@@ -377,6 +377,7 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
     <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
     <h1>Rejoindre le réseau</h1>
     <p class="lead">Votre dossier sera vérifié avant validation de votre accès aux chantiers.</p>
+    <p class="hint">Abonnement artisan : 60 € TTC par mois. Le prix des travaux et les modalités sont convenus directement entre l’artisan et le client.</p>
     <p class="form-error" id="register-error" hidden></p>
 
     <form id="register-form">
@@ -559,6 +560,7 @@ const SUPABASE_URL = 'https://yqjeqcomrubelahrvizd.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_hKaiVb_fWBPRgESxpwWNCA_iAN9acMe';
 const CODE_PARTENAIRE = 'ENTREPRISE3';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const INTERVENTION_PUBLIC_COLUMNS = 'id,reference,zone,adresse,code_postal,ville,etage,categorie,urgence,description,photos,statut,artisan_id,assigned_at,updated_at,profil_demandeur,profil_structure,nom_site,prestations,type_demande,frequence,date_debut_souhaitee,surface_m2,created_at,latitude,longitude,mode_demande';
 
 const CATEGORIES = [
   { value:'plomberie', label:'Plomberie', icone:'🔧' },
@@ -899,9 +901,18 @@ async function chargerChantiers() {
   const list = document.getElementById('chantier-list');
   list.innerHTML = `<div class="skeleton" style="height:64px;margin-bottom:.6rem;"></div>`.repeat(3);
 
-  const { data, error } = await sb.from('interventions').select('*').eq('statut', 'nouveau').order('created_at', { ascending: false });
+  const { data, error } = await sb.from('interventions').select(INTERVENTION_PUBLIC_COLUMNS).eq('statut', 'nouveau').order('created_at', { ascending: false });
   if (error) { toast('Impossible de charger les chantiers.', 'error'); interventions = []; }
-  else interventions = data || [];
+  else {
+    interventions = data || [];
+    if (!DEMO_MODE && currentArtisan) {
+      const { data: mesDevis, error: devisError } = await sb.from('intervention_devis').select('intervention_id').eq('artisan_id', currentArtisan.id);
+      if (!devisError) {
+        const dejaRepondu = new Set((mesDevis || []).map(d => d.intervention_id));
+        interventions = interventions.filter(i => i.mode_demande !== 'devis' || !dejaRepondu.has(i.id));
+      }
+    }
+  }
 
   renderMarkers();
   renderChantierList();
@@ -975,7 +986,7 @@ function renderChantierList() {
         <span class="chantier-card__title">${titre}</span>
         <span class="chantier-card__meta">${esc(i.adresse ?? '')}${i.ville ? ', ' + esc(i.ville) : ''}${dist}</span>
       </span>
-      ${i.type_demande === 'recurrent' ? '<span class="contrat-tag">🔁 Contrat</span>' : `<span class="urgence-tag urgence-tag--${i.urgence}">${URGENCES[i.urgence]?.label ?? i.urgence}</span>`}
+      ${i.mode_demande === 'devis' ? '<span class="contrat-tag">📄 Devis multiples</span>' : i.type_demande === 'recurrent' ? '<span class="contrat-tag">🔁 Contrat</span>' : `<span class="urgence-tag urgence-tag--${i.urgence}">${URGENCES[i.urgence]?.label ?? i.urgence}</span>`}
     </button>`;
   }).join('');
 
@@ -1008,8 +1019,9 @@ async function ouvrirModaleChantier(intervention) {
       ${intervention.type_demande === 'recurrent'
         ? `<span class="contrat-tag">🔁 Contrat ${intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || '' : ''}</span>`
         : `<span class="urgence-tag urgence-tag--${intervention.urgence}">${URGENCES[intervention.urgence]?.label}</span>`}
+      ${intervention.mode_demande === 'devis' ? '<span class="contrat-tag">📄 Plusieurs devis attendus</span>' : ''}
       ${profilLabel ? `<span>${profilLabel}</span>` : ''}
-      <span>Réf. ${intervention.reference ?? '—'}</span>
+      <span>Réf. ${esc(intervention.reference ?? '—')}</span>
     </div>
     <div class="modal__section">
       <h4>Prestations demandées</h4>
@@ -1022,7 +1034,7 @@ async function ouvrirModaleChantier(intervention) {
     </div>
     <div class="action-grid-2">
       <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((intervention.adresse||'')+' '+(intervention.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
-      <a class="btn-action btn-call" href="tel:${intervention.telephone}">📞 Appeler</a>
+      <span class="btn-action">Coordonnées après sélection</span>
     </div>
     <div class="modal__section">
       <h4>Description</h4>
@@ -1030,14 +1042,76 @@ async function ouvrirModaleChantier(intervention) {
     </div>
     ${photos.length ? `<div class="modal__section"><h4>Photos</h4><div class="modal__photos">${photos.map(u => `<img src="${u}" alt="Photo du chantier" />`).join('')}</div></div>` : ''}
     <div class="modal__section">
-      <h4>Demandeur</h4>
-      <p>${esc(intervention.prenom)} ${esc(intervention.nom)} · ${esc(intervention.telephone)}</p>
+      <h4>Réponse attendue</h4>
+      <p>${intervention.mode_demande === 'devis' ? 'Envoyez votre prix et les détails de votre proposition. Le demandeur comparera les devis.' : 'Manifestez votre intérêt ; le demandeur pourra ensuite vous contacter.'}</p>
+      <p class="hint">Le prix et les modalités sont convenus entre le client et l’artisan.</p>
     </div>
     <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' ? 'disabled' : ''}>
-      ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : 'Accepter la mission'}
+      ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : intervention.mode_demande === 'devis' ? 'Répondre avec un devis' : 'Je suis intéressé'}
     </button>
   `;
-  document.getElementById('accept-btn')?.addEventListener('click', () => accepterMission(intervention.id));
+  document.getElementById('accept-btn')?.addEventListener('click', () => intervention.mode_demande === 'devis' ? ouvrirFormulaireDevis(intervention) : accepterMission(intervention.id));
+  ouvrirOverlay();
+}
+
+function ouvrirFormulaireDevis(intervention) {
+  const cat = categorieMeta(intervention.categorie);
+  modalBody.innerHTML = `
+    <h2 class="modal__title">${cat.icone} Envoyer un devis</h2>
+    <p class="modal__meta">Réf. ${esc(intervention.reference ?? '—')} · ${esc(intervention.ville ?? '')}</p>
+    <form id="quote-form">
+      <div class="field">
+        <label for="quote-amount">Montant proposé (€ TTC)</label>
+        <input id="quote-amount" type="number" min="0.01" step="0.01" inputmode="decimal" required />
+      </div>
+      <div class="field">
+        <label for="quote-unit">Période du prix</label>
+        <select id="quote-unit" required>
+          <option value="forfait" ${intervention.type_demande !== 'recurrent' ? 'selected' : ''}>Prix forfaitaire</option>
+          <option value="par_intervention">Prix par intervention</option>
+          <option value="mensuel" ${intervention.type_demande === 'recurrent' ? 'selected' : ''}>Prix mensuel</option>
+          <option value="annuel">Prix annuel</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="quote-frequency">Fréquence / durée incluse</label>
+        <input id="quote-frequency" type="text" maxlength="120" value="${esc(intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || intervention.frequence : '')}" placeholder="Ex. entretien hebdomadaire" />
+      </div>
+      <div class="field">
+        <label for="quote-details">Détail des prestations proposées</label>
+        <textarea id="quote-details" rows="5" minlength="10" maxlength="4000" required placeholder="Décrivez ce qui est compris dans votre prix…"></textarea>
+      </div>
+      <p class="hint">Le devis est envoyé au demandeur. Votre abonnement artisan reste indépendant du montant des travaux.</p>
+      <button class="btn btn-gold btn-block" id="quote-submit" type="submit">Envoyer ma proposition</button>
+    </form>`;
+  document.getElementById('quote-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const button = document.getElementById('quote-submit');
+    button.disabled = true; button.textContent = 'Envoi en cours…';
+    const offer = {
+      intervention_id: intervention.id,
+      artisan_id: currentArtisan.id,
+      montant: Number(document.getElementById('quote-amount').value),
+      unite_tarifaire: document.getElementById('quote-unit').value,
+      details: document.getElementById('quote-details').value.trim(),
+      frequence: document.getElementById('quote-frequency').value.trim() || null
+    };
+    if (DEMO_MODE) {
+      toast('En mode démo, le devis n’est pas enregistré.', 'info');
+      fermerModale();
+      return;
+    }
+    const { error } = await sb.from('intervention_devis').insert(offer);
+    if (error) {
+      console.error(error);
+      toast(error.code === '23505' ? 'Vous avez déjà répondu à cette demande.' : 'Impossible d’envoyer le devis.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
+    toast('Votre devis a été transmis au demandeur.', 'success');
+    fermerModale();
+    await chargerChantiers();
+  });
   ouvrirOverlay();
 }
 
@@ -1060,7 +1134,7 @@ async function accepterMission(interventionId) {
       missions.unshift({ ...i });
       interventions = interventions.filter(x => x.id !== interventionId);
     }
-    toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
+    toast('Vous êtes positionné sur la demande. Le demandeur pourra vous contacter.', 'success');
     fermerModale();
     renderMarkers();
     renderChantierList();
@@ -1075,7 +1149,7 @@ async function accepterMission(interventionId) {
   if (error) {
     toast("Ce chantier vient d'être pris en charge par un autre artisan.", 'error');
   } else {
-    toast('Mission acceptée ! Retrouvez-la dans "Mes missions".', 'success');
+    toast('Vous êtes positionné sur la demande. Le demandeur pourra vous contacter.', 'success');
   }
   fermerModale();
   await chargerChantiers();
@@ -1086,7 +1160,7 @@ async function accepterMission(interventionId) {
    MES MISSIONS (assignées à cet artisan)
    ========================================================================= */
 async function chargerMesMissions() {
-  const { data, error } = await sb.from('interventions').select('*').eq('artisan_id', currentArtisan.id).order('assigned_at', { ascending: false });
+  const { data, error } = await sb.from('interventions').select(INTERVENTION_PUBLIC_COLUMNS).eq('artisan_id', currentArtisan.id).order('assigned_at', { ascending: false });
   if (error) { toast('Impossible de charger vos missions.', 'error'); return; }
   missions = data || [];
   const dot = document.getElementById('missions-dot');
@@ -1120,9 +1194,9 @@ function renderMissionsList() {
     <button class="mission-item" data-id="${m.id}">
       <div class="mission-item__top">
         <span class="mission-item__title">${cat.icone} ${cat.label}</span>
-        <span class="statut-tag">${STATUTS[m.statut] ?? m.statut}</span>
+        <span class="statut-tag">${esc(STATUTS[m.statut] ?? m.statut)}</span>
       </div>
-      <p class="mission-item__addr">${m.adresse ?? ''}${m.ville ? ', ' + m.ville : ''}</p>
+      <p class="mission-item__addr">${esc(m.adresse ?? '')}${m.ville ? ', ' + esc(m.ville) : ''}</p>
     </button>`;
   }).join('');
 
@@ -1137,14 +1211,20 @@ function renderMissionsList() {
 /* =========================================================================
    MODALE — SUIVI D'UNE MISSION ASSIGNÉE (progression + clôture photo)
    ========================================================================= */
-function ouvrirModaleMission(mission) {
+async function ouvrirModaleMission(mission) {
   const cat = categorieMeta(mission.categorie);
+  let contact = { nom: '', prenom: '', telephone: '', email: '' };
+  if (DEMO_MODE) contact = mission;
+  else {
+    const { data, error } = await sb.rpc('coordonnees_mission', { p_intervention_id: mission.id });
+    if (!error && data) contact = data;
+  }
   const steps = ['assigne', 'en_cours', 'termine'];
   const currentIdx = steps.indexOf(mission.statut);
 
   modalBody.innerHTML = `
     <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
-    <div class="modal__meta"><span>Réf. ${mission.reference ?? '—'}</span></div>
+    <div class="modal__meta"><span>Réf. ${esc(mission.reference ?? '—')}</span></div>
 
     <div class="progress-steps">
       ${steps.map((s, i) => `<div class="seg ${i <= currentIdx ? 'done' : ''}"></div>`).join('')}
@@ -1152,11 +1232,15 @@ function ouvrirModaleMission(mission) {
 
     <div class="modal__section">
       <h4>Adresse</h4>
-      <p>${mission.adresse ?? ''}${mission.ville ? ', ' + mission.ville : ''}</p>
+      <p>${esc(mission.adresse ?? '')}${mission.ville ? ', ' + esc(mission.ville) : ''}</p>
     </div>
     <div class="action-grid-2">
       <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((mission.adresse||'')+' '+(mission.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
-      <a class="btn-action btn-call" href="tel:${mission.telephone}">📞 Appeler</a>
+      <a class="btn-action btn-call" href="tel:${esc(contact.telephone)}">📞 Appeler</a>
+    </div>
+    <div class="modal__section">
+      <h4>Contact du demandeur</h4>
+      <p>${esc(contact.prenom)} ${esc(contact.nom)} · ${esc(contact.telephone)}</p>
     </div>
     <div class="modal__section">
       <h4>Description</h4>
@@ -1240,13 +1324,13 @@ function renderProfile() {
   const a = currentArtisan;
   document.getElementById('profile-page').innerHTML = `
     <div class="profile-card">
-      <h3>${a.nom_entreprise}</h3>
+      <h3>${esc(a.nom_entreprise)}</h3>
       <dl>
-        <div class="profile-row"><dt>Gérant</dt><dd>${a.nom_gerant}</dd></div>
-        <div class="profile-row"><dt>Téléphone</dt><dd>${a.telephone}</dd></div>
-        <div class="profile-row"><dt>E-mail</dt><dd>${a.email}</dd></div>
-        <div class="profile-row"><dt>SIRET</dt><dd>${a.siret ?? '—'}</dd></div>
-        <div class="profile-row"><dt>Zones</dt><dd>${(a.zones_intervention||[]).join(', ') || '—'}</dd></div>
+        <div class="profile-row"><dt>Gérant</dt><dd>${esc(a.nom_gerant)}</dd></div>
+        <div class="profile-row"><dt>Téléphone</dt><dd>${esc(a.telephone)}</dd></div>
+        <div class="profile-row"><dt>E-mail</dt><dd>${esc(a.email)}</dd></div>
+        <div class="profile-row"><dt>SIRET</dt><dd>${esc(a.siret ?? '—')}</dd></div>
+        <div class="profile-row"><dt>Zones</dt><dd>${esc((a.zones_intervention||[]).join(', ') || '—')}</dd></div>
       </dl>
       <div class="spec-tags">
         ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone}${categorieMeta(s).label}</span>`).join('')}
@@ -1268,12 +1352,14 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
    TEMPS RÉEL
    ========================================================================= */
 function subscribeRealtime() {
-  sb.channel('interventions-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'interventions' }, () => {
+  // Poll instead of subscribing to whole-row events, which can include private columns.
+  if (window.e3RefreshTimer) clearInterval(window.e3RefreshTimer);
+  window.e3RefreshTimer = setInterval(() => {
+    if (document.visibilityState === 'visible') {
       chargerChantiers();
       chargerMesMissions();
-    })
-    .subscribe();
+    }
+  }, 45000);
 }
 
 /* =========================================================================
