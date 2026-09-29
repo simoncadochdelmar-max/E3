@@ -182,6 +182,19 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 .marker-pin--modere{background:var(--warning);}
 .marker-pin--urgent{background:var(--danger);}
 .marker-pin--mine{background:var(--navy-950);}
+.marker-pin{transition:transform .12s ease;}
+.marker-pin:hover{transform:rotate(-45deg) scale(1.12);}
+.marker-tooltip{font-size:.72rem;font-weight:700;padding:.3em .6em!important;border-radius:6px!important;box-shadow:var(--shadow-card)!important;}
+
+.map-legend{
+  position:absolute;left:1rem;bottom:calc(46% + 1rem);z-index:6;background:#fff;box-shadow:var(--shadow-card);
+  border-radius:var(--radius-s);padding:.55rem .7rem;display:flex;flex-direction:column;gap:.3rem;font-size:.68rem;font-weight:700;color:var(--muted);
+}
+.map-legend span{display:flex;align-items:center;gap:.4rem;}
+.map-legend .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.dot--urgent{background:var(--danger);}
+.dot--modere{background:var(--warning);}
+.dot--faible{background:var(--success);}
 
 /* ---- Bottom sheet -------------------------------------------------------- */
 .bottom-sheet{
@@ -197,6 +210,15 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 .bottom-sheet__header h2{font-size:1.05rem;}
 .badge-count{background:var(--gold-500);color:var(--navy-950);font-weight:800;font-size:.72rem;
   padding:.18em .6em;border-radius:999px;}
+.sheet-toolbar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:0 1.1rem .7rem;}
+.sort-toggle{display:flex;background:var(--cream-200);border-radius:999px;padding:2px;}
+.sort-toggle button{border:none;background:none;font-size:.72rem;font-weight:700;color:var(--muted);padding:.35em .8em;border-radius:999px;}
+.sort-toggle button.is-active{background:#fff;color:var(--navy-950);box-shadow:0 1px 4px rgba(14,31,61,.15);}
+.urgent-toggle{border:1.5px solid var(--danger-bg);background:var(--danger-bg);color:var(--danger);font-size:.72rem;font-weight:700;
+  padding:.4em .8em;border-radius:999px;white-space:nowrap;}
+.urgent-toggle[aria-pressed="true"]{background:var(--danger);color:#fff;border-color:var(--danger);}
+.chantier-card__site{font-size:.7rem;font-weight:700;color:var(--gold-500);text-transform:uppercase;letter-spacing:.02em;display:block;margin-bottom:.1rem;}
+.contrat-tag{font-size:.6rem;font-weight:800;padding:.15em .5em;border-radius:6px;background:var(--cream-200);color:var(--navy-900);flex-shrink:0;white-space:nowrap;}
 .chantier-list{overflow-y:auto;padding:0 1.1rem .8rem;}
 .empty-state{color:var(--muted);text-align:center;padding:2rem 1rem;font-size:.88rem;}
 .chantier-card{
@@ -450,13 +472,26 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 
       <div id="map"></div>
       <div class="map-toolbar" style="top:76px;" id="category-toolbar"></div>
-      <button class="locate-btn" style="right:1rem; bottom:calc(46% + 1rem);" id="locate-btn" title="Me localiser" aria-label="Centrer la carte sur ma position">📍</button>
+      <button class="locate-btn" style="right:1rem; bottom:calc(46% + 4.3rem);" id="locate-btn" title="Me localiser" aria-label="Centrer la carte sur ma position">📍</button>
+      <button class="locate-btn" style="right:1rem; bottom:calc(46% + 1rem);" id="fit-btn" title="Voir tous les chantiers" aria-label="Recentrer la carte sur tous les chantiers">🗺️</button>
+      <div class="map-legend" id="map-legend">
+        <span><i class="dot dot--urgent"></i>Urgent</span>
+        <span><i class="dot dot--modere"></i>Modéré</span>
+        <span><i class="dot dot--faible"></i>Faible</span>
+      </div>
 
       <section class="bottom-sheet" id="bottom-sheet" aria-label="Liste des chantiers disponibles">
         <div class="bottom-sheet__handle"></div>
         <div class="bottom-sheet__header">
           <h2>Chantiers disponibles</h2>
           <span class="badge-count" id="chantiers-count">0</span>
+        </div>
+        <div class="sheet-toolbar">
+          <div class="sort-toggle" id="sort-toggle" role="radiogroup" aria-label="Trier par">
+            <button type="button" data-sort="recent" class="is-active">Récents</button>
+            <button type="button" data-sort="distance">Proches</button>
+          </div>
+          <button type="button" class="urgent-toggle" id="urgent-toggle" aria-pressed="false">🔥 Urgents</button>
         </div>
         <div class="chantier-list" id="chantier-list"></div>
       </section>
@@ -580,6 +615,7 @@ const MOCK_ARTISAN = {
 const MOCK_INTERVENTIONS = [
   { id:'demo-1', reference:'GD-2026-0001', zone:'parties_communes', adresse:'12 rue des Lilas', code_postal:'75011', ville:'Paris', etage:null, porte:null, latitude:48.8589, longitude:2.3800, categorie:'plomberie', urgence:'urgent', description:"Fuite d'eau importante dans la cage d'escalier, niveau RDC.", photos:[], profil_demandeur:'gestionnaire', nom:'Martin', prenom:'Claire', telephone:'0612345678', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
   { id:'demo-2', reference:'GD-2026-0002', zone:'appartement', adresse:'45 avenue Jean Jaurès', code_postal:'93500', ville:'Pantin', etage:'3', porte:'B', latitude:48.8958, longitude:2.4014, categorie:'electricite', urgence:'modere', description:'Disjoncteur qui saute régulièrement dans la cuisine.', photos:[], profil_demandeur:'locataire', nom:'Nguyen', prenom:'Paul', telephone:'0623456789', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
+  { id:'demo-4', reference:'GD-2026-0004', zone:'parties_communes', adresse:'3 rue du Marché', code_postal:'75015', ville:'Paris', etage:null, porte:null, latitude:48.8422, longitude:2.2966, categorie:'menage', prestations:['menage','espaces_verts'], type_demande:'recurrent', frequence:'hebdomadaire', profil_structure:'syndic_copro', nom_site:'Résidence du Marché', urgence:'faible', description:'Entretien hebdomadaire des parties communes et petit espace vert en pied d\'immeuble.', photos:[], profil_demandeur:'gestionnaire', nom:'Bernard', prenom:'Julie', telephone:'0645678901', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
   { id:'demo-3', reference:'GD-2026-0003', zone:'exterieur', adresse:'8 place de la Mairie', code_postal:'92300', ville:'Levallois-Perret', etage:null, porte:null, latitude:48.8938, longitude:2.2870, categorie:'serrurerie', urgence:'faible', description:'Porte du local vélo qui ferme mal, gond à resserrer.', photos:[], profil_demandeur:'proprietaire', nom:'Dubois', prenom:'Sophie', telephone:'0634567890', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
 ];
 let markers = new Map();
@@ -589,6 +625,9 @@ let interventions = [];
 let missions = [];
 let categorieFiltre = null;
 let missionsFiltre = 'actif';
+let sortMode = 'recent';
+let urgentOnly = false;
+let hasAutoFit = false;
 
 /* =========================================================================
    NAVIGATION AUTH <-> APP
@@ -814,6 +853,16 @@ function markerIcon(urgence, mine = false) {
   return L.divIcon({ className: '', html: `<div class="marker-pin marker-pin--${cls}"><span>${symbol}</span></div>`, iconSize:[36,36], iconAnchor:[18,36] });
 }
 
+function fitToChantiers(force = false) {
+  const pts = filteredInterventions().filter(i => i.latitude && i.longitude).map(i => [i.latitude, i.longitude]);
+  if (!pts.length) return;
+  if (!force && hasAutoFit) return;
+  hasAutoFit = true;
+  if (pts.length === 1) map.setView(pts[0], 14);
+  else map.fitBounds(pts, { padding: [50, 90] });
+}
+document.getElementById('fit-btn').addEventListener('click', () => fitToChantiers(true));
+
 function distanceKm(lat1, lng1, lat2, lng2) {
   const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
   const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
@@ -860,25 +909,48 @@ async function chargerChantiers() {
 
 function filteredInterventions() {
   let list = interventions;
-  if (categorieFiltre) list = list.filter(i => i.categorie === categorieFiltre);
+  if (categorieFiltre) list = list.filter(i => (i.prestations?.length ? i.prestations.includes(categorieFiltre) : i.categorie === categorieFiltre));
+  if (urgentOnly) list = list.filter(i => i.urgence === 'urgent');
   if (userPosition) {
     list = list.map(i => ({ ...i, _distance: (i.latitude && i.longitude) ? distanceKm(userPosition.lat, userPosition.lng, i.latitude, i.longitude) : null }));
-    list.sort((a, b) => (a._distance ?? 999) - (b._distance ?? 999));
   }
+  if (sortMode === 'distance' && userPosition) list.sort((a, b) => (a._distance ?? 999) - (b._distance ?? 999));
+  else list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   return list;
 }
+
+document.getElementById('sort-toggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  if (btn.dataset.sort === 'distance' && !userPosition) { localiserArtisan(); }
+  document.querySelectorAll('#sort-toggle button').forEach(b => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  sortMode = btn.dataset.sort;
+  renderChantierList();
+});
+document.getElementById('urgent-toggle').addEventListener('click', (e) => {
+  urgentOnly = !urgentOnly;
+  e.currentTarget.setAttribute('aria-pressed', String(urgentOnly));
+  renderMarkers(); renderChantierList();
+});
 
 function renderMarkers() {
   markers.forEach(m => map.removeLayer(m));
   markers.clear();
   filteredInterventions().filter(i => i.latitude && i.longitude).forEach(i => {
+    const cat = categorieMeta(i.categorie);
     const marker = L.marker([i.latitude, i.longitude], { icon: markerIcon(i.urgence) }).addTo(map);
+    marker.bindTooltip(`${cat.icone} ${cat.label} · ${i.ville ?? ''}`, { direction: 'top', offset: [0, -30], className: 'marker-tooltip' });
     marker.on('click', () => ouvrirModaleChantier(i));
     markers.set(i.id, marker);
   });
+  fitToChantiers();
 }
 
 function categorieMeta(value) { return CATEGORIES.find(c => c.value === value) ?? { label: value, icone: '🛠️' }; }
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const escNl = s => esc(s).replace(/\n/g, '<br>');
+const PROFIL_STRUCTURE_LABELS = { syndic_copro:'Syndic de copropriété', agence_immo:'Agence immobilière', commerce:'Commerce / Boutique', bureau_entreprise:'Bureau / Entreprise', ecole:'École / Établissement', particulier:'Particulier' };
+const FREQUENCE_LABELS = { hebdomadaire:'Hebdomadaire', mensuelle:'Mensuelle', trimestrielle:'Trimestrielle' };
 
 function renderChantierList() {
   const list = document.getElementById('chantier-list');
@@ -893,14 +965,17 @@ function renderChantierList() {
   list.innerHTML = filtered.map(i => {
     const cat = categorieMeta(i.categorie);
     const dist = i._distance != null ? ` · ${i._distance.toFixed(1)} km` : '';
+    const nbExtra = (i.prestations?.length || 1) - 1;
+    const titre = cat.label + (nbExtra > 0 ? ` +${nbExtra}` : '');
     return `
     <button class="chantier-card" data-id="${i.id}">
       <span class="chantier-card__icon">${cat.icone}</span>
       <span class="chantier-card__info">
-        <span class="chantier-card__title">${cat.label}</span>
-        <span class="chantier-card__meta">${i.adresse ?? ''}${i.ville ? ', ' + i.ville : ''}${dist}</span>
+        ${i.nom_site ? `<span class="chantier-card__site">${esc(i.nom_site)}</span>` : ''}
+        <span class="chantier-card__title">${titre}</span>
+        <span class="chantier-card__meta">${esc(i.adresse ?? '')}${i.ville ? ', ' + esc(i.ville) : ''}${dist}</span>
       </span>
-      <span class="urgence-tag urgence-tag--${i.urgence}">${URGENCES[i.urgence]?.label ?? i.urgence}</span>
+      ${i.type_demande === 'recurrent' ? '<span class="contrat-tag">🔁 Contrat</span>' : `<span class="urgence-tag urgence-tag--${i.urgence}">${URGENCES[i.urgence]?.label ?? i.urgence}</span>`}
     </button>`;
   }).join('');
 
@@ -924,15 +999,26 @@ async function ouvrirModaleChantier(intervention) {
   const cat = categorieMeta(intervention.categorie);
   const photos = await Promise.all((intervention.photos || []).map(photoUrl));
 
+  const prestaLabels = (intervention.prestations?.length ? intervention.prestations : [intervention.categorie]).map(v => categorieMeta(v).label);
+  const profilLabel = PROFIL_STRUCTURE_LABELS[intervention.profil_structure];
+
   modalBody.innerHTML = `
-    <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
+    <h2 class="modal__title" id="modal-title">${cat.icone} ${esc(intervention.nom_site) || cat.label}</h2>
     <div class="modal__meta">
-      <span class="urgence-tag urgence-tag--${intervention.urgence}">${URGENCES[intervention.urgence]?.label}</span>
+      ${intervention.type_demande === 'recurrent'
+        ? `<span class="contrat-tag">🔁 Contrat ${intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || '' : ''}</span>`
+        : `<span class="urgence-tag urgence-tag--${intervention.urgence}">${URGENCES[intervention.urgence]?.label}</span>`}
+      ${profilLabel ? `<span>${profilLabel}</span>` : ''}
       <span>Réf. ${intervention.reference ?? '—'}</span>
     </div>
     <div class="modal__section">
+      <h4>Prestations demandées</h4>
+      <div class="spec-tags">${prestaLabels.map(l => `<span class="spec-tag">${esc(l)}</span>`).join('')}</div>
+    </div>
+    ${intervention.surface_m2 ? `<div class="modal__section"><h4>Surface</h4><p>${intervention.surface_m2} m²</p></div>` : ''}
+    <div class="modal__section">
       <h4>Adresse</h4>
-      <p>${intervention.adresse ?? ''}${intervention.etage ? `, étage ${intervention.etage}` : ''}${intervention.porte ? `, porte ${intervention.porte}` : ''}<br>${intervention.code_postal ?? ''} ${intervention.ville ?? ''}</p>
+      <p>${esc(intervention.adresse ?? '')}${intervention.etage ? `, ${esc(intervention.etage)}` : ''}<br>${esc(intervention.code_postal ?? '')} ${esc(intervention.ville ?? '')}</p>
     </div>
     <div class="action-grid-2">
       <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((intervention.adresse||'')+' '+(intervention.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
@@ -940,12 +1026,12 @@ async function ouvrirModaleChantier(intervention) {
     </div>
     <div class="modal__section">
       <h4>Description</h4>
-      <p>${intervention.description ?? ''}</p>
+      <p>${escNl(intervention.description)}</p>
     </div>
     ${photos.length ? `<div class="modal__section"><h4>Photos</h4><div class="modal__photos">${photos.map(u => `<img src="${u}" alt="Photo du chantier" />`).join('')}</div></div>` : ''}
     <div class="modal__section">
       <h4>Demandeur</h4>
-      <p>${intervention.prenom ?? ''} ${intervention.nom ?? ''} · ${intervention.telephone ?? ''}</p>
+      <p>${esc(intervention.prenom)} ${esc(intervention.nom)} · ${esc(intervention.telephone)}</p>
     </div>
     <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' ? 'disabled' : ''}>
       ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : 'Accepter la mission'}
@@ -1074,7 +1160,7 @@ function ouvrirModaleMission(mission) {
     </div>
     <div class="modal__section">
       <h4>Description</h4>
-      <p>${mission.description ?? ''}</p>
+      <p>${escNl(mission.description)}</p>
     </div>
 
     ${mission.statut === 'termine' ? `
