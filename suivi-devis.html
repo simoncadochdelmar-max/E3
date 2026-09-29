@@ -43,9 +43,15 @@
         return;
       }
       const { data, error } = await sb.rpc('lire_devis_demande', { p_reference: reference, p_token: token });
-      if (error || !data) {
+      if (error) {
+        console.error('Erreur lire_devis_demande:', error);
         statusBox.className = 'error';
-        statusBox.textContent = 'Lien invalide ou demande introuvable. Utilisez le lien privé reçu après l’envoi.';
+        statusBox.textContent = `Erreur Supabase (${error.code || 'sans code'}) : ${error.message || 'détail indisponible'}${error.details ? ` — ${error.details}` : ''}${error.hint ? ` — Conseil : ${error.hint}` : ''}`;
+        return;
+      }
+      if (!data) {
+        statusBox.className = 'error';
+        statusBox.textContent = 'Supabase a répondu, mais aucune demande ne correspond à ce lien. Vérifiez que ce lien correspond bien à cette demande.';
         return;
       }
       statusBox.textContent = `Demande ${data.reference} · ${data.ville} · ${data.statut === 'assigne' ? 'Entreprise choisie' : 'En attente de votre choix'}`;
