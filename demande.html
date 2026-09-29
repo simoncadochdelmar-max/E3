@@ -364,7 +364,19 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
 <!-- ÉTAPE 3 — BESOIN -->
 <section class="section" id="s3" aria-labelledby="s3-title">
   <h2 class="section-title" id="s3-title">De quoi avez-vous besoin ?</h2>
-  <p class="section-sub">Sélectionnez un ou plusieurs services, ponctuels ou récurrents.</p>
+  <p class="section-sub">Choisissez une intervention directe ou demandez plusieurs devis, puis précisez les prestations.</p>
+
+  <div class="demand-type" id="demand-mode" role="radiogroup" aria-label="Mode de mise en relation">
+    <div class="demand-card sel" data-v="intervention" onclick="pickModeDemande(this)" role="radio" aria-checked="true" tabindex="0">
+      <div class="demand-icon">🤝</div><div class="demand-title">Trouver un artisan</div>
+      <div class="demand-sub">Un artisan intéressé prend en charge la demande.</div>
+    </div>
+    <div class="demand-card" data-v="devis" onclick="pickModeDemande(this)" role="radio" aria-checked="false" tabindex="0">
+      <div class="demand-icon">📄</div><div class="demand-title">Recevoir plusieurs devis</div>
+      <div class="demand-sub">Plusieurs entreprises peuvent répondre. Vous choisissez.</div>
+    </div>
+  </div>
+  <p class="section-sub">Le prix des travaux est proposé par les artisans et convenu directement avec l’entreprise choisie.</p>
 
   <div class="demand-type" id="demand-type" role="radiogroup" aria-label="Type de demande">
     <div class="demand-card sel" data-v="ponctuel" onclick="pickDemandType(this)" role="radio" aria-checked="true" tabindex="0">
@@ -425,7 +437,7 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
 <!-- ÉTAPE 4 — CONTACT -->
 <section class="section" id="s4" aria-labelledby="s4-title">
   <h2 class="section-title" id="s4-title">Vos coordonnées</h2>
-  <p class="section-sub">Pour vous transmettre un devis ou vous mettre en relation avec un artisan.</p>
+  <p class="section-sub">Pour permettre à un artisan intéressé de vous contacter au sujet de votre demande.</p>
 
   <div class="field-row">
     <div class="field">
@@ -450,7 +462,7 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
 
   <label class="consent">
     <input type="checkbox" id="consent" />
-    <span>J'accepte d'être contacté par Entreprise 3 et ses artisans partenaires au sujet de cette demande. Mes données ne sont utilisées que pour la traiter.</span>
+    <span>J'accepte que mes coordonnées soient utilisées pour traiter cette demande et, si je demande plusieurs devis, transmises aux artisans qui répondent. Elles ne seront communiquées qu'à l'artisan retenu pour une demande d'intervention directe.</span>
   </label>
 
   <p class="grid-err" id="err-contact">Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.</p>
@@ -461,6 +473,7 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
   <h2 class="section-title" id="s5-title">Vérifiez votre demande</h2>
   <p class="section-sub">Relisez les informations avant l'envoi.</p>
   <div id="summary"></div>
+  <p class="section-sub">Le prix des travaux et les modalités d’intervention seront convenus directement entre vous et l’artisan.</p>
 </section>
 
 <!-- ÉTAPE 6 — CONFIRMATION -->
@@ -474,6 +487,8 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
       <div class="val" id="ticket-number">—</div>
     </div>
     <p class="confirm-note" id="confirm-note"></p>
+    <a id="tracking-link" class="btn btn-primary" hidden style="margin:12px auto 0;max-width:320px;" target="_blank" rel="noopener">🔐 Voir et comparer mes devis</a>
+    <p class="section-sub" id="tracking-hint" hidden>Gardez ce lien privé : il permet d’accéder aux devis de cette demande.</p>
     <button type="button" class="btn btn-copy" id="copy-ref" onclick="copyRef()">📋 Copier la référence</button>
     <button type="button" class="btn btn-primary" style="margin:14px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
   </div>
@@ -579,7 +594,7 @@ let photoFiles = [];
 let selectedPrestations = new Set();
 let data = {
   profile:null, occupant:null,
-  demandType:'ponctuel', urgence:'faible', frequence:null,
+  demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null,
 };
 
 /* =========================================================================
@@ -629,6 +644,15 @@ function pickOccupant(el) {
 /* =========================================================================
    ÉTAPE 3 — PRESTATIONS, TYPE DE DEMANDE, URGENCE/FRÉQUENCE
    ========================================================================= */
+function pickModeDemande(el) {
+  document.querySelectorAll('#demand-mode .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
+  el.classList.add('sel'); el.setAttribute('aria-checked','true');
+  data.modeDemande = el.dataset.v;
+}
+document.querySelectorAll('#demand-mode .demand-card').forEach(card => {
+  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
+});
+
 function pickDemandType(el) {
   document.querySelectorAll('#demand-type .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
   el.classList.add('sel'); el.setAttribute('aria-checked','true');
@@ -801,7 +825,8 @@ function buildSummary() {
     ]},
     { title:'Besoin', step:3, rows:[
       ['Prestations', prestaLabels.join(', ')],
-      ['Type de demande', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
+      ['Mode de mise en relation', data.modeDemande === 'devis' ? 'Recevoir plusieurs devis' : 'Trouver un artisan'],
+      ['Type de prestation', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
       ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
         : [['Fréquence', data.frequence ? { hebdomadaire:'Hebdomadaire', mensuelle:'Mensuelle', trimestrielle:'Trimestrielle' }[data.frequence] : 'Non précisée']]),
       ['Surface', document.getElementById('surface_m2').value ? document.getElementById('surface_m2').value + ' m²' : '—'],
@@ -870,6 +895,7 @@ async function submitDemand() {
       nom_site: document.getElementById('nom_site').value || null,
       prestations: prestations,
       type_demande: data.demandType,
+      mode_demande: data.modeDemande,
       frequence: data.demandType === 'recurrent' ? data.frequence : null,
       date_debut_souhaitee: document.getElementById('date_debut').value || null,
       surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
@@ -888,16 +914,28 @@ async function submitDemand() {
     let suffix = '';
     for (let i = 0; i < 5; i++) suffix += alphabet[Math.floor(Math.random() * alphabet.length)];
     payload.reference = `GD-${new Date().getFullYear()}-${suffix}`;
+    let suiviToken = null;
+    if (data.modeDemande === 'devis') {
+      suiviToken = randomAccessToken();
+      payload.suivi_token_hash = await hashToken(suiviToken);
+    }
 
     const { error } = await sb.from('interventions').insert(payload);
     if (error) throw error;
 
     document.getElementById('ticket-number').textContent = payload.reference;
-    document.getElementById('confirm-note').textContent = data.demandType === 'recurrent'
-      ? "Vous recevrez une proposition de devis pour un contrat d'entretien sous 48h."
-      : (data.urgence === 'urgent'
-        ? 'Un artisan disponible va être notifié immédiatement.'
-        : 'Un artisan de notre réseau va prendre contact avec vous prochainement.');
+    document.getElementById('confirm-note').textContent = data.modeDemande === 'devis'
+      ? 'Votre demande est transmise aux entreprises partenaires. Vous pourrez comparer leurs devis et choisir celui qui vous convient. Le prix est proposé par les artisans.'
+      : "Votre demande est transmise au réseau d’artisans. Un artisan intéressé pourra vous contacter ; le prix et les modalités seront convenus directement avec lui.";
+    const trackingLink = document.getElementById('tracking-link');
+    if (suiviToken) {
+      const suiviUrl = new URL('suivi-devis.html', window.location.href);
+      suiviUrl.searchParams.set('reference', payload.reference);
+      suiviUrl.searchParams.set('token', suiviToken);
+      trackingLink.href = suiviUrl.href;
+      trackingLink.hidden = false;
+      document.getElementById('tracking-hint').hidden = false;
+    } else { trackingLink.hidden = true; document.getElementById('tracking-hint').hidden = true; }
 
     step = 6;
     showStep();
@@ -917,10 +955,11 @@ function resetForm() {
   step = 1;
   photoFiles = [];
   selectedPrestations = new Set();
-  data = { profile:null, occupant:null, demandType:'ponctuel', urgence:'faible', frequence:null };
+  data = { profile:null, occupant:null, demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null };
   document.getElementById('wizard-form').reset();
   document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card,#particulier-toggle button').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
   document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
+  document.querySelectorAll('#demand-mode .demand-card').forEach((card, i) => { card.classList.toggle('sel', i === 0); card.setAttribute('aria-checked', i === 0 ? 'true' : 'false'); });
   document.querySelector('.urg-card[data-u="faible"]').classList.add('sel');
   document.getElementById('urgence-wrap').hidden = false;
   document.getElementById('frequence-wrap').hidden = true;
@@ -930,6 +969,8 @@ function resetForm() {
   document.getElementById('preview-wrap').innerHTML = '';
   document.getElementById('desc-count').textContent = '0';
   document.getElementById('global-error').style.display = 'none';
+  document.getElementById('tracking-link').hidden = true;
+  document.getElementById('tracking-hint').hidden = true;
   const btn = document.getElementById('btn-next');
   btn.disabled = false; btn.textContent = 'Continuer';
   resetAddressState();
@@ -941,6 +982,14 @@ function resetForm() {
    ========================================================================= */
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeName = n => String(n || 'photo.jpg').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_').slice(-60);
+function randomAccessToken() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+}
+async function hashToken(token) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+  return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+}
 
 function compressImage(file, maxSide = 1600, quality = 0.82) {
   return new Promise((resolve) => {
