@@ -906,11 +906,14 @@ async function chargerChantiers() {
   else {
     interventions = data || [];
     if (!DEMO_MODE && currentArtisan) {
-      const { data: mesDevis, error: devisError } = await sb.from('intervention_devis').select('intervention_id').eq('artisan_id', currentArtisan.id);
-      if (!devisError) {
-        const dejaRepondu = new Set((mesDevis || []).map(d => d.intervention_id));
-        interventions = interventions.filter(i => i.mode_demande !== 'devis' || !dejaRepondu.has(i.id));
-      }
+      const [{ data: mesDevis }, { data: mesInterets }] = await Promise.all([
+        sb.from('intervention_devis').select('intervention_id').eq('artisan_id', currentArtisan.id),
+        sb.from('intervention_interets').select('intervention_id,statut').eq('artisan_id', currentArtisan.id)
+      ]);
+      const devisIds = new Set((mesDevis || []).map(d => d.intervention_id));
+      const interetIds = new Set((mesInterets || []).filter(i => i.statut !== 'annule').map(i => i.intervention_id));
+      interventions = interventions.map(i => ({ ...i, _interested: interetIds.has(i.id) }));
+      interventions = interventions.map(i => ({ ...i, _hasQuote: devisIds.has(i.id) }));
     }
   }
 
@@ -1043,14 +1046,16 @@ async function ouvrirModaleChantier(intervention) {
     ${photos.length ? `<div class="modal__section"><h4>Photos</h4><div class="modal__photos">${photos.map(u => `<img src="${u}" alt="Photo du chantier" />`).join('')}</div></div>` : ''}
     <div class="modal__section">
       <h4>Réponse attendue</h4>
-      <p>${intervention.mode_demande === 'devis' ? 'Envoyez votre prix et les détails de votre proposition. Le demandeur comparera les devis.' : 'Manifestez votre intérêt ; le demandeur pourra ensuite vous contacter.'}</p>
+      <p>${intervention.mode_demande === 'devis' ? 'Envoyez votre prix et les détails de votre proposition. Le demandeur comparera les devis.' : 'Manifestez votre intérêt : le client verra vos coordonnées et pourra vous choisir. Ce clic ne bloque pas le chantier.'}</p>
       <p class="hint">Le prix et les modalités sont convenus entre le client et l’artisan.</p>
     </div>
     <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' ? 'disabled' : ''}>
-      ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : intervention.mode_demande === 'devis' ? 'Répondre avec un devis' : 'Je suis intéressé'}
+      ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : intervention.mode_demande === 'devis' ? intervention._hasQuote ? 'Devis déjà envoyé' : 'Répondre avec un devis' : intervention._interested ? 'Intérêt déjà envoyé' : 'Je suis intéressé'}
     </button>
   `;
-  document.getElementById('accept-btn')?.addEventListener('click', () => intervention.mode_demande === 'devis' ? ouvrirFormulaireDevis(intervention) : accepterMission(intervention.id));
+  const acceptButton = document.getElementById('accept-btn');
+  if (intervention._interested || intervention._hasQuote) acceptButton.disabled = true;
+  acceptButton?.addEventListener('click', () => intervention.mode_demande === 'devis' ? ouvrirFormulaireDevis(intervention) : manifesterInteret(intervention.id));
   ouvrirOverlay();
 }
 
@@ -1124,36 +1129,23 @@ document.getElementById('modal-close').addEventListener('click', fermerModale);
 overlay.addEventListener('click', (e) => { if (e.target === overlay) fermerModale(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) fermerModale(); });
 
-async function accepterMission(interventionId) {
+async function manifesterInteret(interventionId) {
   if (DEMO_MODE) {
     const i = interventions.find(x => x.id === interventionId);
-    if (i) {
-      i.statut = 'assigne';
-      i.artisan_id = currentArtisan.id;
-      i.assigned_at = new Date().toISOString();
-      missions.unshift({ ...i });
-      interventions = interventions.filter(x => x.id !== interventionId);
-    }
-    toast('Vous êtes positionné sur la demande. Le demandeur pourra vous contacter.', 'success');
+    if (i) i._interested = true;
+    toast('Votre intérêt est transmis au demandeur. Le chantier reste disponible aux autres artisans.', 'success');
     fermerModale();
-    renderMarkers();
-    renderChantierList();
-    renderMissionsList();
+    renderMarkers(); renderChantierList();
     return;
   }
-
-  const { error } = await sb.from('interventions')
-    .update({ statut: 'assigne', artisan_id: currentArtisan.id, assigned_at: new Date().toISOString() })
-    .eq('id', interventionId).eq('statut', 'nouveau');
-
+  const { error } = await sb.rpc('manifester_interet', { p_intervention_id: interventionId });
   if (error) {
-    toast("Ce chantier vient d'être pris en charge par un autre artisan.", 'error');
+    toast(error.message || 'Impossible d’envoyer votre intérêt.', 'error');
   } else {
-    toast('Vous êtes positionné sur la demande. Le demandeur pourra vous contacter.', 'success');
+    toast('Votre intérêt est transmis au demandeur. Le chantier reste disponible aux autres artisans.', 'success');
   }
   fermerModale();
   await chargerChantiers();
-  await chargerMesMissions();
 }
 
 /* =========================================================================
@@ -1214,10 +1206,13 @@ function renderMissionsList() {
 async function ouvrirModaleMission(mission) {
   const cat = categorieMeta(mission.categorie);
   let contact = { nom: '', prenom: '', telephone: '', email: '' };
+  let planning = { creneaux_proposes: [], creneau_retenu: null };
   if (DEMO_MODE) contact = mission;
   else {
     const { data, error } = await sb.rpc('coordonnees_mission', { p_intervention_id: mission.id });
     if (!error && data) contact = data;
+    const { data: p } = await sb.from('intervention_interets').select('id,creneaux_proposes,creneau_retenu').eq('intervention_id', mission.id).eq('artisan_id', currentArtisan.id).maybeSingle();
+    if (p) planning = p;
   }
   const steps = ['assigne', 'en_cours', 'termine'];
   const currentIdx = steps.indexOf(mission.statut);
@@ -1247,6 +1242,17 @@ async function ouvrirModaleMission(mission) {
       <p>${escNl(mission.description)}</p>
     </div>
 
+    ${mission.statut === 'assigne' ? `
+      ${planning.creneau_retenu ? `<div class="form-success">✓ Créneau choisi par le client : ${new Date(planning.creneau_retenu).toLocaleString('fr-FR',{dateStyle:'full',timeStyle:'short'})}</div>` : `
+        <div class="modal__section"><h4>Proposer des créneaux</h4><p class="hint">Le client choisira un créneau parmi vos propositions.</p>
+          <input type="datetime-local" class="schedule-input" aria-label="Premier créneau" />
+          <input type="datetime-local" class="schedule-input" aria-label="Deuxième créneau (facultatif)" />
+          <input type="datetime-local" class="schedule-input" aria-label="Troisième créneau (facultatif)" />
+          <button class="btn btn-gold btn-block" id="proposer-creneaux-btn">Envoyer mes créneaux</button>
+        </div>`}
+      <button class="btn btn-block" id="annuler-mission-btn" style="background:#9d241e">Annuler ma participation avant le démarrage</button>
+    ` : ''}
+
     ${mission.statut === 'termine' ? `
       <div class="form-success">✓ Mission clôturée le ${new Date(mission.updated_at).toLocaleDateString('fr-FR')}.</div>
     ` : mission.statut === 'en_cours' ? `
@@ -1262,7 +1268,32 @@ async function ouvrirModaleMission(mission) {
 
   document.getElementById('demarrer-btn')?.addEventListener('click', () => changerStatutMission(mission.id, 'en_cours'));
   document.getElementById('cloturer-btn')?.addEventListener('click', () => cloturerMission(mission.id));
+  document.getElementById('proposer-creneaux-btn')?.addEventListener('click', () => envoyerCreneaux(mission.id));
+  document.getElementById('annuler-mission-btn')?.addEventListener('click', () => annulerMission(mission.id));
   ouvrirOverlay();
+}
+
+async function envoyerCreneaux(id) {
+  const values = [...document.querySelectorAll('.schedule-input')].map(input => input.value).filter(Boolean);
+  if (!values.length) { toast('Choisissez au moins un créneau.', 'error'); return; }
+  const creneaux = values.map(value => new Date(value).toISOString());
+  const { error } = await sb.rpc('proposer_creneaux_intervention', { p_intervention_id: id, p_creneaux: creneaux });
+  if (error) { toast(error.message || 'Impossible d’envoyer les créneaux.', 'error'); return; }
+  toast('Vos créneaux ont été transmis au client.', 'success');
+  fermerModale();
+  await chargerMesMissions();
+}
+
+async function annulerMission(id) {
+  if (!confirm('Annuler votre participation avant de démarrer ? Le chantier redeviendra disponible aux artisans.')) return;
+  if (DEMO_MODE) {
+    missions = missions.filter(m => m.id !== id);
+    toast('Votre participation est annulée.', 'success'); fermerModale(); renderMissionsList(); return;
+  }
+  const { error } = await sb.rpc('annuler_mission_artisan', { p_intervention_id: id });
+  if (error) { toast(error.message || 'Impossible d’annuler cette mission.', 'error'); return; }
+  toast('Votre participation est annulée. Le chantier est de nouveau disponible.', 'success');
+  fermerModale(); await chargerMesMissions(); await chargerChantiers();
 }
 
 async function changerStatutMission(id, statut) {
