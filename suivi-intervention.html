@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Suivre ma demande — Entreprise 3</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{font-family:Arial,sans-serif;color:#1a2332;background:#faf7f2;--navy:#0e2140;--gold:#c9963a;--line:#e0d8cc}
+    *{box-sizing:border-box}body{margin:0;padding:24px 16px}.wrap{max-width:680px;margin:auto}.brand{color:white;background:var(--navy);padding:22px;border-radius:18px 18px 0 0}.brand strong{font-size:20px}.body{background:white;padding:24px;border-radius:0 0 18px 18px;box-shadow:0 10px 28px #0e214012}
+    h1{font-size:23px;margin:0 0 8px;color:var(--navy)}.sub{color:#667085;line-height:1.5}.status{padding:12px 14px;background:#fbeecb;border-radius:10px;margin:18px 0}.card{border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}.card h2{font-size:18px;margin:0 0 8px}.btn{display:block;width:100%;border:0;border-radius:10px;background:var(--navy);color:white;padding:14px;font-size:15px;font-weight:700;margin-top:16px;cursor:pointer}.btn:disabled{opacity:.6}.empty,.error{padding:14px;background:#f5f3ef;border-radius:10px}.error{background:#fdf0ef;color:#9d241e}a{color:var(--navy)}.slot{display:block;margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:9px}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="brand"><strong>Entreprise 3</strong></header>
+    <section class="body">
+      <h1>Suivre ma demande</h1>
+      <p class="sub">Consultez les artisans intéressés, choisissez avec qui avancer, puis sélectionnez un créneau proposé.</p>
+      <div id="status" class="status">Chargement de votre demande…</div>
+      <div id="artisans"></div>
+    </section>
+  </main>
+  <script>
+    const SUPABASE_URL = 'https://yqjeqcomrubelahrvizd.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_hKaiVb_fWBPRgESxpwWNCA_iAN9acMe';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const params = new URLSearchParams(location.search);
+    const reference = params.get('reference');
+    const token = params.get('token');
+    const statusBox = document.getElementById('status');
+    const artisansBox = document.getElementById('artisans');
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const fmtDate = value => new Date(value).toLocaleString('fr-FR',{dateStyle:'full',timeStyle:'short'});
+
+    async function load() {
+      if (!reference || !token) { statusBox.className='error'; statusBox.textContent='Ce lien privé est incomplet.'; return; }
+      const {data,error}=await sb.rpc('lire_suivi_intervention',{p_reference:reference,p_token:token});
+      if(error){statusBox.className='error';statusBox.textContent=`Erreur Supabase (${error.code||'sans code'}) : ${error.message}`;return;}
+      if(!data){statusBox.className='error';statusBox.textContent='Demande introuvable.';return;}
+      const state={nouveau:'En attente de votre choix',assigne:'Artisan choisi',en_cours:'Intervention en cours',termine:'Intervention terminée',annule:'Demande annulée'};
+      statusBox.textContent=`Demande ${data.reference} · ${data.ville||''} · ${state[data.statut]||data.statut}`;
+      const artisans=data.artisans||[];
+      if(!artisans.length){artisansBox.innerHTML='<p class="empty">Aucun artisan ne s’est encore manifesté. Revenez plus tard avec ce lien privé.</p>';return;}
+      artisansBox.innerHTML=artisans.map(a=>{
+        const choisi=a.statut==='choisi';
+        const assigned=data.statut==='assigne'||data.statut==='en_cours'||data.statut==='termine';
+        const slots=a.creneaux_proposes||[];
+        return `<article class="card"><h2>${esc(a.entreprise)}</h2>
+          ${a.statut==='annule'?'<p>Cette entreprise a annulé sa participation. Le chantier est de nouveau disponible.</p>':''}
+          <p>Téléphone : <a href="tel:${esc(a.telephone)}">${esc(a.telephone)}</a></p>
+          ${a.email?`<p>E-mail : <a href="mailto:${esc(a.email)}">${esc(a.email)}</a></p>`:''}
+          ${data.statut==='nouveau'&&a.statut==='interesse'?`<button class="btn choose" data-id="${esc(a.id)}">Choisir cet artisan et autoriser le partage de mon numéro</button>`:''}
+          ${choisi&&slots.length&&!a.creneau_retenu?`<h3>Choisissez un créneau</h3>${slots.map(s=>`<label class="slot"><input type="radio" name="slot-${esc(a.id)}" value="${esc(s)}"> ${esc(fmtDate(s))}</label>`).join('')}<button class="btn pick-slot" data-id="${esc(a.id)}">Confirmer ce créneau</button>`:''}
+          ${a.creneau_retenu?`<p><strong>Rendez-vous confirmé :</strong> ${esc(fmtDate(a.creneau_retenu))}</p>`:''}
+          ${choisi&&!slots.length?'<p>Votre artisan a été choisi. Il vous proposera bientôt des créneaux.</p>':''}
+          ${assigned&&!choisi?'<p>Un autre artisan a été choisi pour cette demande.</p>':''}
+        </article>`;
+      }).join('');
+      artisansBox.querySelectorAll('.choose').forEach(b=>b.addEventListener('click',()=>chooseArtisan(b)));
+      artisansBox.querySelectorAll('.pick-slot').forEach(b=>b.addEventListener('click',()=>chooseSlot(b)));
+    }
+    async function chooseArtisan(button){
+      if(!confirm('Confirmer le choix de cet artisan ? Votre numéro lui sera communiqué.'))return;
+      button.disabled=true;
+      const {error}=await sb.rpc('choisir_artisan_intervention',{p_reference:reference,p_token:token,p_interet_id:button.dataset.id});
+      if(error){statusBox.className='error';statusBox.textContent=error.message;button.disabled=false;return;}
+      await load();
+    }
+    async function chooseSlot(button){
+      const radio=artisansBox.querySelector(`input[name="slot-${CSS.escape(button.dataset.id)}"]:checked`);
+      if(!radio){alert('Choisissez un créneau.');return;}
+      button.disabled=true;
+      const {error}=await sb.rpc('choisir_creneau_intervention',{p_reference:reference,p_token:token,p_interet_id:button.dataset.id,p_creneau:radio.value});
+      if(error){statusBox.className='error';statusBox.textContent=error.message;button.disabled=false;return;}
+      await load();
+    }
+    load();
+  </script>
+</body>
+</html>
