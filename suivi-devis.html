@@ -68,7 +68,7 @@
           ${o.frequence ? `<p><strong>Fréquence / durée :</strong> ${esc(o.frequence)}</p>` : ''}
           ${o.validite_jusquau ? `<p><strong>Valable jusqu’au :</strong> ${esc(o.validite_jusquau)}</p>` : ''}
           <div class="details">${esc(o.details)}</div>
-          ${o.statut === 'choisi' ? `<div class="contact"><strong>Entreprise retenue</strong>${o.telephone ? `<p>Téléphone : <a href="tel:${esc(o.telephone)}">${esc(o.telephone)}</a></p>` : ''}${o.email ? `<p>E-mail : <a href="mailto:${esc(o.email)}">${esc(o.email)}</a></p>` : ''}</div>` : ''}
+          <div class="contact">${o.statut === 'choisi' ? '<strong>Entreprise retenue · </strong>' : ''}${o.telephone ? `<p>Téléphone : <a href="tel:${esc(o.telephone)}">${esc(o.telephone)}</a></p>` : ''}${o.email ? `<p>E-mail : <a href="mailto:${esc(o.email)}">${esc(o.email)}</a></p>` : ''}</div>
           ${data.statut === 'nouveau' ? `<button class="btn" data-quote="${esc(o.id)}">Choisir cette entreprise</button>` : ''}
         </article>`).join('');
       offersBox.querySelectorAll('[data-quote]').forEach(button => button.addEventListener('click', () => choose(button)));
@@ -96,3 +96,4 @@
   </script>
 </body>
 </html>
+
