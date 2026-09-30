@@ -488,7 +488,7 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
     </div>
     <p class="confirm-note" id="confirm-note"></p>
     <a id="tracking-link" class="btn btn-primary" hidden style="margin:12px auto 0;max-width:320px;" target="_blank" rel="noopener">🔐 Voir et comparer mes devis</a>
-    <p class="section-sub" id="tracking-hint" hidden>Gardez ce lien privé : il permet d’accéder aux devis de cette demande.</p>
+    <p class="section-sub" id="tracking-hint" hidden>Gardez ce lien privé : il permet de suivre votre demande.</p>
     <button type="button" class="btn btn-copy" id="copy-ref" onclick="copyRef()">📋 Copier la référence</button>
     <button type="button" class="btn btn-primary" style="margin:14px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
   </div>
@@ -915,10 +915,9 @@ async function submitDemand() {
     for (let i = 0; i < 5; i++) suffix += alphabet[Math.floor(Math.random() * alphabet.length)];
     payload.reference = `GD-${new Date().getFullYear()}-${suffix}`;
     let suiviToken = null;
-    if (data.modeDemande === 'devis') {
-      suiviToken = randomAccessToken();
-      payload.suivi_token_hash = await hashToken(suiviToken);
-    }
+    // Chaque demande reçoit un lien privé de suivi : devis ou mission classique.
+    suiviToken = randomAccessToken();
+    payload.suivi_token_hash = await hashToken(suiviToken);
 
     const { error } = await sb.from('interventions').insert(payload);
     if (error) throw error;
@@ -929,10 +928,12 @@ async function submitDemand() {
       : "Votre demande est transmise au réseau d’artisans. Un artisan intéressé pourra vous contacter ; le prix et les modalités seront convenus directement avec lui.";
     const trackingLink = document.getElementById('tracking-link');
     if (suiviToken) {
-      const suiviUrl = new URL('https://e3-ecru.vercel.app/suivi-devis.html');
+      const pageSuivi = data.modeDemande === 'devis' ? 'suivi-devis.html' : 'suivi-intervention.html';
+      const suiviUrl = new URL(pageSuivi, 'https://e3-ecru.vercel.app/');
       suiviUrl.searchParams.set('reference', payload.reference);
       suiviUrl.searchParams.set('token', suiviToken);
       trackingLink.href = suiviUrl.href;
+      trackingLink.textContent = data.modeDemande === 'devis' ? '🔐 Voir et comparer mes devis' : '🔐 Suivre ma demande';
       trackingLink.hidden = false;
       document.getElementById('tracking-hint').hidden = false;
     } else { trackingLink.hidden = true; document.getElementById('tracking-hint').hidden = true; }
