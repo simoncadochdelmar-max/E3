@@ -268,6 +268,13 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
 .copro-area-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
 .copro-area-list label{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:9px;font-size:13px;text-transform:none;letter-spacing:0}
 .copro-area-list input{accent-color:var(--navy)}
+.syndic-scope-card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:12px;background:#fff}
+.syndic-scope-card h4{margin:0 0 10px;color:var(--navy);font-size:15px}
+.syndic-scope-card .scope-checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.syndic-scope-card .scope-checks label{display:flex;align-items:center;gap:7px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:12px;text-transform:none;letter-spacing:0}
+.syndic-scope-card input[type="checkbox"]{accent-color:var(--navy)}
+.syndic-scope-card .scope-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.syndic-scope-card[hidden]{display:none}
 .demand-card[hidden]{display:none}
 
 @media (min-width:520px){
@@ -411,26 +418,43 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
   <div id="frequence-wrap" class="field" hidden>
     <label>Fréquence souhaitée</label>
     <div class="freq-row" id="freq-choices">
-      <div class="cat-card" data-f="hebdomadaire" onclick="pickFreq(this)"><span class="cat-label">Hebdo</span></div>
+      <div class="cat-card" data-f="hebdomadaire" onclick="pickFreq(this)"><span class="cat-label">1× / semaine</span></div>
+      <div class="cat-card" data-f="bihebdomadaire" onclick="pickFreq(this)"><span class="cat-label">2× / semaine</span></div>
+      <div class="cat-card" data-f="quotidienne" onclick="pickFreq(this)"><span class="cat-label">Quotidien</span></div>
       <div class="cat-card" data-f="mensuelle" onclick="pickFreq(this)"><span class="cat-label">Mensuelle</span></div>
-      <div class="cat-card" data-f="trimestrielle" onclick="pickFreq(this)"><span class="cat-label">Trimestre</span></div>
+      <div class="cat-card" data-f="trimestrielle" onclick="pickFreq(this)"><span class="cat-label">Tous les 3 mois</span></div>
+      <div class="cat-card" data-f="a_definir" onclick="pickFreq(this)"><span class="cat-label">À définir</span></div>
     </div>
     <label for="date_debut" style="margin-top:12px;">Démarrage souhaité <span class="optional-tag">(facultatif)</span></label>
     <input type="date" id="date_debut" />
   </div>
 
   <div id="copro-details" class="field" hidden>
-    <h3 class="section-title" style="font-size:17px;margin-bottom:6px;">Précisions sur la copropriété</h3>
-    <p class="section-sub">Ces informations aident les artisans à préparer une réponse adaptée. Tout est facultatif.</p>
+    <h3 class="section-title" style="font-size:17px;margin-bottom:6px;">Informations sur la copropriété</h3>
+    <p class="section-sub">Partagez uniquement ce que vous connaissez. Ces précisions aideront l’entreprise à préparer son devis.</p>
     <div class="field-row">
       <div class="field">
         <label for="copro-batiments">Nombre de bâtiments</label>
         <input type="number" id="copro-batiments" min="1" inputmode="numeric" placeholder="Ex. 2" />
       </div>
       <div class="field">
-        <label for="copro-lots">Nombre de lots / logements</label>
+        <label for="copro-etages">Nombre d’étages</label>
+        <input type="number" id="copro-etages" min="0" inputmode="numeric" placeholder="Ex. 5" />
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="copro-cages">Cages d’escalier</label>
+        <input type="number" id="copro-cages" min="0" inputmode="numeric" placeholder="Ex. 3" />
+      </div>
+      <div class="field">
+        <label for="copro-lots">Lots / logements</label>
         <input type="number" id="copro-lots" min="1" inputmode="numeric" placeholder="Ex. 40" />
       </div>
+    </div>
+    <div class="field">
+      <label for="copro-ascenseurs">Nombre d’ascenseurs</label>
+      <input type="number" id="copro-ascenseurs" min="0" inputmode="numeric" placeholder="Ex. 2" />
     </div>
     <div class="field">
       <label>Zones communes concernées <span class="optional-tag">(plusieurs choix possibles)</span></label>
@@ -444,6 +468,31 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
         <label><input type="checkbox" value="Autre partie commune"> Autre partie commune</label>
       </div>
     </div>
+    <div class="field" id="copro-contract-base" hidden>
+      <label for="copro-contrat-actuel">Avez-vous déjà un contrat en cours ?</label>
+      <select id="copro-contrat-actuel" onchange="document.getElementById('copro-contract-end-wrap').hidden = this.value !== 'oui'">
+        <option value="">Je ne sais pas / je préfère préciser plus tard</option>
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+      </select>
+      <div id="copro-contract-end-wrap" hidden style="margin-top:10px;">
+        <label for="copro-fin-contrat">Date de fin du contrat actuel <span class="optional-tag">(facultatif)</span></label>
+        <input type="date" id="copro-fin-contrat" />
+      </div>
+      <label for="copro-visite" style="margin-top:12px;">Une visite sur place est-elle possible ?</label>
+      <select id="copro-visite">
+        <option value="a_convenir">À convenir avec l’entreprise</option>
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+      </select>
+    </div>
+    <div id="copro-multiservice-wrap" class="field" hidden>
+      <label class="consent"><input type="checkbox" id="copro-multiservice" />
+        <span>Je souhaite, si possible, recevoir une proposition regroupant plusieurs prestations.</span>
+      </label>
+    </div>
+    <div id="syndic-service-details"></div>
+    <p class="grid-err" id="err-syndic-scope">Pour chaque service sélectionné, cochez au moins une opération à chiffrer.</p>
   </div>
 
   <div class="field" id="field-surface">
@@ -549,7 +598,7 @@ const PROFILES = [
   { v:'gestionnaire_immo', icon:'🏢', label:'Syndic / Agence immobilière', desc:'Copropriété, résidence, biens en gestion', profil_demandeur:'gestionnaire' },
   { v:'commerce',          icon:'🏬', label:'Commerce / Boutique', desc:'Magasin, restaurant, local pro', profil_demandeur:'gestionnaire' },
   { v:'bureau_entreprise', icon:'🏛️', label:'Bureau / Entreprise', desc:'Locaux professionnels', profil_demandeur:'gestionnaire' },
-  { v:'etablissement',     icon:'🏫', label:'Établissement', desc:'Mairie, école, cabinet médical, association…', profil_demandeur:'gestionnaire' },
+  { v:'etablissement',     icon:'🏢', label:'Établissement', desc:'Mairie, cabinet médical, association…', profil_demandeur:'gestionnaire' },
   { v:'particulier',       icon:'🏠', label:'Particulier', desc:'Logement personnel', profil_demandeur:null },
 ];
 
@@ -560,12 +609,14 @@ const SERVICE_GROUPS = {
   technique:  { label:'Dépannage & maintenance technique', items:[
     {v:'plomberie', l:'Plomberie', i:'💧'}, {v:'electricite', l:'Électricité', i:'⚡'},
     {v:'chauffage', l:'Chauffage / Clim', i:'🔥'}, {v:'serrurerie', l:'Serrurerie', i:'🔑'},
-    {v:'ascenseur', l:'Ascenseur', i:'🛗'}, {v:'interphone', l:'Interphone', i:'📟'},
+    {v:'ascenseur', l:'Ascenseur', i:'🛗'}, {v:'vmc', l:'VMC', i:'🌬️'},
+    {v:'portes_portails', l:'Portes / Portails', i:'🚪'}, {v:'interphone', l:'Interphone', i:'📟'},
     {v:'vitrerie', l:'Vitrerie', i:'🪟'},
   ]},
   entretien:  { label:'Entretien courant & propreté', items:[
     {v:'menage', l:'Ménage / Nettoyage', i:'🧹'}, {v:'nettoyage_vitrine', l:'Nettoyage vitrines', i:'✨'},
     {v:'espaces_verts', l:'Espaces verts', i:'🌳'}, {v:'desherbage', l:'Désherbage', i:'🌿'},
+    {v:'parking', l:'Parking', i:'🅿️'}, {v:'piscine', l:'Piscine', i:'🏊'},
   ]},
   nuisibles:  { label:'Nuisibles & hygiène', items:[
     {v:'deratisation', l:'Dératisation', i:'🐀'}, {v:'desinsectisation', l:'Désinsectisation', i:'🪳'},
@@ -573,7 +624,8 @@ const SERVICE_GROUPS = {
   ]},
   travaux:    { label:'Travaux & rénovation', items:[
     {v:'peinture', l:'Peinture / Sols', i:'🎨'}, {v:'renovation', l:'Rénovation', i:'🔨'},
-    {v:'agencement', l:'Agencement local', i:'🏗️'},
+    {v:'agencement', l:'Agencement local', i:'🏗️'}, {v:'toiture_terrasse', l:'Toiture / Terrasse', i:'🏠'},
+    {v:'petits_travaux', l:'Petits travaux', i:'🧰'},
   ]},
   securite:   { label:'Sécurité', items:[
     {v:'camera', l:'Vidéosurveillance', i:'📷'}, {v:'controle_acces', l:'Contrôle d\'accès', i:'🔐'},
@@ -581,6 +633,38 @@ const SERVICE_GROUPS = {
   ]},
   autre:      { label:'Autre besoin', items:[{v:'autre', l:'Autre', i:'❓'}] },
 };
+
+// Questions de chiffrage affichées uniquement pour les prestations choisies par un syndic.
+const SYNDIC_SCOPE_CONFIG = {
+  menage:{title:'Nettoyage des parties communes',checks:['Halls','Escaliers','Paliers et couloirs','Ascenseurs','Vitres','Sortie / rentrée des poubelles','Locaux poubelles','Parkings','Autres zones'],fields:[['passages_semaine','Passages par semaine souhaités','number','Ex. 2']]},
+  espaces_verts:{title:'Entretien des espaces verts',checks:['Tonte','Taille des haies','Taille des arbres','Désherbage','Entretien des massifs','Ramassage des feuilles','Évacuation des déchets verts'],fields:[['surface_verts','Surface approximative en m²','number','Ex. 500'],['type_verts','Types d’espaces verts','text','Pelouse, haies, massifs, arbres…']]},
+  chauffage:{title:'Chaudière / chauffage collectif',checks:['Entretien annuel','Maintenance préventive','Dépannage inclus','Astreinte souhaitée','Production d’eau chaude'],fields:[['type_chaudiere','Type de chaudière / énergie','text','Ex. gaz, fioul, réseau de chaleur'],['nb_chaudieres','Nombre de chaudières','number',''],['puissance_chauffage','Puissance connue (facultatif)','text','Ex. 250 kW'],['nb_logements_chauffage','Nombre de logements desservis','number',''],['contrat_chauffage','Contrat actuel','select','Aucun|Oui|Ne sait pas'],['fin_contrat_chauffage','Fin du contrat actuel (si connue)','date','']]},
+  vmc:{title:'Entretien de la VMC',checks:['Nettoyage des gaines','Nettoyage des bouches','Vérification des moteurs','Contrôle du fonctionnement'],fields:[['type_vmc','Type de VMC','select','Simple flux|Double flux|Ne sait pas'],['nb_systemes_vmc','Nombre de systèmes','number',''],['derniere_vmc','Date de la dernière intervention (si connue)','date','']]},
+  portes_portails:{title:'Portes et portails',checks:['Contrôle des moteurs','Contrôle des télécommandes','Réglages','Graissage','Dépannage inclus','Astreinte souhaitée'],fields:[['nb_portes','Nombre de portes','number',''],['nb_portails','Nombre de portails','number',''],['type_portes_portails','Fonctionnement','select','Automatique|Manuel|Les deux|Ne sait pas']]},
+  ascenseur:{title:'Entretien des ascenseurs',checks:['Maintenance préventive','Dépannage','Astreinte 24 h/24','Contrôle réglementaire'],fields:[['nb_ascenseurs','Nombre d’ascenseurs','number',''],['niveaux_ascenseurs','Niveaux desservis','number',''],['marque_ascenseurs','Marque / modèle (si connu)','text',''],['contrat_ascenseur','Contrat actuel','select','Aucun|Oui|Ne sait pas'],['fin_contrat_ascenseur','Fin du contrat actuel (si connue)','date','']]},
+  toiture_terrasse:{title:'Toiture / terrasse',checks:['Contrôle de l’étanchéité','Nettoyage des évacuations d’eau','Nettoyage des gouttières','Recherche de fuite','Inspection annuelle'],fields:[['type_toiture','Type','select','Toiture|Terrasse|Les deux'],['surface_toiture','Surface approximative en m²','number',''],['couverture_toiture','Type de couverture (si connu)','text','']]},
+  plomberie:{title:'Plomberie des parties communes',checks:['Recherche de fuite','Contrôle des canalisations','Entretien des colonnes','Débouchage','Intervention d’urgence','Astreinte souhaitée'],fields:[['installation_plomberie','Installation','select','Collective|Individuelle|Les deux|Ne sait pas'],['nb_logements_plomberie','Nombre de logements concernés','number','']]},
+  electricite:{title:'Électricité des parties communes',checks:['Éclairage des parties communes','Éclairage extérieur','Éclairage du parking','Contrôle du tableau électrique','Remplacement des ampoules / LED','Vérification des installations','Dépannage','Contrat annuel souhaité'],fields:[['nb_batiments_electricite','Nombre de bâtiments concernés','number',''],['nb_cages_electricite','Nombre de cages d’escalier','number','']]},
+  incendie:{title:'Sécurité incendie',checks:['Extincteurs','BAES','Désenfumage','Portes coupe-feu','Alarmes incendie','Vérifications périodiques','Maintenance','Rapport d’intervention'],fields:[['nb_equipements_incendie','Nombre d’équipements (si connu)','number',''],['nb_etages_incendie','Nombre d’étages concernés','number','']]},
+  parking:{title:'Entretien du parking',checks:['Nettoyage','Lavage','Éclairage','Portail automatique','Ventilation','Signalétique','Nettoyage des caniveaux'],fields:[['nb_places_parking','Nombre de places (si connu)','number',''],['type_parking','Type de parking','select','Intérieur|Extérieur|Les deux']]},
+  deratisation:{title:'Dératisation / désinsectisation',checks:['Rats / souris','Cafards','Fourmis','Punaises','Autres nuisibles','Intervention ponctuelle','Contrat annuel'],fields:[['zones_nuisibles','Zones concernées','text','Ex. caves, locaux poubelles, logements'],['nb_logements_nuisibles','Nombre de logements concernés (si connu)','number','']]},
+  desinsectisation:{title:'Désinsectisation',checks:['Cafards','Fourmis','Punaises','Autres insectes','Intervention ponctuelle','Contrat annuel'],fields:[['zones_insectes','Zones concernées','text','Ex. caves, locaux poubelles, logements']]},
+  piscine:{title:'Entretien de la piscine',checks:['Nettoyage','Traitement de l’eau','Contrôle du pH','Contrôle du chlore','Entretien de la filtration','Mise en service','Hivernage'],fields:[['type_piscine','Type de piscine','select','Intérieure|Extérieure|Les deux'],['volume_piscine','Dimensions / volume (si connu)','text','Ex. 10 × 5 m ou 60 m³']]},
+  petits_travaux:{title:'Petits travaux des espaces communs',checks:['Peinture','Plâtrerie','Petite plomberie','Petite électricité','Remplacement de serrures','Remplacement de luminaires','Réparation de portes','Réparation de murs / sols','Autres travaux'],fields:[]},
+  renovation:{title:'Travaux / rénovation des espaces communs',checks:['Peinture','Sols','Murs / plâtrerie','Plomberie','Électricité','Portes / serrures','Autre'],fields:[['surface_travaux','Surface approximative en m² (si connue)','number','']]},
+  multi_service:{title:'Contrat multiservices',checks:['Nettoyage','Espaces verts','Plomberie','Électricité','Chauffage','VMC','Portes / portails','Ascenseur','Parking','Petits travaux','Autre'],fields:[]},
+};
+SYNDIC_SCOPE_CONFIG.nettoyage_vitrine = {...SYNDIC_SCOPE_CONFIG.menage, title:'Nettoyage des vitres'};
+SYNDIC_SCOPE_CONFIG.desherbage = {...SYNDIC_SCOPE_CONFIG.espaces_verts, title:'Désherbage des espaces verts'};
+SYNDIC_SCOPE_CONFIG.serrurerie = {...SYNDIC_SCOPE_CONFIG.portes_portails, title:'Serrurerie et portes'};
+SYNDIC_SCOPE_CONFIG.controle_acces = {...SYNDIC_SCOPE_CONFIG.portes_portails, title:'Contrôle d’accès'};
+SYNDIC_SCOPE_CONFIG.peinture = {...SYNDIC_SCOPE_CONFIG.petits_travaux, title:'Peinture / sols'};
+SYNDIC_SCOPE_CONFIG.agencement = {...SYNDIC_SCOPE_CONFIG.petits_travaux, title:'Agencement des espaces communs'};
+SYNDIC_SCOPE_CONFIG.interphone = {title:'Interphone', checks:['Contrôle du fonctionnement','Entretien des postes','Vérification des accès','Dépannage'], fields:[['nb_interphones','Nombre d’équipements','number',''],['type_interphone','Type / modèle (si connu)','text','']]};
+SYNDIC_SCOPE_CONFIG.vitrerie = {title:'Vitrerie des parties communes', checks:['Nettoyage des vitres','Nettoyage des verrières','Nettoyage des vitres difficiles d’accès'], fields:[['nb_vitres','Nombre ou surface approximative','text','À préciser']]};
+SYNDIC_SCOPE_CONFIG.desinfection = {...SYNDIC_SCOPE_CONFIG.deratisation, title:'Désinfection des parties communes'};
+SYNDIC_SCOPE_CONFIG.camera = {title:'Vidéosurveillance', checks:['Vérification des caméras','Contrôle de l’enregistrement','Entretien / nettoyage','Dépannage'], fields:[['nb_cameras','Nombre de caméras (si connu)','number','']]};
+SYNDIC_SCOPE_CONFIG.autre = {title:'Autre prestation d’entretien', checks:[], fields:[['autre_prestation','Précisez la prestation souhaitée','text','']]};
 
 // Ordre des groupes affichés selon le profil (les plus pertinents en premier)
 const PROFILE_GROUP_ORDER = {
@@ -674,6 +758,7 @@ function selectProfile(value, el) {
       : 'Décrivez le besoin, les horaires d’accès et les éventuelles contraintes du lieu…';
 
   renderPrestations();
+  renderSyndicServiceDetails();
 }
 
 function pickOccupant(el) {
@@ -701,6 +786,7 @@ function pickDemandType(el) {
   document.getElementById('urgence-wrap').hidden = data.demandType !== 'ponctuel';
   document.getElementById('frequence-wrap').hidden = data.demandType !== 'recurrent';
   document.getElementById('copro-details').hidden = data.profile !== 'gestionnaire_immo';
+  renderSyndicServiceDetails();
 }
 document.querySelectorAll('#demand-type .demand-card').forEach(card => {
   card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
@@ -740,6 +826,39 @@ function togglePrestation(value, el) {
   if (selectedPrestations.has(value)) { selectedPrestations.delete(value); el.classList.remove('sel'); el.setAttribute('aria-pressed','false'); }
   else { selectedPrestations.add(value); el.classList.add('sel'); el.setAttribute('aria-pressed','true'); }
   document.getElementById('err-cat').classList.remove('show');
+  renderSyndicServiceDetails();
+}
+
+function renderSyndicServiceDetails() {
+  const container = document.getElementById('syndic-service-details');
+  if (!container.dataset.ready) {
+    container.innerHTML = '<p class="section-sub">Pour chaque service sélectionné, cochez les opérations à inclure. Les quantités et autres précisions peuvent rester vides si vous ne les connaissez pas.</p>' + Object.entries(SYNDIC_SCOPE_CONFIG)
+      .filter(([serviceId]) => serviceId !== 'multi_service')
+      .map(([serviceId, config]) => {
+        const checks = (config.checks || []).map((item, i) => `
+          <label><input type="checkbox" data-contract-check="${esc(serviceId)}" value="${esc(item)}"> ${esc(item)}</label>`).join('');
+        const fields = (config.fields || []).map(([key, label, type, placeholder]) => {
+          if (type === 'select') {
+            const options = placeholder.split('|').map(option => `<option value="${esc(option)}">${esc(option)}</option>`).join('');
+            return `<div class="field"><label for="syndic-${esc(serviceId)}-${esc(key)}">${esc(label)}</label><select id="syndic-${esc(serviceId)}-${esc(key)}" data-contract-field="${esc(key)}"><option value="">À préciser</option>${options}</select></div>`;
+          }
+          return `<div class="field"><label for="syndic-${esc(serviceId)}-${esc(key)}">${esc(label)}</label><input id="syndic-${esc(serviceId)}-${esc(key)}" type="${esc(type)}" data-contract-field="${esc(key)}" placeholder="${esc(placeholder)}" ${type === 'number' ? 'min="0" inputmode="numeric"' : ''}></div>`;
+        }).join('');
+        return `<section class="syndic-scope-card" data-service-id="${esc(serviceId)}" hidden>
+          <h4>${esc(config.title)}</h4>
+          ${checks ? `<div class="scope-checks">${checks}</div>` : ''}
+          ${fields ? `<div class="scope-fields">${fields}</div>` : ''}
+        </section>`;
+      }).join('');
+    container.dataset.ready = 'true';
+  }
+  const isSyndicContract = data.profile === 'gestionnaire_immo' && data.demandType === 'recurrent';
+  document.getElementById('copro-contract-base').hidden = !isSyndicContract;
+  document.getElementById('copro-multiservice-wrap').hidden = !isSyndicContract || selectedPrestations.size < 2;
+  document.getElementById('err-syndic-scope').classList.remove('show');
+  container.querySelectorAll('[data-service-id]').forEach(section => {
+    section.hidden = !isSyndicContract || !selectedPrestations.has(section.dataset.serviceId);
+  });
 }
 
 /* Compteur de caractères de la description */
@@ -791,6 +910,21 @@ function validateStep() {
     let ok = true;
     if (selectedPrestations.size === 0) { document.getElementById('err-cat').classList.add('show'); ok = false; }
     if (!descField.value.trim()) { document.getElementById('err-desc').classList.add('show'); ok = false; }
+    if (data.profile === 'gestionnaire_immo' && data.demandType === 'recurrent') {
+      const missingScope = Array.from(selectedPrestations).some(serviceId => {
+        const config = SYNDIC_SCOPE_CONFIG[serviceId];
+        if (!config) return false;
+        const section = document.querySelector(`#syndic-service-details [data-service-id="${serviceId}"]`);
+        if (!section) return true;
+        if (config.checks?.length) return !section.querySelector('[data-contract-check]:checked');
+        return !Array.from(section.querySelectorAll('[data-contract-field]')).some(input => input.value.trim());
+      });
+      if (missingScope) {
+        const scopeError = document.getElementById('err-syndic-scope');
+        scopeError.classList.add('show');
+        ok = false;
+      }
+    }
     return ok;
   }
   if (step === 4) {
@@ -847,18 +981,57 @@ function showStep() {
 /* =========================================================================
    RÉCAPITULATIF
    ========================================================================= */
+function collectSyndicDetailLines() {
+  if (data.profile !== 'gestionnaire_immo') return [];
+  const lines = [];
+  const addField = (id, label) => {
+    const value = document.getElementById(id)?.value?.trim();
+    if (value) lines.push(`${label} : ${value}`);
+  };
+  addField('copro-batiments', 'Nombre de bâtiments');
+  addField('copro-etages', 'Nombre d’étages');
+  addField('copro-cages', 'Nombre de cages d’escalier');
+  addField('copro-ascenseurs', 'Nombre d’ascenseurs');
+  addField('copro-lots', 'Nombre de lots / logements');
+  const zones = Array.from(document.querySelectorAll('#copro-areas input:checked')).map(input => input.value);
+  if (zones.length) lines.push(`Parties communes concernées : ${zones.join(', ')}`);
+
+  if (data.demandType === 'recurrent') {
+    const currentContract = document.getElementById('copro-contrat-actuel').value;
+    if (currentContract) lines.push(`Contrat actuel : ${currentContract === 'oui' ? 'oui' : 'non'}`);
+    addField('copro-fin-contrat', 'Fin du contrat actuel');
+    const visit = document.getElementById('copro-visite').value;
+    if (visit) {
+      const visitLabel = {a_convenir:'à convenir',oui:'oui',non:'non'}[visit] || visit;
+      lines.push(`Visite sur place : ${visitLabel}`);
+    }
+    if (document.getElementById('copro-multiservice').checked) lines.push('Souhaite une proposition regroupant plusieurs prestations si possible');
+
+    document.querySelectorAll('#syndic-service-details [data-service-id]').forEach(section => {
+      const serviceId = section.dataset.serviceId;
+      if (!selectedPrestations.has(serviceId)) return;
+      const title = SYNDIC_SCOPE_CONFIG[serviceId]?.title || serviceId;
+      const checked = Array.from(section.querySelectorAll('[data-contract-check]:checked')).map(input => input.value);
+      if (checked.length) lines.push(`${title} — prestations : ${checked.join(', ')}`);
+      section.querySelectorAll('[data-contract-field]').forEach(input => {
+        const value = input.value?.trim();
+        if (!value) return;
+        const label = input.closest('.field')?.querySelector('label')?.textContent?.trim() || 'Précision';
+        lines.push(`${title} — ${label} : ${value}`);
+      });
+    });
+  }
+  return lines;
+}
+
 function buildSummary() {
   const profileMeta = PROFILES.find(p => p.v === data.profile);
   const prestaLabels = Array.from(selectedPrestations).map(v => {
     for (const g of Object.values(SERVICE_GROUPS)) { const found = g.items.find(i => i.v === v); if (found) return found.l; }
     return v;
   });
-  const coproZones = Array.from(document.querySelectorAll('#copro-areas input:checked')).map(input => input.value);
-  const coproRows = data.profile === 'gestionnaire_immo' ? [
-    ['Bâtiments', document.getElementById('copro-batiments').value || '—'],
-    ['Lots / logements', document.getElementById('copro-lots').value || '—'],
-    ['Zones communes', coproZones.length ? coproZones.join(', ') : '—'],
-  ] : [];
+  const coproDetailLines = collectSyndicDetailLines();
+  const coproRows = coproDetailLines.length ? [['Informations complémentaires', coproDetailLines.join(' · ')]] : [];
 
   const blocks = [
     { title:'Profil', step:1, rows:[
@@ -876,7 +1049,7 @@ function buildSummary() {
       ['Mode de mise en relation', data.modeDemande === 'devis' ? 'Recevoir plusieurs devis' : 'Trouver un artisan'],
       ['Type de prestation', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
       ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
-        : [['Fréquence', data.frequence ? { hebdomadaire:'Hebdomadaire', mensuelle:'Mensuelle', trimestrielle:'Trimestrielle' }[data.frequence] : 'Non précisée']]),
+        : [['Fréquence', data.frequence ? { hebdomadaire:'1× par semaine', bihebdomadaire:'2× par semaine', quotidienne:'Quotidienne', mensuelle:'Mensuelle', trimestrielle:'Tous les 3 mois', a_definir:'À définir' }[data.frequence] : 'Non précisée']]),
       ...coproRows,
       ['Surface', document.getElementById('surface_m2').value ? document.getElementById('surface_m2').value + ' m²' : '—'],
       ['Description', document.getElementById('desc').value],
@@ -914,17 +1087,8 @@ async function submitDemand() {
     const profileMeta = PROFILES.find(p => p.v === data.profile);
     const profilDemandeur = data.profile === 'particulier' ? (data.occupant || 'proprietaire') : profileMeta.profil_demandeur;
     const descriptionParts = [document.getElementById('desc').value];
-    if (data.profile === 'gestionnaire_immo') {
-      const nbBatiments = document.getElementById('copro-batiments').value;
-      const nbLots = document.getElementById('copro-lots').value;
-      const zones = Array.from(document.querySelectorAll('#copro-areas input:checked')).map(input => input.value);
-      const coproLines = [
-        nbBatiments ? `Nombre de bâtiments : ${nbBatiments}` : null,
-        nbLots ? `Nombre de lots / logements : ${nbLots}` : null,
-        zones.length ? `Zones communes concernées : ${zones.join(', ')}` : null,
-      ].filter(Boolean);
-      if (coproLines.length) descriptionParts.push(`Informations copropriété :\n${coproLines.join('\n')}`);
-    }
+    const syndicLines = collectSyndicDetailLines();
+    if (syndicLines.length) descriptionParts.push(`Informations complémentaires pour le devis :\n${syndicLines.join('\n')}`);
 
     // 1. Upload des photos
     const photoPaths = [];
@@ -1027,6 +1191,7 @@ function resetForm() {
   document.getElementById('urgence-wrap').hidden = false;
   document.getElementById('frequence-wrap').hidden = true;
   document.getElementById('copro-details').hidden = true;
+  document.getElementById('copro-contract-end-wrap').hidden = true;
   document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
   document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
   document.getElementById('particulier-toggle').hidden = true;
@@ -1036,6 +1201,7 @@ function resetForm() {
   document.getElementById('global-error').style.display = 'none';
   document.getElementById('tracking-link').hidden = true;
   document.getElementById('tracking-hint').hidden = true;
+  renderSyndicServiceDetails();
   const btn = document.getElementById('btn-next');
   btn.disabled = false; btn.textContent = 'Continuer';
   resetAddressState();
