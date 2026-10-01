@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -514,11 +515,10 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    RÉFÉRENTIEL PROFILS
    ========================================================================= */
 const PROFILES = [
-  { v:'syndic_copro',      icon:'🏢', label:'Syndic de copropriété', desc:'Parties communes, résidences', profil_demandeur:'gestionnaire' },
-  { v:'agence_immo',       icon:'🗝️', label:'Agence immobilière',    desc:'Biens en gestion, remise en état', profil_demandeur:'gestionnaire' },
+  { v:'gestionnaire_immo', icon:'🏢', label:'Syndic / Agence immobilière', desc:'Copropriété, résidence, biens en gestion', profil_demandeur:'gestionnaire' },
   { v:'commerce',          icon:'🏬', label:'Commerce / Boutique',    desc:'Magasin, restaurant, local pro', profil_demandeur:'gestionnaire' },
   { v:'bureau_entreprise', icon:'🏛️', label:'Bureau / Entreprise',    desc:'Locaux professionnels', profil_demandeur:'gestionnaire' },
-  { v:'ecole',             icon:'🏫', label:'École / Établissement',  desc:'Scolaire, périscolaire', profil_demandeur:'gestionnaire' },
+  { v:'etablissement',     icon:'🏛️', label:'Établissement',          desc:'Mairie, école, cabinet médical, association…', profil_demandeur:'gestionnaire' },
   { v:'particulier',       icon:'🏠', label:'Particulier',            desc:'Logement personnel', profil_demandeur:null },
 ];
 
@@ -553,35 +553,31 @@ const SERVICE_GROUPS = {
 
 // Ordre des groupes affichés selon le profil (les plus pertinents en premier)
 const PROFILE_GROUP_ORDER = {
-  syndic_copro:      ['entretien','nuisibles','technique','securite','travaux','autre'],
-  agence_immo:       ['entretien','travaux','technique','nuisibles','autre'],
+  gestionnaire_immo: ['entretien','travaux','technique','nuisibles','securite','autre'],
   commerce:          ['entretien','securite','technique','travaux','nuisibles','autre'],
   bureau_entreprise: ['entretien','securite','technique','nuisibles','travaux','autre'],
-  ecole:             ['entretien','nuisibles','securite','technique','travaux','autre'],
+  etablissement:     ['entretien','nuisibles','securite','technique','travaux','autre'],
   particulier:       ['technique','entretien','nuisibles','travaux','autre'],
 };
 
 const HEADER_TITLES = {
-  syndic_copro:'Demande pour<br><em>votre copropriété</em>',
-  agence_immo:'Demande pour<br><em>votre agence</em>',
+  gestionnaire_immo:'Demande pour<br><em>votre immeuble ou bien en gestion</em>',
   commerce:'Demande pour<br><em>votre commerce</em>',
   bureau_entreprise:'Demande pour<br><em>vos locaux</em>',
-  ecole:'Demande pour<br><em>votre établissement</em>',
+  etablissement:'Demande pour<br><em>votre établissement</em>',
   particulier:'Faire une<br><em>demande</em>',
 };
 const NOMSITE_LABELS = {
-  syndic_copro:'Nom de la copropriété / résidence',
-  agence_immo:"Nom de l'agence",
+  gestionnaire_immo:'Nom de la copropriété / résidence / agence',
   commerce:'Enseigne du commerce',
   bureau_entreprise:"Nom de l'entreprise",
-  ecole:"Nom de l'établissement",
+  etablissement:"Nom de l'établissement",
 };
 const COMPLEMENT_LABELS = {
-  syndic_copro:'Bâtiment / étage / porte / lot',
-  agence_immo:'Étage / local / référence bien',
+  gestionnaire_immo:'Bâtiment / étage / local / référence du bien',
   commerce:'Étage / local commercial',
   bureau_entreprise:'Bâtiment / étage / bureau',
-  ecole:'Bâtiment / salle / accès',
+  etablissement:'Bâtiment / salle / accès',
   particulier:"Étage / n° d'appartement / interphone",
 };
 
