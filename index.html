@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -301,6 +302,10 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
   border:none;background:var(--cream-200);font-size:.9rem;color:var(--navy-950);}
 .modal__title{font-size:1.3rem;margin-bottom:.3rem;padding-right:2rem;}
 .modal__meta{display:flex;gap:.5rem;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted);}
+.quote-company-card{padding:14px 16px;margin:0 0 1.1rem;border:1px solid var(--border);border-radius:12px;background:#f7f8fa}
+.quote-company-card strong{display:block;margin-bottom:7px;color:var(--navy-700)}
+.quote-company-card p{margin:4px 0;font-size:.9rem}
+.quote-company-card a{color:inherit}
 .modal__section{margin-bottom:1.2rem;}
 .modal__section h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem;font-weight:700;}
 .modal__photos{display:flex;gap:.6rem;flex-wrap:wrap;}
@@ -364,7 +369,6 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
       </div>
       <button type="submit" class="btn btn-primary btn-block" id="login-btn">Se connecter</button>
     </form>
-    <button type="button" class="btn btn-ghost btn-block" style="margin-top:.7rem;" onclick="lancerModeDemo()">🧪 Essayer en mode démo (sans Supabase)</button>
     <p class="auth-switch">Pas encore de compte ? <button type="button" onclick="afficherEcran('register')">S'inscrire avec un code partenaire</button></p>
   </div>
 </div>
@@ -565,15 +569,33 @@ const INTERVENTION_PUBLIC_COLUMNS = 'id,reference,zone,adresse,code_postal,ville
 const CATEGORIES = [
   { value:'plomberie', label:'Plomberie', icone:'🔧' },
   { value:'electricite', label:'Électricité', icone:'⚡' },
-  { value:'chauffage', label:'Chauffage', icone:'🔥' },
+  { value:'chauffage', label:'Chauffage / chaudière', icone:'🔥' },
   { value:'ascenseur', label:'Ascenseur', icone:'🛗' },
+  { value:'vmc', label:'VMC', icone:'🌬️' },
   { value:'interphone', label:'Interphone', icone:'📞' },
+  { value:'portes_portails', label:'Portes / portails', icone:'🚪' },
   { value:'portes', label:'Portes', icone:'🚪' },
-  { value:'camera', label:'Caméra', icone:'📷' },
-  { value:'proprete', label:'Propreté', icone:'🧹' },
   { value:'serrurerie', label:'Serrurerie', icone:'🔑' },
-  { value:'renovation', label:'Rénovation', icone:'🏗️' },
+  { value:'controle_acces', label:'Contrôle d’accès', icone:'🔐' },
+  { value:'vitrerie', label:'Vitrerie', icone:'🪟' },
+  { value:'menage', label:'Ménage / nettoyage', icone:'🧹' },
+  { value:'proprete', label:'Propreté', icone:'🧹' },
+  { value:'nettoyage_vitrine', label:'Nettoyage des vitres', icone:'✨' },
+  { value:'espaces_verts', label:'Espaces verts', icone:'🌳' },
+  { value:'desherbage', label:'Désherbage', icone:'🌿' },
+  { value:'parking', label:'Parking', icone:'🅿️' },
+  { value:'piscine', label:'Piscine', icone:'🏊' },
+  { value:'camera', label:'Vidéosurveillance', icone:'📷' },
+  { value:'incendie', label:'Sécurité incendie', icone:'🧯' },
   { value:'deratisation', label:'Dératisation', icone:'🐀' },
+  { value:'desinsectisation', label:'Désinsectisation', icone:'🪳' },
+  { value:'desinfection', label:'Désinfection', icone:'🧴' },
+  { value:'debarras', label:'Débarras', icone:'🗑️' },
+  { value:'peinture', label:'Peinture / sols', icone:'🎨' },
+  { value:'renovation', label:'Rénovation', icone:'🏗️' },
+  { value:'agencement', label:'Agencement', icone:'🧰' },
+  { value:'toiture_terrasse', label:'Toiture / terrasse', icone:'🏠' },
+  { value:'petits_travaux', label:'Petits travaux', icone:'🧰' },
   { value:'autre', label:'Autre', icone:'✨' },
 ];
 const URGENCES = {
@@ -598,28 +620,8 @@ function toast(message, type = 'info') {
 /* =========================================================================
    ÉTAT GLOBAL
    ========================================================================= */
-let DEMO_MODE = false;
 let currentArtisan = null;
 let map = null;
-
-/* ---- Données de démonstration (aucun Supabase requis) ------------------- */
-const MOCK_ARTISAN = {
-  id: 'demo-artisan',
-  nom_entreprise: 'Bati Rénov 92 (démo)',
-  nom_gerant: 'Alex Martin',
-  telephone: '06 12 34 56 78',
-  email: 'demo@entreprise3.fr',
-  siret: null,
-  specialites: ['plomberie', 'electricite'],
-  zones_intervention: ['75', '92', '93'],
-  statut_verification: 'valide',
-};
-const MOCK_INTERVENTIONS = [
-  { id:'demo-1', reference:'GD-2026-0001', zone:'parties_communes', adresse:'12 rue des Lilas', code_postal:'75011', ville:'Paris', etage:null, porte:null, latitude:48.8589, longitude:2.3800, categorie:'plomberie', urgence:'urgent', description:"Fuite d'eau importante dans la cage d'escalier, niveau RDC.", photos:[], profil_demandeur:'gestionnaire', nom:'Martin', prenom:'Claire', telephone:'0612345678', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
-  { id:'demo-2', reference:'GD-2026-0002', zone:'appartement', adresse:'45 avenue Jean Jaurès', code_postal:'93500', ville:'Pantin', etage:'3', porte:'B', latitude:48.8958, longitude:2.4014, categorie:'electricite', urgence:'modere', description:'Disjoncteur qui saute régulièrement dans la cuisine.', photos:[], profil_demandeur:'locataire', nom:'Nguyen', prenom:'Paul', telephone:'0623456789', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
-  { id:'demo-4', reference:'GD-2026-0004', zone:'parties_communes', adresse:'3 rue du Marché', code_postal:'75015', ville:'Paris', etage:null, porte:null, latitude:48.8422, longitude:2.2966, categorie:'menage', prestations:['menage','espaces_verts'], type_demande:'recurrent', frequence:'hebdomadaire', profil_structure:'syndic_copro', nom_site:'Résidence du Marché', urgence:'faible', description:'Entretien hebdomadaire des parties communes et petit espace vert en pied d\'immeuble.', photos:[], profil_demandeur:'gestionnaire', nom:'Bernard', prenom:'Julie', telephone:'0645678901', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
-  { id:'demo-3', reference:'GD-2026-0003', zone:'exterieur', adresse:'8 place de la Mairie', code_postal:'92300', ville:'Levallois-Perret', etage:null, porte:null, latitude:48.8938, longitude:2.2870, categorie:'serrurerie', urgence:'faible', description:'Porte du local vélo qui ferme mal, gond à resserrer.', photos:[], profil_demandeur:'proprietaire', nom:'Dubois', prenom:'Sophie', telephone:'0634567890', statut:'nouveau', artisan_id:null, created_at:new Date().toISOString() },
-];
 let markers = new Map();
 let userMarker = null;
 let userPosition = null;
@@ -751,22 +753,13 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
 /* =========================================================================
    LANCEMENT DE L'APPLICATION
    ========================================================================= */
-function lancerModeDemo() {
-  DEMO_MODE = true;
-  currentArtisan = { ...MOCK_ARTISAN };
-  interventions = MOCK_INTERVENTIONS.map(i => ({ ...i }));
-  missions = [];
-  demarrerApplication();
-  toast('Mode démo activé — aucune donnée n\'est envoyée à Supabase.', 'success');
-}
-
 async function lancerApplication() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { afficherEcran('login'); return; }
 
   const { data: artisan, error } = await sb.from('artisans').select('*').eq('id', session.user.id).single();
   if (error || !artisan) {
-    toast("Impossible de charger votre profil. Vérifiez que Supabase est configuré (schema.sql exécuté), ou utilisez le mode démo.", 'error');
+    toast("Impossible de charger votre profil. Vérifiez que Supabase est configuré (schema.sql exécuté).", 'error');
     afficherEcran('login');
     return;
   }
@@ -779,14 +772,15 @@ async function demarrerApplication() {
   document.getElementById('login-screen').hidden = true;
   document.getElementById('register-screen').hidden = true;
   document.getElementById('app-screen').classList.add('is-active');
+  document.getElementById('logout-btn').textContent = 'Déconnexion';
 
   const pill = document.getElementById('verif-pill');
-  pill.textContent = DEMO_MODE ? '🧪 Mode démo' : currentArtisan.statut_verification === 'valide' ? '✓ Compte validé'
+  pill.textContent = currentArtisan.statut_verification === 'valide' ? '✓ Compte validé'
     : currentArtisan.statut_verification === 'refuse' ? 'Dossier refusé' : 'En vérification';
-  pill.className = `status-pill status-pill--${DEMO_MODE ? 'valide' : currentArtisan.statut_verification}`;
+  pill.className = `status-pill status-pill--${currentArtisan.statut_verification}`;
 
   const banner = document.getElementById('verify-banner');
-  if (!DEMO_MODE && currentArtisan.statut_verification !== 'valide') {
+  if (currentArtisan.statut_verification !== 'valide') {
     banner.hidden = false;
     banner.textContent = currentArtisan.statut_verification === 'refuse'
       ? "Votre dossier n'a pas été validé. Contactez le support pour plus d'informations."
@@ -799,15 +793,9 @@ async function demarrerApplication() {
   initMap();
   renderProfile();
 
-  if (DEMO_MODE) {
-    renderMarkers();
-    renderChantierList();
-    renderMissionsList();
-  } else {
-    await chargerChantiers();
-    await chargerMesMissions();
-    subscribeRealtime();
-  }
+  await chargerChantiers();
+  await chargerMesMissions();
+  subscribeRealtime();
   localiserArtisan();
 }
 
@@ -905,7 +893,7 @@ async function chargerChantiers() {
   if (error) { toast('Impossible de charger les chantiers.', 'error'); interventions = []; }
   else {
     interventions = data || [];
-    if (!DEMO_MODE && currentArtisan) {
+    if (currentArtisan) {
       const [{ data: mesDevis }, { data: mesInterets }] = await Promise.all([
         sb.from('intervention_devis').select('intervention_id').eq('artisan_id', currentArtisan.id),
         sb.from('intervention_interets').select('intervention_id,statut').eq('artisan_id', currentArtisan.id)
@@ -963,8 +951,8 @@ function renderMarkers() {
 function categorieMeta(value) { return CATEGORIES.find(c => c.value === value) ?? { label: value, icone: '🛠️' }; }
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const escNl = s => esc(s).replace(/\n/g, '<br>');
-const PROFIL_STRUCTURE_LABELS = { syndic_copro:'Syndic de copropriété', agence_immo:'Agence immobilière', commerce:'Commerce / Boutique', bureau_entreprise:'Bureau / Entreprise', ecole:'École / Établissement', particulier:'Particulier' };
-const FREQUENCE_LABELS = { hebdomadaire:'Hebdomadaire', mensuelle:'Mensuelle', trimestrielle:'Trimestrielle' };
+const PROFIL_STRUCTURE_LABELS = { syndic_copro:'Syndic de copropriété', agence_immo:'Agence immobilière', commerce:'Commerce / Boutique', bureau_entreprise:'Bureau / Entreprise', ecole:'Établissement', particulier:'Particulier' };
+const FREQUENCE_LABELS = { hebdomadaire:'1× par semaine', bihebdomadaire:'2× par semaine', quotidienne:'Quotidienne', mensuelle:'Mensuelle', trimestrielle:'Tous les 3 mois', a_definir:'À définir' };
 
 function renderChantierList() {
   const list = document.getElementById('chantier-list');
@@ -1061,10 +1049,21 @@ async function ouvrirModaleChantier(intervention) {
 
 function ouvrirFormulaireDevis(intervention) {
   const cat = categorieMeta(intervention.categorie);
+  const dateValidite = new Date();
+  dateValidite.setDate(dateValidite.getDate() + 30);
+  const dateValiditeLocale = new Date(dateValidite.getTime() - dateValidite.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const artisan = currentArtisan || {};
   modalBody.innerHTML = `
     <h2 class="modal__title">${cat.icone} Envoyer un devis</h2>
     <p class="modal__meta">Réf. ${esc(intervention.reference ?? '—')} · ${esc(intervention.ville ?? '')}</p>
     <form id="quote-form">
+      <div class="quote-company-card">
+        <strong>Vos coordonnées (préremplies depuis votre profil)</strong>
+        <div class="field"><label for="quote-company">Nom de l’entreprise</label><input id="quote-company" type="text" maxlength="150" value="${esc(artisan.nom_entreprise || '')}" required /></div>
+        <div class="field"><label for="quote-siret">SIRET (14 chiffres)</label><input id="quote-siret" type="text" inputmode="numeric" maxlength="14" pattern="[0-9]{14}" value="${esc(String(artisan.siret || '').replace(/\D/g, ''))}" placeholder="14 chiffres" required /></div>
+        <div class="field"><label for="quote-phone">Téléphone communiqué au demandeur</label><input id="quote-phone" type="tel" maxlength="20" value="${esc(artisan.telephone || '')}" required /></div>
+        <p class="hint">Ces informations seront enregistrées dans votre profil et jointes à votre réponse.</p>
+      </div>
       <div class="field">
         <label for="quote-amount">Montant proposé (€ TTC)</label>
         <input id="quote-amount" type="number" min="0.01" step="0.01" inputmode="decimal" required />
@@ -1083,10 +1082,14 @@ function ouvrirFormulaireDevis(intervention) {
         <input id="quote-frequency" type="text" maxlength="120" value="${esc(intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || intervention.frequence : '')}" placeholder="Ex. entretien hebdomadaire" />
       </div>
       <div class="field">
+        <label for="quote-validity">Devis valable jusqu’au</label>
+        <input id="quote-validity" type="date" value="${dateValiditeLocale}" />
+      </div>
+      <div class="field">
         <label for="quote-details">Détail des prestations proposées</label>
         <textarea id="quote-details" rows="5" minlength="10" maxlength="4000" required placeholder="Décrivez ce qui est compris dans votre prix…"></textarea>
       </div>
-      <p class="hint">Le devis est envoyé au demandeur. Votre abonnement artisan reste indépendant du montant des travaux.</p>
+      <p class="hint">Le demandeur recevra votre prix, le détail de votre offre et vos coordonnées d’entreprise. Vérifiez-les dans votre profil avant l’envoi.</p>
       <button class="btn btn-gold btn-block" id="quote-submit" type="submit">Envoyer ma proposition</button>
     </form>`;
   document.getElementById('quote-form').addEventListener('submit', async (event) => {
@@ -1099,13 +1102,22 @@ function ouvrirFormulaireDevis(intervention) {
       montant: Number(document.getElementById('quote-amount').value),
       unite_tarifaire: document.getElementById('quote-unit').value,
       details: document.getElementById('quote-details').value.trim(),
-      frequence: document.getElementById('quote-frequency').value.trim() || null
+      frequence: document.getElementById('quote-frequency').value.trim() || null,
+      validite_jusquau: document.getElementById('quote-validity').value || null
     };
-    if (DEMO_MODE) {
-      toast('En mode démo, le devis n’est pas enregistré.', 'info');
-      fermerModale();
+    const profileUpdate = {
+      nom_entreprise: document.getElementById('quote-company').value.trim(),
+      siret: document.getElementById('quote-siret').value.trim(),
+      telephone: document.getElementById('quote-phone').value.trim()
+    };
+    const { error: profileError } = await sb.from('artisans').update(profileUpdate).eq('id', currentArtisan.id);
+    if (profileError) {
+      console.error(profileError);
+      toast('Impossible d’enregistrer vos coordonnées. Vérifiez votre profil puis réessayez.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
       return;
     }
+    currentArtisan = { ...currentArtisan, ...profileUpdate };
     const { error } = await sb.from('intervention_devis').insert(offer);
     if (error) {
       console.error(error);
@@ -1130,14 +1142,6 @@ overlay.addEventListener('click', (e) => { if (e.target === overlay) fermerModal
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) fermerModale(); });
 
 async function manifesterInteret(interventionId) {
-  if (DEMO_MODE) {
-    const i = interventions.find(x => x.id === interventionId);
-    if (i) i._interested = true;
-    toast('Votre intérêt est transmis au demandeur. Le chantier reste disponible aux autres artisans.', 'success');
-    fermerModale();
-    renderMarkers(); renderChantierList();
-    return;
-  }
   const { error } = await sb.rpc('manifester_interet', { p_intervention_id: interventionId });
   if (error) {
     toast(error.message || 'Impossible d’envoyer votre intérêt.', 'error');
@@ -1207,13 +1211,10 @@ async function ouvrirModaleMission(mission) {
   const cat = categorieMeta(mission.categorie);
   let contact = { nom: '', prenom: '', telephone: '', email: '' };
   let planning = { creneaux_proposes: [], creneau_retenu: null };
-  if (DEMO_MODE) contact = mission;
-  else {
-    const { data, error } = await sb.rpc('coordonnees_mission', { p_intervention_id: mission.id });
-    if (!error && data) contact = data;
-    const { data: p } = await sb.from('intervention_interets').select('id,creneaux_proposes,creneau_retenu').eq('intervention_id', mission.id).eq('artisan_id', currentArtisan.id).maybeSingle();
-    if (p) planning = p;
-  }
+  const { data, error } = await sb.rpc('coordonnees_mission', { p_intervention_id: mission.id });
+  if (!error && data) contact = data;
+  const { data: p } = await sb.from('intervention_interets').select('id,creneaux_proposes,creneau_retenu').eq('intervention_id', mission.id).eq('artisan_id', currentArtisan.id).maybeSingle();
+  if (p) planning = p;
   const steps = ['assigne', 'en_cours', 'termine'];
   const currentIdx = steps.indexOf(mission.statut);
 
@@ -1286,10 +1287,6 @@ async function envoyerCreneaux(id) {
 
 async function annulerMission(id) {
   if (!confirm('Annuler votre participation avant de démarrer ? Le chantier redeviendra disponible aux artisans.')) return;
-  if (DEMO_MODE) {
-    missions = missions.filter(m => m.id !== id);
-    toast('Votre participation est annulée.', 'success'); fermerModale(); renderMissionsList(); return;
-  }
   const { error } = await sb.rpc('annuler_mission_artisan', { p_intervention_id: id });
   if (error) { toast(error.message || 'Impossible d’annuler cette mission.', 'error'); return; }
   toast('Votre participation est annulée. Le chantier est de nouveau disponible.', 'success');
@@ -1297,14 +1294,6 @@ async function annulerMission(id) {
 }
 
 async function changerStatutMission(id, statut) {
-  if (DEMO_MODE) {
-    const m = missions.find(x => x.id === id);
-    if (m) m.statut = statut;
-    toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
-    fermerModale();
-    renderMissionsList();
-    return;
-  }
   const { error } = await sb.from('interventions').update({ statut }).eq('id', id);
   if (error) { toast('Une erreur est survenue.', 'error'); return; }
   toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
@@ -1316,15 +1305,6 @@ async function cloturerMission(id) {
   const fileInput = document.getElementById('photo-fin-input');
   const btn = document.getElementById('cloturer-btn');
   btn.disabled = true; btn.textContent = 'Clôture en cours…';
-
-  if (DEMO_MODE) {
-    const m = missions.find(x => x.id === id);
-    if (m) { m.statut = 'termine'; m.updated_at = new Date().toISOString(); }
-    toast('Chantier clôturé, rapport transmis.', 'success');
-    fermerModale();
-    renderMissionsList();
-    return;
-  }
 
   try {
     const updates = { statut: 'termine', updated_at: new Date().toISOString() };
