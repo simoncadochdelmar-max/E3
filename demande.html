@@ -265,6 +265,10 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
 .consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--text-mid);line-height:1.45;margin:6px 0 4px;cursor:pointer;}
 .consent input{width:20px;height:20px;margin-top:1px;flex-shrink:0;accent-color:var(--navy);}
 .btn-copy{background:white;border:1.5px solid var(--border);color:var(--navy);margin-top:12px;padding:12px;font-size:13px;width:100%;}
+.copro-area-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
+.copro-area-list label{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:9px;font-size:13px;text-transform:none;letter-spacing:0}
+.copro-area-list input{accent-color:var(--navy)}
+.demand-card[hidden]{display:none}
 
 @media (min-width:520px){
   body{max-width:520px;margin:0 auto;box-shadow:0 0 60px rgba(14,33,64,.08);}
@@ -302,8 +306,8 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
 
 <!-- ÉTAPE 1 — PROFIL -->
 <section class="section active" id="s1" aria-labelledby="s1-title">
-  <h2 class="section-title" id="s1-title">Qui êtes-vous ?</h2>
-  <p class="section-sub">Choisissez votre profil pour adapter les prestations proposées.</p>
+  <h2 class="section-title" id="s1-title">Quel lieu est concerné ?</h2>
+  <p class="section-sub">Choisissez le cas qui correspond le mieux.</p>
 
   <div class="picker-grid" id="profile-grid" role="radiogroup" aria-label="Profil"></div>
 
@@ -388,7 +392,7 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
     <div class="demand-card" data-v="recurrent" onclick="pickDemandType(this)" role="radio" aria-checked="false" tabindex="0">
       <div class="demand-icon">🔁</div>
       <div class="demand-title">Contrat d'entretien</div>
-      <div class="demand-sub">Prestation régulière (nettoyage, espaces verts...)</div>
+      <div class="demand-sub">Nettoyage régulier, espaces verts, parties communes…</div>
     </div>
   </div>
 
@@ -413,6 +417,33 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
     </div>
     <label for="date_debut" style="margin-top:12px;">Démarrage souhaité <span class="optional-tag">(facultatif)</span></label>
     <input type="date" id="date_debut" />
+  </div>
+
+  <div id="copro-details" class="field" hidden>
+    <h3 class="section-title" style="font-size:17px;margin-bottom:6px;">Précisions sur la copropriété</h3>
+    <p class="section-sub">Ces informations aident les artisans à préparer une réponse adaptée. Tout est facultatif.</p>
+    <div class="field-row">
+      <div class="field">
+        <label for="copro-batiments">Nombre de bâtiments</label>
+        <input type="number" id="copro-batiments" min="1" inputmode="numeric" placeholder="Ex. 2" />
+      </div>
+      <div class="field">
+        <label for="copro-lots">Nombre de lots / logements</label>
+        <input type="number" id="copro-lots" min="1" inputmode="numeric" placeholder="Ex. 40" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Zones communes concernées <span class="optional-tag">(plusieurs choix possibles)</span></label>
+      <div class="copro-area-list" id="copro-areas">
+        <label><input type="checkbox" value="Hall d'entrée"> Hall d'entrée</label>
+        <label><input type="checkbox" value="Escaliers et couloirs"> Escaliers et couloirs</label>
+        <label><input type="checkbox" value="Ascenseur"> Ascenseur</label>
+        <label><input type="checkbox" value="Local poubelles"> Local poubelles</label>
+        <label><input type="checkbox" value="Parking"> Parking</label>
+        <label><input type="checkbox" value="Espaces verts"> Espaces verts</label>
+        <label><input type="checkbox" value="Autre partie commune"> Autre partie commune</label>
+      </div>
+    </div>
   </div>
 
   <div class="field" id="field-surface">
@@ -516,10 +547,10 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    ========================================================================= */
 const PROFILES = [
   { v:'gestionnaire_immo', icon:'🏢', label:'Syndic / Agence immobilière', desc:'Copropriété, résidence, biens en gestion', profil_demandeur:'gestionnaire' },
-  { v:'commerce',          icon:'🏬', label:'Commerce / Boutique',    desc:'Magasin, restaurant, local pro', profil_demandeur:'gestionnaire' },
-  { v:'bureau_entreprise', icon:'🏛️', label:'Bureau / Entreprise',    desc:'Locaux professionnels', profil_demandeur:'gestionnaire' },
-  { v:'etablissement',     icon:'🏛️', label:'Établissement',          desc:'Mairie, école, cabinet médical, association…', profil_demandeur:'gestionnaire' },
-  { v:'particulier',       icon:'🏠', label:'Particulier',            desc:'Logement personnel', profil_demandeur:null },
+  { v:'commerce',          icon:'🏬', label:'Commerce / Boutique', desc:'Magasin, restaurant, local pro', profil_demandeur:'gestionnaire' },
+  { v:'bureau_entreprise', icon:'🏛️', label:'Bureau / Entreprise', desc:'Locaux professionnels', profil_demandeur:'gestionnaire' },
+  { v:'etablissement',     icon:'🏫', label:'Établissement', desc:'Mairie, école, cabinet médical, association…', profil_demandeur:'gestionnaire' },
+  { v:'particulier',       icon:'🏠', label:'Particulier', desc:'Logement personnel', profil_demandeur:null },
 ];
 
 /* =========================================================================
@@ -557,7 +588,7 @@ const PROFILE_GROUP_ORDER = {
   commerce:          ['entretien','securite','technique','travaux','nuisibles','autre'],
   bureau_entreprise: ['entretien','securite','technique','nuisibles','travaux','autre'],
   etablissement:     ['entretien','nuisibles','securite','technique','travaux','autre'],
-  particulier:       ['technique','entretien','nuisibles','travaux','autre'],
+  particulier:       ['technique','travaux','nuisibles','autre'],
 };
 
 const HEADER_TITLES = {
@@ -610,6 +641,7 @@ function selectProfile(value, el) {
   document.querySelectorAll('#profile-grid .picker-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
   el.classList.add('sel'); el.setAttribute('aria-checked','true');
   data.profile = value;
+  selectedPrestations.clear();
   document.getElementById('err-profile').classList.remove('show');
 
   const meta = PROFILES.find(p => p.v === value);
@@ -620,13 +652,26 @@ function selectProfile(value, el) {
   particulierToggle.hidden = value !== 'particulier';
   if (value !== 'particulier') data.occupant = null;
 
+  const recurrentCard = document.querySelector('#demand-type [data-v="recurrent"]');
+  recurrentCard.hidden = value === 'particulier';
+  document.getElementById('copro-details').hidden = value !== 'gestionnaire_immo';
+  if (value === 'particulier' && data.demandType === 'recurrent') {
+    pickDemandType(document.querySelector('#demand-type [data-v="ponctuel"]'));
+    data.frequence = null;
+  }
+
   document.getElementById('label-nomsite').textContent = NOMSITE_LABELS[value] || "Nom (facultatif)";
   document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
   document.getElementById('label-complement').innerHTML = `${COMPLEMENT_LABELS[value] || 'Complément'} <span class="optional-tag">(facultatif)</span>`;
 
   document.getElementById('sub-lieu').textContent = value === 'particulier'
-    ? 'Indiquez l\'adresse de votre logement.'
+    ? 'Indiquez l\'adresse où se situe le problème.'
     : "Indiquez l'adresse exacte de l'intervention.";
+  document.getElementById('desc').placeholder = value === 'gestionnaire_immo'
+    ? 'Décrivez le besoin, les contraintes d’accès, les horaires possibles ou le cahier des charges…'
+    : value === 'particulier'
+      ? 'Décrivez le problème : ce qui ne fonctionne pas, depuis quand, et ce que vous avez constaté…'
+      : 'Décrivez le besoin, les horaires d’accès et les éventuelles contraintes du lieu…';
 
   renderPrestations();
 }
@@ -655,6 +700,7 @@ function pickDemandType(el) {
   data.demandType = el.dataset.v;
   document.getElementById('urgence-wrap').hidden = data.demandType !== 'ponctuel';
   document.getElementById('frequence-wrap').hidden = data.demandType !== 'recurrent';
+  document.getElementById('copro-details').hidden = data.profile !== 'gestionnaire_immo';
 }
 document.querySelectorAll('#demand-type .demand-card').forEach(card => {
   card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
@@ -807,6 +853,12 @@ function buildSummary() {
     for (const g of Object.values(SERVICE_GROUPS)) { const found = g.items.find(i => i.v === v); if (found) return found.l; }
     return v;
   });
+  const coproZones = Array.from(document.querySelectorAll('#copro-areas input:checked')).map(input => input.value);
+  const coproRows = data.profile === 'gestionnaire_immo' ? [
+    ['Bâtiments', document.getElementById('copro-batiments').value || '—'],
+    ['Lots / logements', document.getElementById('copro-lots').value || '—'],
+    ['Zones communes', coproZones.length ? coproZones.join(', ') : '—'],
+  ] : [];
 
   const blocks = [
     { title:'Profil', step:1, rows:[
@@ -825,6 +877,7 @@ function buildSummary() {
       ['Type de prestation', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
       ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
         : [['Fréquence', data.frequence ? { hebdomadaire:'Hebdomadaire', mensuelle:'Mensuelle', trimestrielle:'Trimestrielle' }[data.frequence] : 'Non précisée']]),
+      ...coproRows,
       ['Surface', document.getElementById('surface_m2').value ? document.getElementById('surface_m2').value + ' m²' : '—'],
       ['Description', document.getElementById('desc').value],
       ['Photos', photoFiles.length ? `${photoFiles.length} photo(s)` : 'Aucune'],
@@ -860,6 +913,18 @@ async function submitDemand() {
     const prestations = Array.from(selectedPrestations);
     const profileMeta = PROFILES.find(p => p.v === data.profile);
     const profilDemandeur = data.profile === 'particulier' ? (data.occupant || 'proprietaire') : profileMeta.profil_demandeur;
+    const descriptionParts = [document.getElementById('desc').value];
+    if (data.profile === 'gestionnaire_immo') {
+      const nbBatiments = document.getElementById('copro-batiments').value;
+      const nbLots = document.getElementById('copro-lots').value;
+      const zones = Array.from(document.querySelectorAll('#copro-areas input:checked')).map(input => input.value);
+      const coproLines = [
+        nbBatiments ? `Nombre de bâtiments : ${nbBatiments}` : null,
+        nbLots ? `Nombre de lots / logements : ${nbLots}` : null,
+        zones.length ? `Zones communes concernées : ${zones.join(', ')}` : null,
+      ].filter(Boolean);
+      if (coproLines.length) descriptionParts.push(`Informations copropriété :\n${coproLines.join('\n')}`);
+    }
 
     // 1. Upload des photos
     const photoPaths = [];
@@ -879,7 +944,7 @@ async function submitDemand() {
       etage: document.getElementById('complement_lieu').value || null,
       categorie: prestations[0] || 'autre',
       urgence: data.demandType === 'ponctuel' ? data.urgence : 'faible',
-      description: document.getElementById('desc').value,
+      description: descriptionParts.filter(Boolean).join('\n\n'),
       photos: photoPaths,
       profil_demandeur: profilDemandeur,
       nom: document.getElementById('nom').value,
@@ -956,12 +1021,15 @@ function resetForm() {
   document.getElementById('wizard-form').reset();
   document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card,#particulier-toggle button').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
   document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
+  document.querySelector('#demand-type [data-v="recurrent"]').hidden = false;
   document.querySelectorAll('#demand-mode .demand-card').forEach((card, i) => { card.classList.toggle('sel', i === 0); card.setAttribute('aria-checked', i === 0 ? 'true' : 'false'); });
   document.querySelector('.urg-card[data-u="faible"]').classList.add('sel');
   document.getElementById('urgence-wrap').hidden = false;
   document.getElementById('frequence-wrap').hidden = true;
+  document.getElementById('copro-details').hidden = true;
   document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
   document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
+  document.getElementById('particulier-toggle').hidden = true;
   document.getElementById('prestations-container').innerHTML = '';
   document.getElementById('preview-wrap').innerHTML = '';
   document.getElementById('desc-count').textContent = '0';
