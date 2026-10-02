@@ -4,1356 +4,1468 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Entreprise 3 — Faire une demande</title>
+<title>Entreprise 3 — Espace Artisan</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+/* =========================================================================
+   ENTREPRISE 3 — DESIGN SYSTEM
+   Bleu marine / crème / or — Fraunces (titres) + Inter (texte)
+   ========================================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root{
-  --cream:#faf7f2;
-  --cream-dark:#f2ece0;
-  --navy:#0e2140;
-  --navy-mid:#1a3a6b;
-  --navy-soft:#2558a8;
-  --gold:#c9963a;
-  --gold-light:#f0c060;
-  --gold-pale:#fbeecb;
-  --text:#1a2332;
-  --text-mid:#3d4f66;
-  --muted:#8896a8;
-  --border:#e0d8cc;
-  --border-mid:#c8bfb0;
-  --white:#ffffff;
-  --success:#1a7a52;
-  --success-bg:#eaf6f0;
-  --error:#c0322a;
-  --error-bg:#fdf0ef;
-  --urg-h:#c0322a;
-  --urg-m:#b06020;
-  --urg-l:#1a7a52;
-  --radius-s:10px;
+  --navy-950:#0a1729;
+  --navy-900:#0e1f3d;
+  --navy-700:#16305a;
+  --navy-500:#2c4d80;
+  --cream-100:#f7f2e7;
+  --cream-200:#efe6d2;
+  --gold-500:#b8935a;
+  --gold-400:#cdac78;
+  --gold-100:#f1e2c6;
+  --ink:#16213a;
+  --muted:#667088;
+  --border:#e3d9c4;
+  --success:#2f6b4f;
+  --success-bg:#e7f2ec;
+  --warning:#b8863a;
+  --warning-bg:#f6ecdb;
+  --danger:#a3372f;
+  --danger-bg:#f7e5e3;
+  --radius-s:8px;
   --radius-m:14px;
   --radius-l:22px;
-  --shadow:0 10px 28px rgba(14,33,64,.08);
+  --shadow-card:0 2px 16px rgba(14,31,61,.08);
+  --shadow-modal:0 -12px 40px rgba(10,23,41,.25);
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{scroll-padding-top:1rem;}
+*{box-sizing:border-box;}
+html,body{height:100%;}
 body{
-  font-family:'DM Sans',sans-serif;
-  background:var(--cream);
-  color:var(--text);
-  min-height:100dvh;
-  overflow-x:hidden;
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:var(--cream-100);
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
 }
+h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0;color:var(--navy-950);}
+p{margin:0;line-height:1.5;}
 button{font-family:inherit;cursor:pointer;}
-input,textarea,select{font-family:inherit;font-size:inherit;}
-:focus-visible{outline:2.5px solid var(--navy-soft);outline-offset:2px;}
+input,select,textarea{font-family:inherit;font-size:inherit;}
+:focus-visible{outline:2px solid var(--gold-500);outline-offset:2px;}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
 
-/* ---- En-tête ---------------------------------------------------------- */
-.header{
-  background:linear-gradient(135deg,#0e2140,#1a3a6b 65%,#204a86);
-  padding:calc(env(safe-area-inset-top,0px) + 20px) 20px 28px;
-  position:relative;
-  overflow:hidden;
+/* ---- Boutons -------------------------------------------------------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+  border:none;border-radius:var(--radius-s);padding:.85em 1.3em;
+  font-weight:700;font-size:.92rem;transition:transform .1s ease, opacity .15s ease;
 }
-.header::after{
-  content:'';
-  position:absolute;bottom:-1px;left:0;right:0;height:26px;
-  background:var(--cream);border-radius:26px 26px 0 0;
-}
-.header-inner{position:relative;z-index:1;}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
-.brand-mark{
-  width:36px;height:36px;background:var(--gold);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:15px;flex-shrink:0;
-}
-.brand-name{color:white;font-weight:700;font-size:15px;}
-.header-title{font-family:'DM Serif Display',serif;color:white;font-size:29px;line-height:1.12;transition:opacity .2s;}
-.header-title em{font-style:italic;color:var(--gold-light);}
-.profile-chip{
-  display:inline-flex;align-items:center;gap:7px;background:rgba(201,150,58,.18);
-  border:1px solid rgba(201,150,58,.32);border-radius:100px;padding:6px 13px;
-  font-size:12px;font-weight:700;color:var(--gold-light);margin-top:15px;transition:all .2s;
-}
-.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s infinite;flex-shrink:0;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* ---- Fil d'étapes -------------------------------------------------------- */
-.progress-wrap{padding:18px 20px 0;}
-.step-track{display:flex;align-items:center;}
-.step-node{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;}
-.step-node::after{
-  content:'';position:absolute;top:12px;left:calc(50% + 13px);right:calc(-50% + 13px);
-  height:1.5px;background:var(--border-mid);transition:background .25s;
-}
-.step-node:last-child::after{display:none;}
-.step-node.done::after{background:var(--navy-soft);}
-.sn-circle{
-  width:25px;height:25px;border-radius:50%;border:1.5px solid var(--border-mid);background:var(--cream);
-  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted);
-  z-index:1;transition:all .2s;
-}
-.step-node.active .sn-circle{background:var(--navy);border-color:var(--navy);color:white;transform:scale(1.08);}
-.step-node.done .sn-circle{background:var(--navy-soft);border-color:var(--navy-soft);color:white;}
-.sn-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:5px;}
-.step-node.active .sn-label{color:var(--navy);}
-
-/* ---- Sections ------------------------------------------------------------ */
-.section{display:none;padding:22px 20px 10px;animation:up .28s ease;}
-.section.active{display:block;}
-@keyframes up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.section-title{font-family:'DM Serif Display',serif;font-size:23px;color:var(--navy);margin-bottom:4px;}
-.section-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.4;}
-
-/* ---- Cartes de sélection (profil, type de demande) ------------------------ */
-.picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.picker-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:16px 12px;background:white;
-  text-align:left;cursor:pointer;transition:.15s ease;display:flex;flex-direction:column;gap:6px;
-}
-.picker-card:hover{border-color:var(--border-mid);transform:translateY(-1px);}
-.picker-card.sel{border-color:var(--navy);background:var(--navy);color:white;box-shadow:var(--shadow);}
-.picker-card.sel .picker-desc{color:rgba(255,255,255,.72);}
-.picker-icon{font-size:26px;}
-.picker-label{font-size:13px;font-weight:700;}
-.picker-desc{font-size:11px;color:var(--muted);line-height:1.35;}
-
-.subtoggle{display:flex;gap:8px;margin-top:16px;}
-.subtoggle button{
-  flex:1;padding:11px;border-radius:var(--radius-s);border:1.5px solid var(--border);background:white;
-  font-size:13px;font-weight:700;color:var(--text-mid);
-}
-.subtoggle button.sel{background:var(--navy);border-color:var(--navy);color:white;}
-
-/* ---- Champs de formulaire -------------------------------------------------- */
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px;color:var(--text-mid);}
-.field .optional-tag{text-transform:none;font-weight:400;color:var(--muted);}
-.field input,.field textarea{
-  width:100%;border:1.5px solid var(--border);border-radius:var(--radius-s);padding:14px;
-  font-size:15px;outline:none;background:white;transition:border-color .15s;
-}
-.field input:focus,.field textarea:focus{border-color:var(--navy-soft);}
-.field textarea{resize:none;}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px;}
-
-.field-err,.grid-err{
-  display:none;color:var(--error);font-size:11.5px;font-weight:600;margin-top:6px;
-  padding:9px 10px;background:var(--error-bg);border-radius:8px;
-}
-.show{display:block;}
-
-/* ---- Groupes de prestations (multi-sélection) ------------------------------ */
-.service-group{margin-bottom:18px;}
-.service-group-title{
-  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gold);
-  margin-bottom:9px;display:flex;align-items:center;gap:6px;
-}
-.service-group-title::after{content:'';flex:1;height:1px;background:var(--border);}
-.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.cat-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:13px 8px;background:white;
-  text-align:center;cursor:pointer;transition:.15s ease;position:relative;
-}
-.cat-card:hover{transform:translateY(-1px);}
-.cat-card.sel{border-color:var(--navy);background:var(--navy);color:white;}
-.cat-card.sel::before{
-  content:'✓';position:absolute;top:5px;right:6px;font-size:10px;font-weight:800;color:var(--gold-light);
-}
-.cat-icon{font-size:20px;display:block;margin-bottom:6px;}
-.cat-label{font-size:10.5px;font-weight:700;line-height:1.2;}
-
-/* ---- Type de demande (ponctuel / récurrent) --------------------------------- */
-.demand-type{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
-.demand-card{
-  border:1.5px solid var(--border);border-radius:var(--radius-m);padding:14px;background:white;cursor:pointer;transition:.15s;
-}
-.demand-card.sel{border-color:var(--gold);background:var(--gold-pale);}
-.demand-icon{font-size:20px;margin-bottom:6px;}
-.demand-title{font-size:12.5px;font-weight:800;color:var(--navy);}
-.demand-sub{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.3;}
-
-.freq-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
-.freq-row .cat-card{padding:11px 6px;}
-
-/* ---- Urgence ---------------------------------------------------------------- */
-.urg-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.urg-card{border:1.5px solid var(--border);border-radius:var(--radius-m);padding:12px;text-align:center;cursor:pointer;background:white;transition:.15s;}
-.urg-card.sel{transform:scale(1.02);}
-.urg-dot{width:10px;height:10px;border-radius:50%;display:block;margin:0 auto 5px;}
-.urg-card.sel[data-u="faible"]{border-color:var(--urg-l);background:#f0f9f5;}
-.urg-card.sel[data-u="modere"]{border-color:var(--urg-m);background:#fff9f2;}
-.urg-card.sel[data-u="urgent"]{border-color:var(--urg-h);background:#fff5f5;}
-
-/* ---- Photos ------------------------------------------------------------------ */
-.file-btn{
-  display:flex;align-items:center;gap:8px;border:1.5px dashed var(--border-mid);border-radius:var(--radius-s);
-  padding:13px;font-size:13px;font-weight:600;color:var(--text-mid);background:white;width:100%;justify-content:center;
-}
-#preview-wrap{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px;}
-.preview-item{position:relative;flex-shrink:0;}
-.preview-img{width:76px;height:76px;object-fit:cover;border-radius:var(--radius-s);border:1px solid var(--border);display:block;}
-.preview-remove{
-  position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--navy);color:white;
-  border:2px solid var(--cream);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
-}
-
-/* ---- Navigation basse -------------------------------------------------------- */
-.nav-wrap{padding:18px 20px;display:flex;gap:10px;background:var(--cream);}
-.btn{flex:1;padding:16px;border-radius:var(--radius-s);border:none;font-weight:700;font-size:14.5px;transition:.15s;
-  display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn:active{transform:scale(.98);}
-.btn-primary{background:var(--navy);color:white;box-shadow:0 8px 20px rgba(14,33,64,.18);}
-.btn-primary:disabled{background:var(--muted);box-shadow:none;cursor:not-allowed;}
-.btn-back{background:white;border:1.5px solid var(--border);color:var(--muted);flex:0 0 56px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-block{width:100%;}
+.btn-sm{padding:.5em 1em;font-size:.8rem;}
+.btn-primary{background:var(--navy-950);color:var(--cream-100);}
+.btn-primary:hover{background:var(--navy-700);}
+.btn-gold{background:var(--gold-500);color:var(--navy-950);box-shadow:0 4px 14px rgba(184,147,90,.35);}
+.btn-gold:hover{background:var(--gold-400);}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--navy-950);}
+.btn-ghost:hover{background:var(--cream-200);}
+.btn-danger-outline{background:var(--danger-bg);color:var(--danger);}
+.btn-success{background:var(--success);color:#fff;}
 
-/* ---- Récapitulatif ------------------------------------------------------------ */
-.summary{border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;background:white;margin-bottom:14px;}
-.summary-block-title{
-  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--gold);
-  padding:12px 16px 6px;display:flex;justify-content:space-between;align-items:center;
+/* ---- Champs de formulaire -------------------------------------------- */
+.field{margin-bottom:1.1rem;}
+.field label{display:block;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.03em;color:var(--navy-700);margin-bottom:.4em;}
+.field input,.field select,.field textarea{
+  width:100%;padding:.8em .9em;border:1.5px solid var(--border);border-radius:var(--radius-s);
+  background:#fff;color:var(--ink);transition:border-color .15s ease;
 }
-.summary-block-title button{background:none;border:none;color:var(--navy-soft);font-size:11px;font-weight:700;text-decoration:underline;padding:0;}
-.sum-row{display:flex;padding:9px 16px;border-top:1px solid var(--border);font-size:13px;gap:10px;}
-.sum-k{width:118px;flex-shrink:0;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;padding-top:1px;}
-.sum-v{font-weight:600;color:var(--navy);flex:1;word-break:break-word;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold-500);}
+.field .hint{font-size:.75rem;color:var(--muted);margin-top:.35em;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+fieldset{border:none;padding:0;margin:0 0 1.4rem;}
+legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem;color:var(--navy-900);
+  padding-bottom:.5rem;border-bottom:1.5px solid var(--border);margin-bottom:1rem;}
 
-/* ---- Confirmation -------------------------------------------------------------- */
-.confirm-wrap{text-align:center;padding:26px 20px 10px;}
-.confirm-badge{
-  width:82px;height:82px;background:linear-gradient(135deg,var(--success),#28a36a);color:white;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:34px;
-  box-shadow:0 10px 30px rgba(26,122,82,.25);
-}
-.confirm-wrap h2{font-family:'DM Serif Display',serif;font-size:27px;color:var(--navy);margin-bottom:10px;}
-.confirm-wrap p{color:var(--text-mid);line-height:1.6;font-size:15px;max-width:320px;margin:0 auto;}
-.ref-box{margin-top:24px;background:white;border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;}
-.ref-box .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
-.ref-box .val{font-weight:800;color:var(--navy);font-size:19px;letter-spacing:.01em;}
-.confirm-note{
-  margin-top:18px;background:var(--gold-pale);border-radius:var(--radius-s);padding:13px 16px;
-  font-size:12.5px;color:#6b4f1a;text-align:left;line-height:1.5;
-}
+/* ---- Chips -------------------------------------------------------- */
+.chip-group{display:flex;flex-wrap:wrap;gap:.5rem;}
+.chip{padding:.55em 1em;border-radius:999px;border:1.5px solid var(--border);background:#fff;
+  font-size:.85rem;font-weight:600;color:var(--ink);}
+.chip.is-selected{background:var(--navy-950);border-color:var(--navy-950);color:var(--cream-100);}
 
-/* ---- Toast d'erreur globale ----------------------------------------------------- */
-#global-error{
-  display:none;margin:0 20px 16px;background:var(--error-bg);color:var(--error);border-radius:var(--radius-s);
-  padding:12px 14px;font-size:12.5px;font-weight:600;
+/* =========================================================================
+   ÉCRANS D'AUTHENTIFICATION
+   ========================================================================= */
+.auth-screen{
+  position:fixed;inset:0;z-index:100;
+  background:
+    radial-gradient(circle at 15% 0%, var(--navy-700), var(--navy-950) 60%);
+  display:flex;align-items:center;justify-content:center;
+  padding:2rem 1.1rem;overflow-y:auto;
 }
-
-/* ---- Autocomplétion d'adresse + mini-carte ------------------------------- */
-.ac-wrap{position:relative;}
-.ac-list{position:absolute;left:0;right:0;top:calc(100% - 4px);z-index:30;background:white;border:1.5px solid var(--border);
-  border-radius:var(--radius-s);box-shadow:var(--shadow);list-style:none;overflow:hidden;max-height:260px;overflow-y:auto;margin:0;padding:0;}
-.ac-list[hidden]{display:none;}
-.ac-list li{padding:12px 14px;font-size:13.5px;cursor:pointer;border-bottom:1px solid var(--border);line-height:1.35;}
-.ac-list li:last-child{border-bottom:none;}
-.ac-list li small{display:block;color:var(--muted);font-size:11.5px;}
-.ac-list li[aria-selected="true"],.ac-list li:hover{background:var(--gold-pale);}
-.geo-btn{margin-top:9px;background:none;border:none;color:var(--navy-soft);font-size:12.5px;font-weight:700;padding:4px 0;}
-.geo-msg{margin-top:8px;font-size:12px;color:var(--text-mid);}
-.mini-map{margin-top:10px;height:160px;border-radius:var(--radius-s);border:1.5px solid var(--border);overflow:hidden;}
-.mini-map[hidden]{display:none;}
-.geo-ok{margin-top:8px;font-size:12px;font-weight:700;color:var(--success);background:var(--success-bg);padding:8px 10px;border-radius:8px;}
-.hint-small{font-size:11.5px;color:var(--muted);margin-top:5px;}
-.consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--text-mid);line-height:1.45;margin:6px 0 4px;cursor:pointer;}
-.consent input{width:20px;height:20px;margin-top:1px;flex-shrink:0;accent-color:var(--navy);}
-.btn-copy{background:white;border:1.5px solid var(--border);color:var(--navy);margin-top:12px;padding:12px;font-size:13px;width:100%;}
-.copro-area-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
-.copro-area-list label{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:9px;font-size:13px;text-transform:none;letter-spacing:0}
-.copro-area-list input{accent-color:var(--navy)}
-.syndic-scope-card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:12px;background:#fff}
-.syndic-scope-card h4{margin:0 0 10px;color:var(--navy);font-size:15px}
-.syndic-scope-card .scope-checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.syndic-scope-card .scope-checks label{display:flex;align-items:center;gap:7px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:12px;text-transform:none;letter-spacing:0}
-.syndic-scope-card input[type="checkbox"]{accent-color:var(--navy)}
-.syndic-scope-card .scope-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.syndic-scope-card[hidden]{display:none}
-.demand-card[hidden]{display:none}
-
-@media (min-width:520px){
-  body{max-width:520px;margin:0 auto;box-shadow:0 0 60px rgba(14,33,64,.08);}
+.auth-screen[hidden]{display:none;}
+.auth-card{
+  width:100%;max-width:430px;background:#fff;border-radius:var(--radius-l);
+  padding:2rem 1.6rem;box-shadow:0 30px 70px rgba(0,0,0,.35);
+  max-height:92vh;overflow-y:auto;
 }
+.brand-row{display:flex;align-items:center;gap:.65rem;margin-bottom:1.4rem;}
+.brand-mark{
+  display:grid;place-items:center;width:38px;height:38px;border-radius:50%;
+  background:var(--gold-500);color:var(--navy-950);font-family:var(--font-display);
+  font-weight:700;font-size:1rem;flex-shrink:0;
+}
+.brand-name{font-family:var(--font-display);font-size:1.25rem;font-weight:600;color:var(--navy-950);}
+.auth-card h1{font-size:1.4rem;margin-bottom:.3rem;}
+.auth-card > p.lead{color:var(--muted);margin-bottom:1.5rem;font-size:.9rem;}
+.form-error{background:var(--danger-bg);color:var(--danger);padding:.75em 1em;border-radius:var(--radius-s);
+  font-size:.82rem;margin-bottom:1rem;font-weight:600;}
+.form-success{background:var(--success-bg);color:var(--success);padding:.75em 1em;border-radius:var(--radius-s);
+  font-size:.82rem;margin-bottom:1rem;font-weight:600;}
+.auth-switch{text-align:center;margin-top:1.3rem;font-size:.85rem;color:var(--muted);}
+.auth-switch button{background:none;border:none;color:var(--gold-500);font-weight:700;padding:0;font-size:inherit;}
+.file-field{border:1.5px dashed var(--border);border-radius:var(--radius-s);padding:.9em;font-size:.8rem;}
+.file-field.has-file{border-color:var(--success);background:var(--success-bg);}
+
+/* =========================================================================
+   APPLICATION
+   ========================================================================= */
+#app-screen{position:fixed;inset:0;display:none;flex-direction:column;}
+#app-screen.is-active{display:flex;}
+.views{position:relative;flex:1;min-height:0;}
+.view{position:absolute;inset:0;display:none;}
+.view.is-active{display:block;overflow-y:auto;}
+
+/* ---- Barre supérieure -------------------------------------------------- */
+.top-bar{
+  position:absolute;top:0;left:0;right:0;z-index:15;
+  padding:calc(env(safe-area-inset-top,0px) + .7rem) 1rem .7rem;
+  background:#fff;box-shadow:0 2px 14px rgba(14,31,61,.06);
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+}
+.top-bar .brand-row{margin:0;}
+.top-bar .brand-name{font-size:1.05rem;}
+.status-pill{font-size:.7rem;font-weight:700;padding:.3em .7em;border-radius:999px;white-space:nowrap;}
+.status-pill--valide{background:var(--success-bg);color:var(--success);}
+.status-pill--en_attente{background:var(--warning-bg);color:var(--warning);}
+.status-pill--refuse{background:var(--danger-bg);color:var(--danger);}
+
+/* ---- Bandeau vérification ---------------------------------------------- */
+.verify-banner{
+  position:absolute;top:64px;left:0;right:0;z-index:14;
+  background:var(--warning-bg);color:#6b4f22;font-size:.8rem;font-weight:600;
+  padding:.6rem 1rem;text-align:center;
+}
+.verify-banner[hidden]{display:none;}
+
+/* ---- Vue carte ----------------------------------------------------------- */
+#map{position:absolute;inset:0;z-index:0;}
+.map-toolbar{
+  position:absolute;left:1rem;right:1rem;z-index:6;
+  display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.2rem;
+}
+.map-toolbar::-webkit-scrollbar{display:none;}
+.map-toolbar .chip{background:#fff;box-shadow:var(--shadow-card);white-space:nowrap;flex-shrink:0;}
+.locate-btn{
+  position:absolute;z-index:6;width:44px;height:44px;border-radius:50%;
+  background:#fff;box-shadow:var(--shadow-card);border:none;display:grid;place-items:center;font-size:1.1rem;
+}
+.marker-pin{width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+  display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.3);border:2.5px solid #fff;}
+.marker-pin span{transform:rotate(45deg);font-size:1.05rem;}
+.marker-pin--faible{background:var(--success);}
+.marker-pin--modere{background:var(--warning);}
+.marker-pin--urgent{background:var(--danger);}
+.marker-pin--mine{background:var(--navy-950);}
+.marker-pin{transition:transform .12s ease;}
+.marker-pin:hover{transform:rotate(-45deg) scale(1.12);}
+.marker-tooltip{font-size:.72rem;font-weight:700;padding:.3em .6em!important;border-radius:6px!important;box-shadow:var(--shadow-card)!important;}
+
+.map-legend{
+  position:absolute;left:1rem;bottom:calc(46% + 1rem);z-index:6;background:#fff;box-shadow:var(--shadow-card);
+  border-radius:var(--radius-s);padding:.55rem .7rem;display:flex;flex-direction:column;gap:.3rem;font-size:.68rem;font-weight:700;color:var(--muted);
+}
+.map-legend span{display:flex;align-items:center;gap:.4rem;}
+.map-legend .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.dot--urgent{background:var(--danger);}
+.dot--modere{background:var(--warning);}
+.dot--faible{background:var(--success);}
+
+/* ---- Bottom sheet -------------------------------------------------------- */
+.bottom-sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:5;
+  background:#fff;border-radius:var(--radius-l) var(--radius-l) 0 0;
+  box-shadow:var(--shadow-modal);
+  max-height:46%;display:flex;flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  touch-action:pan-y;
+}
+.bottom-sheet__handle{width:38px;height:4px;background:var(--border);border-radius:999px;margin:.65rem auto .3rem;}
+.bottom-sheet__header{display:flex;align-items:center;justify-content:space-between;padding:.35rem 1.25rem .7rem;}
+.bottom-sheet__header h2{font-size:1.05rem;}
+.badge-count{background:var(--gold-500);color:var(--navy-950);font-weight:800;font-size:.72rem;
+  padding:.18em .6em;border-radius:999px;}
+.sheet-toolbar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:0 1.1rem .7rem;}
+.sort-toggle{display:flex;background:var(--cream-200);border-radius:999px;padding:2px;}
+.sort-toggle button{border:none;background:none;font-size:.72rem;font-weight:700;color:var(--muted);padding:.35em .8em;border-radius:999px;}
+.sort-toggle button.is-active{background:#fff;color:var(--navy-950);box-shadow:0 1px 4px rgba(14,31,61,.15);}
+.urgent-toggle{border:1.5px solid var(--danger-bg);background:var(--danger-bg);color:var(--danger);font-size:.72rem;font-weight:700;
+  padding:.4em .8em;border-radius:999px;white-space:nowrap;}
+.urgent-toggle[aria-pressed="true"]{background:var(--danger);color:#fff;border-color:var(--danger);}
+.chantier-card__site{font-size:.7rem;font-weight:700;color:var(--gold-500);text-transform:uppercase;letter-spacing:.02em;display:block;margin-bottom:.1rem;}
+.contrat-tag{font-size:.6rem;font-weight:800;padding:.15em .5em;border-radius:6px;background:var(--cream-200);color:var(--navy-900);flex-shrink:0;white-space:nowrap;}
+.chantier-list{overflow-y:auto;padding:0 1.1rem .8rem;}
+.empty-state{color:var(--muted);text-align:center;padding:2rem 1rem;font-size:.88rem;}
+.chantier-card{
+  display:flex;align-items:center;gap:.8rem;padding:.85rem .2rem;
+  border-bottom:1px solid var(--border);border:none;background:none;width:100%;text-align:left;
+}
+.chantier-card__icon{width:42px;height:42px;border-radius:var(--radius-s);background:var(--cream-200);
+  display:grid;place-items:center;font-size:1.15rem;flex-shrink:0;}
+.chantier-card__info{flex:1;min-width:0;}
+.chantier-card__title{font-weight:700;font-size:.9rem;margin:0 0 .1rem;}
+.chantier-card__meta{font-size:.76rem;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.urgence-tag{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;
+  padding:.22em .55em;border-radius:6px;flex-shrink:0;}
+.urgence-tag--faible{background:var(--success-bg);color:var(--success);}
+.urgence-tag--modere{background:var(--warning-bg);color:var(--warning);}
+.urgence-tag--urgent{background:var(--danger-bg);color:var(--danger);}
+.statut-tag{font-size:.64rem;font-weight:800;padding:.22em .55em;border-radius:6px;flex-shrink:0;
+  background:var(--cream-200);color:var(--navy-900);}
+
+/* ---- Vue "Mes missions" -------------------------------------------------- */
+.page{padding:calc(env(safe-area-inset-top,0px) + 4.6rem) 1.1rem 2rem;}
+.page h1{font-size:1.4rem;margin-bottom:1rem;}
+.tab-filter{display:flex;gap:.5rem;margin-bottom:1.1rem;overflow-x:auto;}
+.tab-filter button{
+  border:1.5px solid var(--border);background:#fff;border-radius:999px;
+  padding:.5em 1em;font-size:.8rem;font-weight:700;color:var(--muted);white-space:nowrap;flex-shrink:0;
+}
+.tab-filter button.is-active{background:var(--navy-950);border-color:var(--navy-950);color:var(--cream-100);}
+.mission-item{
+  background:#fff;border-radius:var(--radius-m);padding:1rem;margin-bottom:.8rem;
+  box-shadow:var(--shadow-card);border:none;width:100%;text-align:left;
+}
+.mission-item__top{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.4rem;}
+.mission-item__title{font-weight:700;font-size:.92rem;}
+.mission-item__addr{font-size:.8rem;color:var(--muted);}
+
+/* ---- Vue profil ------------------------------------------------------- */
+.profile-card{background:#fff;border-radius:var(--radius-m);padding:1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-card);}
+.profile-card h3{font-size:.95rem;margin-bottom:.9rem;}
+.profile-row{display:flex;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.profile-row:last-child{border-bottom:none;}
+.profile-row dt{color:var(--muted);}
+.profile-row dd{margin:0;font-weight:700;text-align:right;}
+.spec-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.3rem;}
+.spec-tag{background:var(--cream-200);color:var(--navy-900);font-size:.72rem;font-weight:700;padding:.25em .65em;border-radius:6px;}
+
+/* ---- Navigation basse ---------------------------------------------------- */
+.nav-bar{
+  height:64px;background:#fff;border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;align-items:center;
+  padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0;z-index:20;
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:.2rem;
+  background:none;border:none;color:var(--muted);font-size:.68rem;font-weight:700;padding:.4rem .8rem;
+}
+.nav-item svg{width:21px;height:21px;fill:currentColor;}
+.nav-item.is-active{color:var(--gold-500);}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--danger);position:relative;top:-14px;left:10px;display:none;}
+.nav-item .dot.show{display:block;}
+
+/* =========================================================================
+   MODALE MISSION
+   ========================================================================= */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;background:rgba(10,23,41,.6);
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.modal-overlay[hidden]{display:none;}
+@media (min-width:640px){.modal-overlay{align-items:center;}}
+.modal{
+  position:relative;background:#fff;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;
+  border-radius:var(--radius-l) var(--radius-l) 0 0;padding:1.6rem;
+  padding-bottom:calc(1.6rem + env(safe-area-inset-bottom,0px));
+  animation:slideUp .22s ease-out;
+}
+@media (min-width:640px){.modal{border-radius:var(--radius-l);}}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal__close{position:absolute;top:1rem;right:1rem;width:32px;height:32px;border-radius:50%;
+  border:none;background:var(--cream-200);font-size:.9rem;color:var(--navy-950);}
+.modal__title{font-size:1.3rem;margin-bottom:.3rem;padding-right:2rem;}
+.modal__meta{display:flex;gap:.5rem;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted);}
+.quote-company-card{padding:14px 16px;margin:0 0 1.1rem;border:1px solid var(--border);border-radius:12px;background:#f7f8fa}
+.quote-company-card strong{display:block;margin-bottom:7px;color:var(--navy-700)}
+.quote-company-card p{margin:4px 0;font-size:.9rem}
+.quote-company-card a{color:inherit}
+.quote-lines{display:grid;gap:.8rem;margin:.8rem 0}
+.quote-line{padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.quote-line-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-bottom:.6rem;color:var(--navy-700);font-weight:700}
+.quote-line-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.quote-line-grid .field{margin-bottom:.55rem}
+.quote-line-grid .wide{grid-column:1/-1}
+.quote-line-total{font-weight:800;text-align:right;color:var(--navy-950);padding:.35rem 0}
+.quote-total{display:flex;justify-content:space-between;padding:14px 0;margin:.6rem 0;border-top:2px solid var(--border);font-size:1.05rem;font-weight:800}
+@media(max-width:560px){.quote-line-grid{grid-template-columns:1fr 1fr}.quote-line-grid .wide{grid-column:1/-1}}
+.modal__section{margin-bottom:1.2rem;}
+.modal__section h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem;font-weight:700;}
+.modal__photos{display:flex;gap:.6rem;flex-wrap:wrap;}
+.modal__photos img{width:88px;height:88px;object-fit:cover;border-radius:var(--radius-s);}
+.action-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.8rem;}
+.btn-action{padding:.8em;border-radius:var(--radius-s);text-align:center;font-size:.8rem;font-weight:700;
+  text-decoration:none;display:flex;align-items:center;justify-content:center;gap:.4rem;
+  border:1.5px solid var(--border);background:#fff;color:var(--navy-950);}
+.btn-call{background:var(--success);color:#fff;border:none;}
+.btn-mail{background:var(--navy-950);color:var(--cream-100);border:none;}
+.progress-steps{display:flex;align-items:center;gap:.3rem;margin-bottom:1.2rem;}
+.progress-steps .seg{flex:1;height:5px;border-radius:999px;background:var(--border);}
+.progress-steps .seg.done{background:var(--gold-500);}
+.photo-zone{border:1.5px dashed var(--gold-500);background:var(--gold-100);padding:.9rem;border-radius:var(--radius-s);margin-bottom:1rem;}
+.photo-zone h5{font-size:.78rem;color:#6b4f22;margin-bottom:.5rem;font-weight:700;}
+.photo-zone input{font-size:.78rem;width:100%;}
+
+/* =========================================================================
+   TOASTS
+   ========================================================================= */
+#toast-region{position:fixed;top:calc(env(safe-area-inset-top,0px) + 1rem);left:1rem;right:1rem;
+  z-index:500;display:flex;flex-direction:column;gap:.5rem;align-items:center;pointer-events:none;}
+.toast{
+  background:var(--navy-950);color:var(--cream-100);padding:.75em 1.1em;border-radius:var(--radius-s);
+  font-size:.85rem;font-weight:600;box-shadow:0 10px 28px rgba(0,0,0,.25);max-width:420px;
+  display:flex;align-items:center;gap:.5em;animation:toast-in .2s ease-out;
+}
+.toast--success{background:var(--success);}
+.toast--error{background:var(--danger);}
+@keyframes toast-in{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:none;}}
+
+/* ---- Skeleton loading ---------------------------------------------------- */
+.skeleton{background:linear-gradient(90deg,var(--cream-200) 25%,#fff 37%,var(--cream-200) 63%);
+  background-size:400% 100%;animation:skeleton-loading 1.4s ease infinite;border-radius:var(--radius-s);}
+@keyframes skeleton-loading{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
+
+@media (max-width:360px){.field-row{grid-template-columns:1fr;}.action-grid-2{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-inner">
-    <div class="brand">
-      <div class="brand-mark" aria-hidden="true">E3</div>
-      <div class="brand-name">Entreprise 3</div>
-    </div>
-    <h1 class="header-title" id="header-title">Faire une<br><em>demande</em></h1>
-    <div class="profile-chip">
-      <span class="chip-dot" aria-hidden="true"></span>
-      <span id="header-profile-label">Sélectionnez votre profil</span>
-    </div>
+<div id="toast-region" role="status" aria-live="polite"></div>
+
+<!-- =====================================================================
+     CONNEXION
+     ===================================================================== -->
+<div id="login-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
+    <h1>Espace artisan</h1>
+    <p class="lead">Connectez-vous pour accéder aux chantiers disponibles en Île-de-France.</p>
+    <p class="form-error" id="login-error" hidden></p>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">E-mail professionnel</label>
+        <input type="email" id="login-email" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="login-pass">Mot de passe</label>
+        <input type="password" id="login-pass" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="login-btn">Se connecter</button>
+    </form>
+    <p class="auth-switch">Pas encore de compte ? <button type="button" onclick="afficherEcran('register')">S'inscrire avec un code partenaire</button></p>
   </div>
 </div>
 
-<div class="progress-wrap" aria-hidden="true">
-  <div class="step-track">
-    <div class="step-node active"><div class="sn-circle">1</div><div class="sn-label">Profil</div></div>
-    <div class="step-node"><div class="sn-circle">2</div><div class="sn-label">Lieu</div></div>
-    <div class="step-node"><div class="sn-circle">3</div><div class="sn-label">Besoin</div></div>
-    <div class="step-node"><div class="sn-circle">4</div><div class="sn-label">Contact</div></div>
+<!-- =====================================================================
+     INSCRIPTION
+     ===================================================================== -->
+<div id="register-screen" class="auth-screen" hidden>
+  <div class="auth-card">
+    <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
+    <h1>Rejoindre le réseau</h1>
+    <p class="lead">Votre dossier sera vérifié avant validation de votre accès aux chantiers.</p>
+    <p class="hint">Abonnement artisan : 60 € TTC par mois. Le prix des travaux et les modalités sont convenus directement entre l’artisan et le client.</p>
+    <p class="form-error" id="register-error" hidden></p>
+
+    <form id="register-form">
+      <fieldset>
+        <legend>Accès partenaire</legend>
+        <div class="field">
+          <label for="reg-code">Code d'accès partenaire</label>
+          <input type="text" id="reg-code" required placeholder="ENTREPRISE3" />
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Identifiants</legend>
+        <div class="field">
+          <label for="reg-email">E-mail</label>
+          <input type="email" id="reg-email" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="reg-pass">Mot de passe</label>
+          <input type="password" id="reg-pass" required minlength="8" autocomplete="new-password" />
+          <p class="hint">8 caractères minimum.</p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Entreprise</legend>
+        <div class="field">
+          <label for="reg-company">Nom de l'entreprise</label>
+          <input type="text" id="reg-company" required />
+        </div>
+        <div class="field">
+          <label for="reg-gerant">Nom du gérant</label>
+          <input type="text" id="reg-gerant" required />
+        </div>
+        <div class="field">
+          <label for="reg-tel">Téléphone</label>
+          <input type="tel" id="reg-tel" required />
+        </div>
+        <div class="field">
+          <label for="reg-siret">SIRET <span style="font-weight:400;">(facultatif)</span></label>
+          <input type="text" id="reg-siret" inputmode="numeric" pattern="[0-9]{14}" />
+        </div>
+        <div class="field">
+          <label>Spécialités</label>
+          <div class="chip-group" id="reg-specialites"></div>
+        </div>
+        <div class="field">
+          <label for="reg-zones">Zone d'intervention (départements)</label>
+          <input type="text" id="reg-zones" placeholder="75, 92, 93" required />
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Dossier de vérification</legend>
+        <div class="field">
+          <label for="doc-identite">Pièce d'identité du gérant</label>
+          <input type="file" id="doc-identite" class="file-field" accept="image/*,application/pdf" required />
+        </div>
+        <div class="field">
+          <label for="doc-decennale">Attestation d'assurance décennale</label>
+          <input type="file" id="doc-decennale" class="file-field" accept="image/*,application/pdf" required />
+        </div>
+        <div class="field">
+          <label for="doc-rcpro">Attestation RC Pro</label>
+          <input type="file" id="doc-rcpro" class="file-field" accept="image/*,application/pdf" required />
+        </div>
+        <div class="field">
+          <label for="doc-kbis">Extrait Kbis / justificatif d'activité</label>
+          <input type="file" id="doc-kbis" class="file-field" accept="image/*,application/pdf" required />
+        </div>
+      </fieldset>
+
+      <button type="submit" class="btn btn-gold btn-block" id="register-btn">Envoyer mon dossier</button>
+    </form>
+    <p class="auth-switch">Déjà inscrit ? <button type="button" onclick="afficherEcran('login')">Se connecter</button></p>
   </div>
 </div>
 
-<p id="global-error" role="alert"></p>
+<!-- =====================================================================
+     APPLICATION
+     ===================================================================== -->
+<div id="app-screen">
 
-<form id="wizard-form" novalidate>
+  <div class="views">
 
-<!-- ÉTAPE 1 — PROFIL -->
-<section class="section active" id="s1" aria-labelledby="s1-title">
-  <h2 class="section-title" id="s1-title">Quel lieu est concerné ?</h2>
-  <p class="section-sub">Choisissez le cas qui correspond le mieux.</p>
-
-  <div class="picker-grid" id="profile-grid" role="radiogroup" aria-label="Profil"></div>
-
-  <div class="subtoggle" id="particulier-toggle" hidden role="radiogroup" aria-label="Vous êtes">
-    <button type="button" data-v="proprietaire" onclick="pickOccupant(this)">Propriétaire</button>
-    <button type="button" data-v="locataire" onclick="pickOccupant(this)">Locataire</button>
-  </div>
-
-  <p class="grid-err" id="err-profile">Veuillez sélectionner un profil pour continuer.</p>
-</section>
-
-<!-- ÉTAPE 2 — LIEU -->
-<section class="section" id="s2" aria-labelledby="s2-title">
-  <h2 class="section-title" id="s2-title">Localisation</h2>
-  <p class="section-sub" id="sub-lieu">Précisez l'adresse concernée par la demande.</p>
-
-  <div class="field" id="field-nomsite">
-    <label for="nom_site" id="label-nomsite">Nom de la copropriété / résidence</label>
-    <input type="text" id="nom_site" placeholder="Ex : Résidence Les Tilleuls" autocomplete="organization" />
-  </div>
-
-  <div class="field ac-wrap">
-    <label for="adresse_lieu">Adresse</label>
-    <input type="text" id="adresse_lieu" placeholder="Commencez à taper : 12 rue de la Ré…" autocomplete="off"
-           role="combobox" aria-expanded="false" aria-controls="ac-list" aria-autocomplete="list" />
-    <ul id="ac-list" class="ac-list" role="listbox" hidden></ul>
-    <button type="button" class="geo-btn" id="geo-btn">📍 Utiliser ma position actuelle</button>
-    <p class="geo-msg" id="geo-msg" hidden></p>
-    <div id="mini-map" class="mini-map" hidden></div>
-    <p class="geo-ok" id="geo-ok" hidden>✓ Position confirmée — les artisans la verront sur la carte.</p>
-    <p class="field-err" id="err-adresse">Merci de renseigner l'adresse.</p>
-  </div>
-
-  <div class="field-row">
-    <div class="field">
-      <label for="code_postal">Code postal</label>
-      <input type="text" id="code_postal" inputmode="numeric" placeholder="75011" pattern="[0-9]{5}" />
-      <p class="field-err" id="err-cp">Code postal invalide.</p>
-    </div>
-    <div class="field">
-      <label for="ville">Ville</label>
-      <input type="text" id="ville" placeholder="Paris" />
-      <p class="field-err" id="err-ville">Merci d'indiquer la ville.</p>
-    </div>
-  </div>
-
-  <div class="field">
-    <label for="complement_lieu" id="label-complement">Bâtiment / étage / porte / lot <span class="optional-tag">(facultatif)</span></label>
-    <input type="text" id="complement_lieu" placeholder="Ex : Bâtiment B, 3ème étage, Lot 42" />
-  </div>
-
-  <div class="field">
-    <label for="acces_info">Accès / contact sur place <span class="optional-tag">(facultatif)</span></label>
-    <input type="text" id="acces_info" placeholder="Ex : digicode 1234A, gardien Mme Leroy, accès 8h-18h" maxlength="200" />
-    <p class="hint-small">Aide l'artisan à intervenir plus vite, sans vous rappeler.</p>
-  </div>
-</section>
-
-<!-- ÉTAPE 3 — BESOIN -->
-<section class="section" id="s3" aria-labelledby="s3-title">
-  <h2 class="section-title" id="s3-title">De quoi avez-vous besoin ?</h2>
-  <p class="section-sub">Choisissez une intervention directe ou demandez plusieurs devis, puis précisez les prestations.</p>
-
-  <div class="demand-type" id="demand-mode" role="radiogroup" aria-label="Mode de mise en relation">
-    <div class="demand-card sel" data-v="intervention" onclick="pickModeDemande(this)" role="radio" aria-checked="true" tabindex="0">
-      <div class="demand-icon">🤝</div><div class="demand-title">Trouver un artisan</div>
-      <div class="demand-sub">Un artisan intéressé prend en charge la demande.</div>
-    </div>
-    <div class="demand-card" data-v="devis" onclick="pickModeDemande(this)" role="radio" aria-checked="false" tabindex="0">
-      <div class="demand-icon">📄</div><div class="demand-title">Recevoir plusieurs devis</div>
-      <div class="demand-sub">Plusieurs entreprises peuvent répondre. Vous choisissez.</div>
-    </div>
-  </div>
-  <p class="section-sub">Le prix des travaux est proposé par les artisans et convenu directement avec l’entreprise choisie.</p>
-
-  <div class="demand-type" id="demand-type" role="radiogroup" aria-label="Type de demande">
-    <div class="demand-card sel" data-v="ponctuel" onclick="pickDemandType(this)" role="radio" aria-checked="true" tabindex="0">
-      <div class="demand-icon">⚡</div>
-      <div class="demand-title">Intervention ponctuelle</div>
-      <div class="demand-sub">Dépannage, réparation, besoin immédiat</div>
-    </div>
-    <div class="demand-card" data-v="recurrent" onclick="pickDemandType(this)" role="radio" aria-checked="false" tabindex="0">
-      <div class="demand-icon">🔁</div>
-      <div class="demand-title">Contrat d'entretien</div>
-      <div class="demand-sub">Nettoyage régulier, espaces verts, parties communes…</div>
-    </div>
-  </div>
-
-  <div id="prestations-container"></div>
-  <p class="grid-err" id="err-cat">Choisissez au moins une prestation.</p>
-
-  <div id="urgence-wrap" class="field" style="margin-top:6px;">
-    <label>Niveau d'urgence</label>
-    <div class="urg-row" id="urg-choices">
-      <div class="urg-card sel" data-u="faible" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-l)"></span><div class="cat-label">Faible</div></div>
-      <div class="urg-card" data-u="modere" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-m)"></span><div class="cat-label">Modéré</div></div>
-      <div class="urg-card" data-u="urgent" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-h)"></span><div class="cat-label">Urgent</div></div>
-    </div>
-  </div>
-
-  <div id="frequence-wrap" class="field" hidden>
-    <label>Fréquence souhaitée</label>
-    <div class="freq-row" id="freq-choices">
-      <div class="cat-card" data-f="hebdomadaire" onclick="pickFreq(this)"><span class="cat-label">1× / semaine</span></div>
-      <div class="cat-card" data-f="bihebdomadaire" onclick="pickFreq(this)"><span class="cat-label">2× / semaine</span></div>
-      <div class="cat-card" data-f="quotidienne" onclick="pickFreq(this)"><span class="cat-label">Quotidien</span></div>
-      <div class="cat-card" data-f="mensuelle" onclick="pickFreq(this)"><span class="cat-label">Mensuelle</span></div>
-      <div class="cat-card" data-f="trimestrielle" onclick="pickFreq(this)"><span class="cat-label">Tous les 3 mois</span></div>
-      <div class="cat-card" data-f="a_definir" onclick="pickFreq(this)"><span class="cat-label">À définir</span></div>
-    </div>
-    <label for="date_debut" style="margin-top:12px;">Démarrage souhaité <span class="optional-tag">(facultatif)</span></label>
-    <input type="date" id="date_debut" />
-  </div>
-
-  <div id="copro-details" class="field" hidden>
-    <h3 class="section-title" style="font-size:17px;margin-bottom:6px;">Informations sur la copropriété</h3>
-    <p class="section-sub">Partagez uniquement ce que vous connaissez. Ces précisions aideront l’entreprise à préparer son devis.</p>
-    <div class="field-row">
-      <div class="field">
-        <label for="copro-batiments">Nombre de bâtiments</label>
-        <input type="number" id="copro-batiments" min="1" inputmode="numeric" placeholder="Ex. 2" />
+    <!-- VUE CARTE ------------------------------------------------------ -->
+    <section id="view-map" class="view is-active">
+      <div class="top-bar">
+        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
+        <span class="status-pill" id="verif-pill">—</span>
       </div>
-      <div class="field">
-        <label for="copro-etages">Nombre d’étages</label>
-        <input type="number" id="copro-etages" min="0" inputmode="numeric" placeholder="Ex. 5" />
+      <p class="verify-banner" id="verify-banner" hidden></p>
+
+      <div id="map"></div>
+      <div class="map-toolbar" style="top:76px;" id="category-toolbar"></div>
+      <button class="locate-btn" style="right:1rem; bottom:calc(46% + 4.3rem);" id="locate-btn" title="Me localiser" aria-label="Centrer la carte sur ma position">📍</button>
+      <button class="locate-btn" style="right:1rem; bottom:calc(46% + 1rem);" id="fit-btn" title="Voir tous les chantiers" aria-label="Recentrer la carte sur tous les chantiers">🗺️</button>
+      <div class="map-legend" id="map-legend">
+        <span><i class="dot dot--urgent"></i>Urgent</span>
+        <span><i class="dot dot--modere"></i>Modéré</span>
+        <span><i class="dot dot--faible"></i>Faible</span>
       </div>
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label for="copro-cages">Cages d’escalier</label>
-        <input type="number" id="copro-cages" min="0" inputmode="numeric" placeholder="Ex. 3" />
+
+      <section class="bottom-sheet" id="bottom-sheet" aria-label="Liste des chantiers disponibles">
+        <div class="bottom-sheet__handle"></div>
+        <div class="bottom-sheet__header">
+          <h2>Chantiers disponibles</h2>
+          <span class="badge-count" id="chantiers-count">0</span>
+        </div>
+        <div class="sheet-toolbar">
+          <div class="sort-toggle" id="sort-toggle" role="radiogroup" aria-label="Trier par">
+            <button type="button" data-sort="recent" class="is-active">Récents</button>
+            <button type="button" data-sort="distance">Proches</button>
+          </div>
+          <button type="button" class="urgent-toggle" id="urgent-toggle" aria-pressed="false">🔥 Urgents</button>
+        </div>
+        <div class="chantier-list" id="chantier-list"></div>
+      </section>
+    </section>
+
+    <!-- VUE MES MISSIONS ------------------------------------------------ -->
+    <section id="view-missions" class="view">
+      <div class="top-bar">
+        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Mes missions</span></div>
       </div>
-      <div class="field">
-        <label for="copro-lots">Lots / logements</label>
-        <input type="number" id="copro-lots" min="1" inputmode="numeric" placeholder="Ex. 40" />
+      <div class="page">
+        <div class="tab-filter" id="missions-filter">
+          <button data-filter="actif" class="is-active">En cours</button>
+          <button data-filter="termine">Terminées</button>
+          <button data-filter="tous">Toutes</button>
+        </div>
+        <div id="missions-list"></div>
       </div>
-    </div>
-    <div class="field">
-      <label for="copro-ascenseurs">Nombre d’ascenseurs</label>
-      <input type="number" id="copro-ascenseurs" min="0" inputmode="numeric" placeholder="Ex. 2" />
-    </div>
-    <div class="field">
-      <label>Zones communes concernées <span class="optional-tag">(plusieurs choix possibles)</span></label>
-      <div class="copro-area-list" id="copro-areas">
-        <label><input type="checkbox" value="Hall d'entrée"> Hall d'entrée</label>
-        <label><input type="checkbox" value="Escaliers et couloirs"> Escaliers et couloirs</label>
-        <label><input type="checkbox" value="Ascenseur"> Ascenseur</label>
-        <label><input type="checkbox" value="Local poubelles"> Local poubelles</label>
-        <label><input type="checkbox" value="Parking"> Parking</label>
-        <label><input type="checkbox" value="Espaces verts"> Espaces verts</label>
-        <label><input type="checkbox" value="Autre partie commune"> Autre partie commune</label>
+    </section>
+
+    <!-- VUE PROFIL -------------------------------------------------------- -->
+    <section id="view-profile" class="view">
+      <div class="top-bar">
+        <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Mon profil</span></div>
+        <button class="btn btn-ghost btn-sm" id="logout-btn">Déconnexion</button>
       </div>
-    </div>
-    <div class="field" id="copro-contract-base" hidden>
-      <label for="copro-contrat-actuel">Avez-vous déjà un contrat en cours ?</label>
-      <select id="copro-contrat-actuel" onchange="document.getElementById('copro-contract-end-wrap').hidden = this.value !== 'oui'">
-        <option value="">Je ne sais pas / je préfère préciser plus tard</option>
-        <option value="oui">Oui</option>
-        <option value="non">Non</option>
-      </select>
-      <div id="copro-contract-end-wrap" hidden style="margin-top:10px;">
-        <label for="copro-fin-contrat">Date de fin du contrat actuel <span class="optional-tag">(facultatif)</span></label>
-        <input type="date" id="copro-fin-contrat" />
-      </div>
-      <label for="copro-visite" style="margin-top:12px;">Une visite sur place est-elle possible ?</label>
-      <select id="copro-visite">
-        <option value="a_convenir">À convenir avec l’entreprise</option>
-        <option value="oui">Oui</option>
-        <option value="non">Non</option>
-      </select>
-    </div>
-    <div id="copro-multiservice-wrap" class="field" hidden>
-      <label class="consent"><input type="checkbox" id="copro-multiservice" />
-        <span>Je souhaite, si possible, recevoir une proposition regroupant plusieurs prestations.</span>
-      </label>
-    </div>
-    <div id="syndic-service-details"></div>
-    <p class="grid-err" id="err-syndic-scope">Pour chaque service sélectionné, cochez au moins une opération à chiffrer.</p>
+      <div class="page" id="profile-page"></div>
+    </section>
+
   </div>
 
-  <div class="field" id="field-surface">
-    <label for="surface_m2">Surface approximative en m² <span class="optional-tag">(facultatif)</span></label>
-    <input type="number" id="surface_m2" min="0" inputmode="numeric" placeholder="Ex : 350" />
-  </div>
-
-  <div class="field">
-    <label for="desc">Description</label>
-    <textarea id="desc" rows="4" maxlength="600" placeholder="Détaillez votre besoin : nature du problème, fréquence souhaitée, contraintes d'accès..."></textarea>
-    <p class="char-count"><span id="desc-count">0</span>/600</p>
-    <p class="field-err" id="err-desc">Merci de décrire votre besoin.</p>
-  </div>
-
-  <div class="field">
-    <label for="photos">Photos <span class="optional-tag">(jusqu'à 3, facultatif)</span></label>
-    <label class="file-btn" for="photos">📷 Ajouter des photos</label>
-    <input type="file" id="photos" accept="image/*" capture="environment" multiple hidden />
-    <div id="preview-wrap"></div>
-  </div>
-</section>
-
-<!-- ÉTAPE 4 — CONTACT -->
-<section class="section" id="s4" aria-labelledby="s4-title">
-  <h2 class="section-title" id="s4-title">Vos coordonnées</h2>
-  <p class="section-sub">Pour permettre à un artisan intéressé de vous contacter au sujet de votre demande.</p>
-
-  <div class="field-row">
-    <div class="field">
-      <label for="prenom">Prénom</label>
-      <input type="text" id="prenom" autocomplete="given-name" />
-    </div>
-    <div class="field">
-      <label for="nom">Nom</label>
-      <input type="text" id="nom" autocomplete="family-name" />
-    </div>
-  </div>
-
-  <div class="field">
-    <label for="tel">Téléphone direct</label>
-    <input type="tel" id="tel" placeholder="06 00 00 00 00" autocomplete="tel" />
-  </div>
-
-  <div class="field">
-    <label for="email">E-mail <span id="email-optional-tag" class="optional-tag">(facultatif)</span></label>
-    <input type="email" id="email" placeholder="contact@domaine.com" autocomplete="email" />
-  </div>
-
-  <label class="consent">
-    <input type="checkbox" id="consent" />
-    <span>J'accepte que mes coordonnées soient utilisées pour traiter cette demande et, si je demande plusieurs devis, transmises aux artisans qui répondent. Elles ne seront communiquées qu'à l'artisan retenu pour une demande d'intervention directe.</span>
-  </label>
-
-  <p class="grid-err" id="err-contact">Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.</p>
-</section>
-
-<!-- ÉTAPE 5 — RÉCAPITULATIF -->
-<section class="section" id="s5" aria-labelledby="s5-title">
-  <h2 class="section-title" id="s5-title">Vérifiez votre demande</h2>
-  <p class="section-sub">Relisez les informations avant l'envoi.</p>
-  <div id="summary"></div>
-  <p class="section-sub">Le prix des travaux et les modalités d’intervention seront convenus directement entre vous et l’artisan.</p>
-</section>
-
-<!-- ÉTAPE 6 — CONFIRMATION -->
-<section class="section" id="s6">
-  <div class="confirm-wrap">
-    <div class="confirm-badge" aria-hidden="true">✓</div>
-    <h2>Demande transmise</h2>
-    <p>Votre dossier a bien été envoyé à notre réseau d'artisans et prestataires en Île-de-France.</p>
-    <div class="ref-box">
-      <div class="lbl">Référence du dossier</div>
-      <div class="val" id="ticket-number">—</div>
-    </div>
-    <p class="confirm-note" id="confirm-note"></p>
-    <a id="tracking-link" class="btn btn-primary" hidden style="margin:12px auto 0;max-width:320px;" target="_blank" rel="noopener">🔐 Voir et comparer mes devis</a>
-    <p class="section-sub" id="tracking-hint" hidden>Gardez ce lien privé : il permet de suivre votre demande.</p>
-    <button type="button" class="btn btn-copy" id="copy-ref" onclick="copyRef()">📋 Copier la référence</button>
-    <button type="button" class="btn btn-primary" style="margin:14px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
-  </div>
-</section>
-
-<div class="nav-wrap" id="nav-wrap">
-  <button type="button" class="btn btn-back" id="btn-back" onclick="prevStep()" style="display:none" aria-label="Étape précédente">←</button>
-  <button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer</button>
+  <!-- NAVIGATION BASSE -->
+  <nav class="nav-bar" aria-label="Navigation principale">
+    <button class="nav-item is-active" data-view="map" aria-current="page">
+      <svg viewBox="0 0 24 24"><path d="M12 2.1L1 12h3v9h7v-6h2v6h7v-9h3L12 2.1zm0 2.9l6 5.4v7.6h-3v-6H9v6H6v-7.6l6-5.4z"/></svg>
+      Chantiers
+    </button>
+    <button class="nav-item" data-view="missions">
+      <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+      Missions<span class="dot" id="missions-dot"></span>
+    </button>
+    <button class="nav-item" data-view="profile">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Profil
+    </button>
+  </nav>
 </div>
 
-<p style="text-align:center;font-size:11px;color:#8896a8;padding:6px 0 18px;">Version du formulaire : v4 — adresse intelligente</p>
-</form>
+<!-- =====================================================================
+     MODALE DÉTAIL MISSION
+     ===================================================================== -->
+<div class="modal-overlay" id="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal__close" id="modal-close" aria-label="Fermer">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* =========================================================================
-   CONFIGURATION SUPABASE (même projet que l'espace artisan)
+   CONFIGURATION SUPABASE
    ========================================================================= */
 const SUPABASE_URL = 'https://yqjeqcomrubelahrvizd.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_hKaiVb_fWBPRgESxpwWNCA_iAN9acMe';
+const CODE_PARTENAIRE = 'ENTREPRISE3';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const INTERVENTION_PUBLIC_COLUMNS = 'id,reference,zone,adresse,code_postal,ville,etage,categorie,urgence,description,photos,statut,artisan_id,assigned_at,updated_at,profil_demandeur,profil_structure,nom_site,prestations,type_demande,frequence,date_debut_souhaitee,surface_m2,created_at,latitude,longitude,mode_demande';
 
-/* =========================================================================
-   RÉFÉRENTIEL PROFILS
-   ========================================================================= */
-const PROFILES = [
-  { v:'gestionnaire_immo', icon:'🏢', label:'Syndic / Agence immobilière', desc:'Copropriété, résidence, biens en gestion', profil_demandeur:'gestionnaire' },
-  { v:'commerce',          icon:'🏬', label:'Commerce / Boutique', desc:'Magasin, restaurant, local pro', profil_demandeur:'gestionnaire' },
-  { v:'bureau_entreprise', icon:'🏛️', label:'Bureau / Entreprise', desc:'Locaux professionnels', profil_demandeur:'gestionnaire' },
-  { v:'etablissement',     icon:'🏢', label:'Établissement', desc:'Mairie, cabinet médical, association…', profil_demandeur:'gestionnaire' },
-  { v:'particulier',       icon:'🏠', label:'Particulier', desc:'Logement personnel', profil_demandeur:null },
+const CATEGORIES = [
+  { value:'plomberie', label:'Plomberie', icone:'🔧' },
+  { value:'electricite', label:'Électricité', icone:'⚡' },
+  { value:'chauffage', label:'Chauffage / chaudière', icone:'🔥' },
+  { value:'ascenseur', label:'Ascenseur', icone:'🛗' },
+  { value:'vmc', label:'VMC', icone:'🌬️' },
+  { value:'interphone', label:'Interphone', icone:'📞' },
+  { value:'portes_portails', label:'Portes / portails', icone:'🚪' },
+  { value:'portes', label:'Portes', icone:'🚪' },
+  { value:'serrurerie', label:'Serrurerie', icone:'🔑' },
+  { value:'controle_acces', label:'Contrôle d’accès', icone:'🔐' },
+  { value:'vitrerie', label:'Vitrerie', icone:'🪟' },
+  { value:'menage', label:'Ménage / nettoyage', icone:'🧹' },
+  { value:'proprete', label:'Propreté', icone:'🧹' },
+  { value:'nettoyage_vitrine', label:'Nettoyage des vitres', icone:'✨' },
+  { value:'espaces_verts', label:'Espaces verts', icone:'🌳' },
+  { value:'desherbage', label:'Désherbage', icone:'🌿' },
+  { value:'parking', label:'Parking', icone:'🅿️' },
+  { value:'piscine', label:'Piscine', icone:'🏊' },
+  { value:'camera', label:'Vidéosurveillance', icone:'📷' },
+  { value:'incendie', label:'Sécurité incendie', icone:'🧯' },
+  { value:'deratisation', label:'Dératisation', icone:'🐀' },
+  { value:'desinsectisation', label:'Désinsectisation', icone:'🪳' },
+  { value:'desinfection', label:'Désinfection', icone:'🧴' },
+  { value:'debarras', label:'Débarras', icone:'🗑️' },
+  { value:'peinture', label:'Peinture / sols', icone:'🎨' },
+  { value:'renovation', label:'Rénovation', icone:'🏗️' },
+  { value:'agencement', label:'Agencement', icone:'🧰' },
+  { value:'toiture_terrasse', label:'Toiture / terrasse', icone:'🏠' },
+  { value:'petits_travaux', label:'Petits travaux', icone:'🧰' },
+  { value:'autre', label:'Autre', icone:'✨' },
 ];
-
-/* =========================================================================
-   RÉFÉRENTIEL DES PRESTATIONS (groupées)
-   ========================================================================= */
-const SERVICE_GROUPS = {
-  technique:  { label:'Dépannage & maintenance technique', items:[
-    {v:'plomberie', l:'Plomberie', i:'💧'}, {v:'electricite', l:'Électricité', i:'⚡'},
-    {v:'chauffage', l:'Chauffage / Clim', i:'🔥'}, {v:'serrurerie', l:'Serrurerie', i:'🔑'},
-    {v:'ascenseur', l:'Ascenseur', i:'🛗'}, {v:'vmc', l:'VMC', i:'🌬️'},
-    {v:'portes_portails', l:'Portes / Portails', i:'🚪'}, {v:'interphone', l:'Interphone', i:'📟'},
-    {v:'vitrerie', l:'Vitrerie', i:'🪟'},
-  ]},
-  entretien:  { label:'Entretien courant & propreté', items:[
-    {v:'menage', l:'Ménage / Nettoyage', i:'🧹'}, {v:'nettoyage_vitrine', l:'Nettoyage vitrines', i:'✨'},
-    {v:'espaces_verts', l:'Espaces verts', i:'🌳'}, {v:'desherbage', l:'Désherbage', i:'🌿'},
-    {v:'parking', l:'Parking', i:'🅿️'}, {v:'piscine', l:'Piscine', i:'🏊'},
-  ]},
-  nuisibles:  { label:'Nuisibles & hygiène', items:[
-    {v:'deratisation', l:'Dératisation', i:'🐀'}, {v:'desinsectisation', l:'Désinsectisation', i:'🪳'},
-    {v:'desinfection', l:'Désinfection', i:'🧴'}, {v:'debarras', l:'Débarras', i:'🗑️'},
-  ]},
-  travaux:    { label:'Travaux & rénovation', items:[
-    {v:'peinture', l:'Peinture / Sols', i:'🎨'}, {v:'renovation', l:'Rénovation', i:'🔨'},
-    {v:'agencement', l:'Agencement local', i:'🏗️'}, {v:'toiture_terrasse', l:'Toiture / Terrasse', i:'🏠'},
-    {v:'petits_travaux', l:'Petits travaux', i:'🧰'},
-  ]},
-  securite:   { label:'Sécurité', items:[
-    {v:'camera', l:'Vidéosurveillance', i:'📷'}, {v:'controle_acces', l:'Contrôle d\'accès', i:'🔐'},
-    {v:'incendie', l:'Sécurité incendie', i:'🧯'},
-  ]},
-  autre:      { label:'Autre besoin', items:[{v:'autre', l:'Autre', i:'❓'}] },
+const URGENCES = {
+  faible:{ label:'Faible' }, modere:{ label:'Modéré' }, urgent:{ label:'Urgent' }
 };
-
-// Questions de chiffrage affichées uniquement pour les prestations choisies par un syndic.
-const SYNDIC_SCOPE_CONFIG = {
-  menage:{title:'Nettoyage des parties communes',checks:['Halls','Escaliers','Paliers et couloirs','Ascenseurs','Vitres','Sortie / rentrée des poubelles','Locaux poubelles','Parkings','Autres zones'],fields:[['passages_semaine','Passages par semaine souhaités','number','Ex. 2']]},
-  espaces_verts:{title:'Entretien des espaces verts',checks:['Tonte','Taille des haies','Taille des arbres','Désherbage','Entretien des massifs','Ramassage des feuilles','Évacuation des déchets verts'],fields:[['surface_verts','Surface approximative en m²','number','Ex. 500'],['type_verts','Types d’espaces verts','text','Pelouse, haies, massifs, arbres…']]},
-  chauffage:{title:'Chaudière / chauffage collectif',checks:['Entretien annuel','Maintenance préventive','Dépannage inclus','Astreinte souhaitée','Production d’eau chaude'],fields:[['type_chaudiere','Type de chaudière / énergie','text','Ex. gaz, fioul, réseau de chaleur'],['nb_chaudieres','Nombre de chaudières','number',''],['puissance_chauffage','Puissance connue (facultatif)','text','Ex. 250 kW'],['nb_logements_chauffage','Nombre de logements desservis','number',''],['contrat_chauffage','Contrat actuel','select','Aucun|Oui|Ne sait pas'],['fin_contrat_chauffage','Fin du contrat actuel (si connue)','date','']]},
-  vmc:{title:'Entretien de la VMC',checks:['Nettoyage des gaines','Nettoyage des bouches','Vérification des moteurs','Contrôle du fonctionnement'],fields:[['type_vmc','Type de VMC','select','Simple flux|Double flux|Ne sait pas'],['nb_systemes_vmc','Nombre de systèmes','number',''],['derniere_vmc','Date de la dernière intervention (si connue)','date','']]},
-  portes_portails:{title:'Portes et portails',checks:['Contrôle des moteurs','Contrôle des télécommandes','Réglages','Graissage','Dépannage inclus','Astreinte souhaitée'],fields:[['nb_portes','Nombre de portes','number',''],['nb_portails','Nombre de portails','number',''],['type_portes_portails','Fonctionnement','select','Automatique|Manuel|Les deux|Ne sait pas']]},
-  ascenseur:{title:'Entretien des ascenseurs',checks:['Maintenance préventive','Dépannage','Astreinte 24 h/24','Contrôle réglementaire'],fields:[['nb_ascenseurs','Nombre d’ascenseurs','number',''],['niveaux_ascenseurs','Niveaux desservis','number',''],['marque_ascenseurs','Marque / modèle (si connu)','text',''],['contrat_ascenseur','Contrat actuel','select','Aucun|Oui|Ne sait pas'],['fin_contrat_ascenseur','Fin du contrat actuel (si connue)','date','']]},
-  toiture_terrasse:{title:'Toiture / terrasse',checks:['Contrôle de l’étanchéité','Nettoyage des évacuations d’eau','Nettoyage des gouttières','Recherche de fuite','Inspection annuelle'],fields:[['type_toiture','Type','select','Toiture|Terrasse|Les deux'],['surface_toiture','Surface approximative en m²','number',''],['couverture_toiture','Type de couverture (si connu)','text','']]},
-  plomberie:{title:'Plomberie des parties communes',checks:['Recherche de fuite','Contrôle des canalisations','Entretien des colonnes','Débouchage','Intervention d’urgence','Astreinte souhaitée'],fields:[['installation_plomberie','Installation','select','Collective|Individuelle|Les deux|Ne sait pas'],['nb_logements_plomberie','Nombre de logements concernés','number','']]},
-  electricite:{title:'Électricité des parties communes',checks:['Éclairage des parties communes','Éclairage extérieur','Éclairage du parking','Contrôle du tableau électrique','Remplacement des ampoules / LED','Vérification des installations','Dépannage','Contrat annuel souhaité'],fields:[['nb_batiments_electricite','Nombre de bâtiments concernés','number',''],['nb_cages_electricite','Nombre de cages d’escalier','number','']]},
-  incendie:{title:'Sécurité incendie',checks:['Extincteurs','BAES','Désenfumage','Portes coupe-feu','Alarmes incendie','Vérifications périodiques','Maintenance','Rapport d’intervention'],fields:[['nb_equipements_incendie','Nombre d’équipements (si connu)','number',''],['nb_etages_incendie','Nombre d’étages concernés','number','']]},
-  parking:{title:'Entretien du parking',checks:['Nettoyage','Lavage','Éclairage','Portail automatique','Ventilation','Signalétique','Nettoyage des caniveaux'],fields:[['nb_places_parking','Nombre de places (si connu)','number',''],['type_parking','Type de parking','select','Intérieur|Extérieur|Les deux']]},
-  deratisation:{title:'Dératisation / désinsectisation',checks:['Rats / souris','Cafards','Fourmis','Punaises','Autres nuisibles','Intervention ponctuelle','Contrat annuel'],fields:[['zones_nuisibles','Zones concernées','text','Ex. caves, locaux poubelles, logements'],['nb_logements_nuisibles','Nombre de logements concernés (si connu)','number','']]},
-  desinsectisation:{title:'Désinsectisation',checks:['Cafards','Fourmis','Punaises','Autres insectes','Intervention ponctuelle','Contrat annuel'],fields:[['zones_insectes','Zones concernées','text','Ex. caves, locaux poubelles, logements']]},
-  piscine:{title:'Entretien de la piscine',checks:['Nettoyage','Traitement de l’eau','Contrôle du pH','Contrôle du chlore','Entretien de la filtration','Mise en service','Hivernage'],fields:[['type_piscine','Type de piscine','select','Intérieure|Extérieure|Les deux'],['volume_piscine','Dimensions / volume (si connu)','text','Ex. 10 × 5 m ou 60 m³']]},
-  petits_travaux:{title:'Petits travaux des espaces communs',checks:['Peinture','Plâtrerie','Petite plomberie','Petite électricité','Remplacement de serrures','Remplacement de luminaires','Réparation de portes','Réparation de murs / sols','Autres travaux'],fields:[]},
-  renovation:{title:'Travaux / rénovation des espaces communs',checks:['Peinture','Sols','Murs / plâtrerie','Plomberie','Électricité','Portes / serrures','Autre'],fields:[['surface_travaux','Surface approximative en m² (si connue)','number','']]},
-  multi_service:{title:'Contrat multiservices',checks:['Nettoyage','Espaces verts','Plomberie','Électricité','Chauffage','VMC','Portes / portails','Ascenseur','Parking','Petits travaux','Autre'],fields:[]},
-};
-SYNDIC_SCOPE_CONFIG.nettoyage_vitrine = {...SYNDIC_SCOPE_CONFIG.menage, title:'Nettoyage des vitres'};
-SYNDIC_SCOPE_CONFIG.desherbage = {...SYNDIC_SCOPE_CONFIG.espaces_verts, title:'Désherbage des espaces verts'};
-SYNDIC_SCOPE_CONFIG.serrurerie = {...SYNDIC_SCOPE_CONFIG.portes_portails, title:'Serrurerie et portes'};
-SYNDIC_SCOPE_CONFIG.controle_acces = {...SYNDIC_SCOPE_CONFIG.portes_portails, title:'Contrôle d’accès'};
-SYNDIC_SCOPE_CONFIG.peinture = {...SYNDIC_SCOPE_CONFIG.petits_travaux, title:'Peinture / sols'};
-SYNDIC_SCOPE_CONFIG.agencement = {...SYNDIC_SCOPE_CONFIG.petits_travaux, title:'Agencement des espaces communs'};
-SYNDIC_SCOPE_CONFIG.interphone = {title:'Interphone', checks:['Contrôle du fonctionnement','Entretien des postes','Vérification des accès','Dépannage'], fields:[['nb_interphones','Nombre d’équipements','number',''],['type_interphone','Type / modèle (si connu)','text','']]};
-SYNDIC_SCOPE_CONFIG.vitrerie = {title:'Vitrerie des parties communes', checks:['Nettoyage des vitres','Nettoyage des verrières','Nettoyage des vitres difficiles d’accès'], fields:[['nb_vitres','Nombre ou surface approximative','text','À préciser']]};
-SYNDIC_SCOPE_CONFIG.desinfection = {...SYNDIC_SCOPE_CONFIG.deratisation, title:'Désinfection des parties communes'};
-SYNDIC_SCOPE_CONFIG.camera = {title:'Vidéosurveillance', checks:['Vérification des caméras','Contrôle de l’enregistrement','Entretien / nettoyage','Dépannage'], fields:[['nb_cameras','Nombre de caméras (si connu)','number','']]};
-SYNDIC_SCOPE_CONFIG.autre = {title:'Autre prestation d’entretien', checks:[], fields:[['autre_prestation','Précisez la prestation souhaitée','text','']]};
-
-// Ordre des groupes affichés selon le profil (les plus pertinents en premier)
-const PROFILE_GROUP_ORDER = {
-  gestionnaire_immo: ['entretien','travaux','technique','nuisibles','securite','autre'],
-  commerce:          ['entretien','securite','technique','travaux','nuisibles','autre'],
-  bureau_entreprise: ['entretien','securite','technique','nuisibles','travaux','autre'],
-  etablissement:     ['entretien','nuisibles','securite','technique','travaux','autre'],
-  particulier:       ['technique','travaux','nuisibles','autre'],
-};
-
-const HEADER_TITLES = {
-  gestionnaire_immo:'Demande pour<br><em>votre immeuble ou bien en gestion</em>',
-  commerce:'Demande pour<br><em>votre commerce</em>',
-  bureau_entreprise:'Demande pour<br><em>vos locaux</em>',
-  etablissement:'Demande pour<br><em>votre établissement</em>',
-  particulier:'Faire une<br><em>demande</em>',
-};
-const NOMSITE_LABELS = {
-  gestionnaire_immo:'Nom de la copropriété / résidence / agence',
-  commerce:'Enseigne du commerce',
-  bureau_entreprise:"Nom de l'entreprise",
-  etablissement:"Nom de l'établissement",
-};
-const COMPLEMENT_LABELS = {
-  gestionnaire_immo:'Bâtiment / étage / local / référence du bien',
-  commerce:'Étage / local commercial',
-  bureau_entreprise:'Bâtiment / étage / bureau',
-  etablissement:'Bâtiment / salle / accès',
-  particulier:"Étage / n° d'appartement / interphone",
+const STATUTS = {
+  nouveau:'Disponible', assigne:'Assignée', en_cours:'En cours', termine:'Terminée', annule:'Annulée'
 };
 
 /* =========================================================================
-   ÉTAT
+   TOASTS
    ========================================================================= */
-let step = 1;
-const TOTAL_NODES = 4;
-let photoFiles = [];
-let selectedPrestations = new Set();
-let data = {
-  profile:null, occupant:null,
-  demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null,
-};
+function toast(message, type = 'info') {
+  const region = document.getElementById('toast-region');
+  const el = document.createElement('div');
+  el.className = `toast toast--${type}`;
+  el.textContent = message;
+  region.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; setTimeout(() => el.remove(), 250); }, 3200);
+}
 
 /* =========================================================================
-   ÉTAPE 1 — PROFIL
+   ÉTAT GLOBAL
    ========================================================================= */
-(function initProfiles() {
-  const grid = document.getElementById('profile-grid');
-  grid.innerHTML = PROFILES.map(p => `
-    <button type="button" class="picker-card" data-v="${p.v}" role="radio" aria-checked="false" onclick="selectProfile('${p.v}', this)">
-      <span class="picker-icon" aria-hidden="true">${p.icon}</span>
-      <span class="picker-label">${p.label}</span>
-      <span class="picker-desc">${p.desc}</span>
-    </button>`).join('');
+let currentArtisan = null;
+let map = null;
+let markers = new Map();
+let userMarker = null;
+let userPosition = null;
+let interventions = [];
+let missions = [];
+let categorieFiltre = null;
+let missionsFiltre = 'actif';
+let sortMode = 'recent';
+let urgentOnly = false;
+let hasAutoFit = false;
+
+/* =========================================================================
+   NAVIGATION AUTH <-> APP
+   ========================================================================= */
+function afficherEcran(mode) {
+  document.getElementById('login-screen').hidden = mode !== 'login';
+  document.getElementById('register-screen').hidden = mode !== 'register';
+}
+
+// Chips de spécialités à l'inscription
+const selectedSpecialites = new Set();
+(function initSpecialitesChips() {
+  const container = document.getElementById('reg-specialites');
+  container.innerHTML = CATEGORIES.filter(c => c.value !== 'autre').map(c =>
+    `<button type="button" class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`
+  ).join('');
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    btn.classList.toggle('is-selected');
+    btn.classList.contains('is-selected') ? selectedSpecialites.add(btn.dataset.value) : selectedSpecialites.delete(btn.dataset.value);
+  });
 })();
 
-function selectProfile(value, el) {
-  document.querySelectorAll('#profile-grid .picker-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.profile = value;
-  selectedPrestations.clear();
-  document.getElementById('err-profile').classList.remove('show');
-
-  const meta = PROFILES.find(p => p.v === value);
-  document.getElementById('header-profile-label').textContent = meta.label;
-  document.getElementById('header-title').innerHTML = HEADER_TITLES[value];
-
-  const particulierToggle = document.getElementById('particulier-toggle');
-  particulierToggle.hidden = value !== 'particulier';
-  if (value !== 'particulier') data.occupant = null;
-
-  const recurrentCard = document.querySelector('#demand-type [data-v="recurrent"]');
-  recurrentCard.hidden = value === 'particulier';
-  document.getElementById('copro-details').hidden = value !== 'gestionnaire_immo';
-  if (value === 'particulier' && data.demandType === 'recurrent') {
-    pickDemandType(document.querySelector('#demand-type [data-v="ponctuel"]'));
-    data.frequence = null;
-  }
-
-  document.getElementById('label-nomsite').textContent = NOMSITE_LABELS[value] || "Nom (facultatif)";
-  document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
-  document.getElementById('label-complement').innerHTML = `${COMPLEMENT_LABELS[value] || 'Complément'} <span class="optional-tag">(facultatif)</span>`;
-
-  document.getElementById('sub-lieu').textContent = value === 'particulier'
-    ? 'Indiquez l\'adresse où se situe le problème.'
-    : "Indiquez l'adresse exacte de l'intervention.";
-  document.getElementById('desc').placeholder = value === 'gestionnaire_immo'
-    ? 'Décrivez le besoin, les contraintes d’accès, les horaires possibles ou le cahier des charges…'
-    : value === 'particulier'
-      ? 'Décrivez le problème : ce qui ne fonctionne pas, depuis quand, et ce que vous avez constaté…'
-      : 'Décrivez le besoin, les horaires d’accès et les éventuelles contraintes du lieu…';
-
-  renderPrestations();
-  renderSyndicServiceDetails();
-}
-
-function pickOccupant(el) {
-  document.querySelectorAll('#particulier-toggle button').forEach(b => b.classList.remove('sel'));
-  el.classList.add('sel');
-  data.occupant = el.dataset.v;
-}
-
 /* =========================================================================
-   ÉTAPE 3 — PRESTATIONS, TYPE DE DEMANDE, URGENCE/FRÉQUENCE
+   CONNEXION
    ========================================================================= */
-function pickModeDemande(el) {
-  document.querySelectorAll('#demand-mode .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.modeDemande = el.dataset.v;
-}
-document.querySelectorAll('#demand-mode .demand-card').forEach(card => {
-  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  errorEl.hidden = true;
+  btn.disabled = true; btn.textContent = 'Connexion…';
+
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-pass').value;
+
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    errorEl.textContent = 'Identifiants invalides. Vérifiez votre e-mail et mot de passe.';
+    errorEl.hidden = false;
+    btn.disabled = false; btn.textContent = 'Se connecter';
+    return;
+  }
+  await lancerApplication();
 });
 
-function pickDemandType(el) {
-  document.querySelectorAll('#demand-type .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.demandType = el.dataset.v;
-  document.getElementById('urgence-wrap').hidden = data.demandType !== 'ponctuel';
-  document.getElementById('frequence-wrap').hidden = data.demandType !== 'recurrent';
-  document.getElementById('copro-details').hidden = data.profile !== 'gestionnaire_immo';
-  renderSyndicServiceDetails();
-}
-document.querySelectorAll('#demand-type .demand-card').forEach(card => {
-  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
-});
-
-function pickUrg(el) {
-  document.querySelectorAll('#urg-choices .urg-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  data.urgence = el.dataset.u;
-}
-function pickFreq(el) {
-  document.querySelectorAll('#freq-choices .cat-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  data.frequence = el.dataset.f;
-}
-
-function renderPrestations() {
-  const order = PROFILE_GROUP_ORDER[data.profile] || Object.keys(SERVICE_GROUPS);
-  const container = document.getElementById('prestations-container');
-  container.innerHTML = order.map(groupId => {
-    const group = SERVICE_GROUPS[groupId];
-    return `
-    <div class="service-group">
-      <div class="service-group-title">${group.label}</div>
-      <div class="cat-grid">
-        ${group.items.map(it => `
-          <button type="button" class="cat-card ${selectedPrestations.has(it.v) ? 'sel' : ''}" data-v="${it.v}" aria-pressed="${selectedPrestations.has(it.v)}" onclick="togglePrestation('${it.v}', this)">
-            <span class="cat-icon" aria-hidden="true">${it.i}</span>
-            <span class="cat-label">${it.l}</span>
-          </button>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function togglePrestation(value, el) {
-  if (selectedPrestations.has(value)) { selectedPrestations.delete(value); el.classList.remove('sel'); el.setAttribute('aria-pressed','false'); }
-  else { selectedPrestations.add(value); el.classList.add('sel'); el.setAttribute('aria-pressed','true'); }
-  document.getElementById('err-cat').classList.remove('show');
-  renderSyndicServiceDetails();
-}
-
-function renderSyndicServiceDetails() {
-  const container = document.getElementById('syndic-service-details');
-  if (!container.dataset.ready) {
-    container.innerHTML = '<p class="section-sub">Pour chaque service sélectionné, cochez les opérations à inclure. Les quantités et autres précisions peuvent rester vides si vous ne les connaissez pas.</p>' + Object.entries(SYNDIC_SCOPE_CONFIG)
-      .filter(([serviceId]) => serviceId !== 'multi_service')
-      .map(([serviceId, config]) => {
-        const checks = (config.checks || []).map((item, i) => `
-          <label><input type="checkbox" data-contract-check="${esc(serviceId)}" value="${esc(item)}"> ${esc(item)}</label>`).join('');
-        const fields = (config.fields || []).map(([key, label, type, placeholder]) => {
-          if (type === 'select') {
-            const options = placeholder.split('|').map(option => `<option value="${esc(option)}">${esc(option)}</option>`).join('');
-            return `<div class="field"><label for="syndic-${esc(serviceId)}-${esc(key)}">${esc(label)}</label><select id="syndic-${esc(serviceId)}-${esc(key)}" data-contract-field="${esc(key)}"><option value="">À préciser</option>${options}</select></div>`;
-          }
-          return `<div class="field"><label for="syndic-${esc(serviceId)}-${esc(key)}">${esc(label)}</label><input id="syndic-${esc(serviceId)}-${esc(key)}" type="${esc(type)}" data-contract-field="${esc(key)}" placeholder="${esc(placeholder)}" ${type === 'number' ? 'min="0" inputmode="numeric"' : ''}></div>`;
-        }).join('');
-        return `<section class="syndic-scope-card" data-service-id="${esc(serviceId)}" hidden>
-          <h4>${esc(config.title)}</h4>
-          ${checks ? `<div class="scope-checks">${checks}</div>` : ''}
-          ${fields ? `<div class="scope-fields">${fields}</div>` : ''}
-        </section>`;
-      }).join('');
-    container.dataset.ready = 'true';
-  }
-  const isSyndicContract = data.profile === 'gestionnaire_immo' && data.demandType === 'recurrent';
-  document.getElementById('copro-contract-base').hidden = !isSyndicContract;
-  document.getElementById('copro-multiservice-wrap').hidden = !isSyndicContract || selectedPrestations.size < 2;
-  document.getElementById('err-syndic-scope').classList.remove('show');
-  container.querySelectorAll('[data-service-id]').forEach(section => {
-    section.hidden = !isSyndicContract || !selectedPrestations.has(section.dataset.serviceId);
-  });
-}
-
-/* Compteur de caractères de la description */
-const descField = document.getElementById('desc');
-descField.addEventListener('input', () => { document.getElementById('desc-count').textContent = descField.value.length; });
-
 /* =========================================================================
-   PHOTOS
+   INSCRIPTION
    ========================================================================= */
-document.getElementById('photos').addEventListener('change', async (e) => {
-  const remaining = 3 - photoFiles.length;
-  const files = Array.from(e.target.files).slice(0, remaining);
-  e.target.value = '';
-  for (const file of files) {
-    const small = await compressImage(file);
-    photoFiles.push({ file: small, url: URL.createObjectURL(small) });
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('register-error');
+  const btn = document.getElementById('register-btn');
+  errorEl.hidden = true;
+
+  if (document.getElementById('reg-code').value.trim().toUpperCase() !== CODE_PARTENAIRE) {
+    errorEl.textContent = "Code d'accès partenaire invalide.";
+    errorEl.hidden = false;
+    return;
   }
-  renderPreviews();
-});
-function renderPreviews() {
-  const wrap = document.getElementById('preview-wrap');
-  wrap.innerHTML = photoFiles.map((p, i) => `
-    <div class="preview-item">
-      <img src="${p.url}" class="preview-img" alt="Photo ${i + 1}" />
-      <button type="button" class="preview-remove" aria-label="Supprimer la photo ${i + 1}" onclick="removePhoto(${i})">✕</button>
-    </div>`).join('');
-}
-function removePhoto(i) { photoFiles.splice(i, 1); renderPreviews(); }
-
-/* =========================================================================
-   VALIDATION PAR ÉTAPE
-   ========================================================================= */
-function clearErrors() { document.querySelectorAll('.grid-err,.field-err').forEach(e => e.classList.remove('show')); }
-
-function validateStep() {
-  clearErrors();
-  if (step === 1) {
-    if (!data.profile) { document.getElementById('err-profile').classList.add('show'); return false; }
-    return true;
+  if (selectedSpecialites.size === 0) {
+    errorEl.textContent = 'Sélectionnez au moins une spécialité.';
+    errorEl.hidden = false;
+    return;
   }
-  if (step === 2) {
-    let ok = true;
-    if (!document.getElementById('adresse_lieu').value.trim()) { document.getElementById('err-adresse').classList.add('show'); ok = false; }
-    if (!/^[0-9]{5}$/.test(document.getElementById('code_postal').value.trim())) { document.getElementById('err-cp').classList.add('show'); ok = false; }
-    if (!document.getElementById('ville').value.trim()) { document.getElementById('err-ville').classList.add('show'); ok = false; }
-    return ok;
-  }
-  if (step === 3) {
-    let ok = true;
-    if (selectedPrestations.size === 0) { document.getElementById('err-cat').classList.add('show'); ok = false; }
-    if (!descField.value.trim()) { document.getElementById('err-desc').classList.add('show'); ok = false; }
-    if (data.profile === 'gestionnaire_immo' && data.demandType === 'recurrent') {
-      const missingScope = Array.from(selectedPrestations).some(serviceId => {
-        const config = SYNDIC_SCOPE_CONFIG[serviceId];
-        if (!config) return false;
-        const section = document.querySelector(`#syndic-service-details [data-service-id="${serviceId}"]`);
-        if (!section) return true;
-        if (config.checks?.length) return !section.querySelector('[data-contract-check]:checked');
-        return !Array.from(section.querySelectorAll('[data-contract-field]')).some(input => input.value.trim());
-      });
-      if (missingScope) {
-        const scopeError = document.getElementById('err-syndic-scope');
-        scopeError.classList.add('show');
-        ok = false;
-      }
-    }
-    return ok;
-  }
-  if (step === 4) {
-    const prenom = document.getElementById('prenom').value.trim();
-    const nom = document.getElementById('nom').value.trim();
-    const tel = document.getElementById('tel').value.trim().replace(/\s/g, '');
-    const email = document.getElementById('email').value.trim();
-    const telRegex = /^(0|\+33)[1-9][0-9]{8}$/;
-    const emailRequired = data.profile !== 'particulier';
-    const emailOk = emailRequired ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) : (email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
-    const errBox = document.getElementById('err-contact');
-    if (!prenom || !nom || !telRegex.test(tel) || !emailOk) {
-      errBox.textContent = 'Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.';
-      errBox.classList.add('show'); return false;
-    }
-    if (!document.getElementById('consent').checked) {
-      errBox.textContent = "Merci de cocher la case pour accepter d'être contacté.";
-      errBox.classList.add('show'); return false;
-    }
-    return true;
-  }
-  return true;
-}
 
-/* =========================================================================
-   NAVIGATION
-   ========================================================================= */
-function nextStep() {
-  if (step <= 4 && !validateStep()) return;
-  if (step === 4) buildSummary();
-  if (step === 5) { submitDemand(); return; }
-  step++;
-  showStep();
-}
-function prevStep() { step--; showStep(); }
-function goToStep(n) { step = n; showStep(); }
-
-function showStep() {
-  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i + 1 === step));
-  document.querySelectorAll('.step-node').forEach((n, i) => {
-    const idx = i + 1;
-    n.classList.toggle('active', idx === Math.min(step, TOTAL_NODES));
-    n.classList.toggle('done', idx < step && step <= TOTAL_NODES + 1);
-  });
-  document.getElementById('btn-back').style.display = (step > 1 && step < 6) ? 'flex' : 'none';
-  document.getElementById('btn-next').textContent = step === 5 ? 'Confirmer la demande' : 'Continuer';
-  document.getElementById('nav-wrap').style.display = step === 6 ? 'none' : 'flex';
-  document.getElementById('email-optional-tag').style.display = data.profile === 'particulier' ? 'inline' : 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  const title = document.querySelector(`.section.active .section-title`);
-  if (title) title.setAttribute('tabindex', '-1'), title.focus({ preventScroll: true });
-}
-
-/* =========================================================================
-   RÉCAPITULATIF
-   ========================================================================= */
-function collectSyndicDetailLines() {
-  if (data.profile !== 'gestionnaire_immo') return [];
-  const lines = [];
-  const addField = (id, label) => {
-    const value = document.getElementById(id)?.value?.trim();
-    if (value) lines.push(`${label} : ${value}`);
-  };
-  addField('copro-batiments', 'Nombre de bâtiments');
-  addField('copro-etages', 'Nombre d’étages');
-  addField('copro-cages', 'Nombre de cages d’escalier');
-  addField('copro-ascenseurs', 'Nombre d’ascenseurs');
-  addField('copro-lots', 'Nombre de lots / logements');
-  const zones = Array.from(document.querySelectorAll('#copro-areas input:checked')).map(input => input.value);
-  if (zones.length) lines.push(`Parties communes concernées : ${zones.join(', ')}`);
-
-  if (data.demandType === 'recurrent') {
-    const currentContract = document.getElementById('copro-contrat-actuel').value;
-    if (currentContract) lines.push(`Contrat actuel : ${currentContract === 'oui' ? 'oui' : 'non'}`);
-    addField('copro-fin-contrat', 'Fin du contrat actuel');
-    const visit = document.getElementById('copro-visite').value;
-    if (visit) {
-      const visitLabel = {a_convenir:'à convenir',oui:'oui',non:'non'}[visit] || visit;
-      lines.push(`Visite sur place : ${visitLabel}`);
-    }
-    if (document.getElementById('copro-multiservice').checked) lines.push('Souhaite une proposition regroupant plusieurs prestations si possible');
-
-    document.querySelectorAll('#syndic-service-details [data-service-id]').forEach(section => {
-      const serviceId = section.dataset.serviceId;
-      if (!selectedPrestations.has(serviceId)) return;
-      const title = SYNDIC_SCOPE_CONFIG[serviceId]?.title || serviceId;
-      const checked = Array.from(section.querySelectorAll('[data-contract-check]:checked')).map(input => input.value);
-      if (checked.length) lines.push(`${title} — prestations : ${checked.join(', ')}`);
-      section.querySelectorAll('[data-contract-field]').forEach(input => {
-        const value = input.value?.trim();
-        if (!value) return;
-        const label = input.closest('.field')?.querySelector('label')?.textContent?.trim() || 'Précision';
-        lines.push(`${title} — ${label} : ${value}`);
-      });
-    });
-  }
-  return lines;
-}
-
-function buildSummary() {
-  const profileMeta = PROFILES.find(p => p.v === data.profile);
-  const prestaLabels = Array.from(selectedPrestations).map(v => {
-    for (const g of Object.values(SERVICE_GROUPS)) { const found = g.items.find(i => i.v === v); if (found) return found.l; }
-    return v;
-  });
-  const coproDetailLines = collectSyndicDetailLines();
-  const coproRows = coproDetailLines.length ? [['Informations complémentaires', coproDetailLines.join(' · ')]] : [];
-
-  const blocks = [
-    { title:'Profil', step:1, rows:[
-      ['Type', profileMeta.label + (data.occupant ? ` (${data.occupant === 'proprietaire' ? 'Propriétaire' : 'Locataire'})` : '')],
-    ]},
-    { title:'Lieu', step:2, rows:[
-      ['Nom du site', document.getElementById('nom_site').value || '—'],
-      ['Adresse', document.getElementById('adresse_lieu').value],
-      ['Ville', `${document.getElementById('code_postal').value} ${document.getElementById('ville').value}`],
-      ['Complément', document.getElementById('complement_lieu').value || '—'],
-      ['Accès sur place', document.getElementById('acces_info').value || '—'],
-    ]},
-    { title:'Besoin', step:3, rows:[
-      ['Prestations', prestaLabels.join(', ')],
-      ['Mode de mise en relation', data.modeDemande === 'devis' ? 'Recevoir plusieurs devis' : 'Trouver un artisan'],
-      ['Type de prestation', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
-      ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
-        : [['Fréquence', data.frequence ? { hebdomadaire:'1× par semaine', bihebdomadaire:'2× par semaine', quotidienne:'Quotidienne', mensuelle:'Mensuelle', trimestrielle:'Tous les 3 mois', a_definir:'À définir' }[data.frequence] : 'Non précisée']]),
-      ...coproRows,
-      ['Surface', document.getElementById('surface_m2').value ? document.getElementById('surface_m2').value + ' m²' : '—'],
-      ['Description', document.getElementById('desc').value],
-      ['Photos', photoFiles.length ? `${photoFiles.length} photo(s)` : 'Aucune'],
-    ]},
-    { title:'Contact', step:4, rows:[
-      ['Nom', `${document.getElementById('prenom').value} ${document.getElementById('nom').value}`],
-      ['Téléphone', document.getElementById('tel').value],
-      ['E-mail', document.getElementById('email').value || '—'],
-    ]},
-  ];
-
-  document.getElementById('summary').innerHTML = blocks.map(b => `
-    <div class="summary">
-      <div class="summary-block-title">
-        <span>${b.title}</span>
-        <button type="button" onclick="goToStep(${b.step})">Modifier</button>
-      </div>
-      ${b.rows.map(r => `<div class="sum-row"><div class="sum-k">${r[0]}</div><div class="sum-v">${esc(r[1])}</div></div>`).join('')}
-    </div>`).join('');
-}
-
-/* =========================================================================
-   ENVOI DE LA DEMANDE
-   ========================================================================= */
-async function submitDemand() {
-  const btn = document.getElementById('btn-next');
-  const errorBox = document.getElementById('global-error');
-  errorBox.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Envoi en cours…';
+  btn.disabled = true; btn.textContent = 'Envoi en cours…';
 
   try {
-    const prestations = Array.from(selectedPrestations);
-    const profileMeta = PROFILES.find(p => p.v === data.profile);
-    const profilDemandeur = data.profile === 'particulier' ? (data.occupant || 'proprietaire') : profileMeta.profil_demandeur;
-    const descriptionParts = [document.getElementById('desc').value];
-    const syndicLines = collectSyndicDetailLines();
-    if (syndicLines.length) descriptionParts.push(`Informations complémentaires pour le devis :\n${syndicLines.join('\n')}`);
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-pass').value;
 
-    // 1. Upload des photos
-    const photoPaths = [];
-    for (const [i, p] of photoFiles.entries()) {
-      const path = `${crypto.randomUUID()}-${i}-${safeName(p.file.name)}`;
-      const { error } = await sb.storage.from('intervention-photos').upload(path, p.file);
-      if (error) throw error;
-      photoPaths.push(path);
+    const { data: signUpData, error: signUpError } = await sb.auth.signUp({ email, password });
+    if (signUpError) throw signUpError;
+    const artisanId = signUpData.user.id;
+
+    const zones = document.getElementById('reg-zones').value.split(',').map(z => z.trim()).filter(Boolean);
+
+    const { error: profileError } = await sb.from('artisans').insert({
+      id: artisanId,
+      code_partenaire: CODE_PARTENAIRE,
+      nom_entreprise: document.getElementById('reg-company').value,
+      nom_gerant: document.getElementById('reg-gerant').value,
+      telephone: document.getElementById('reg-tel').value,
+      email,
+      siret: document.getElementById('reg-siret').value || null,
+      specialites: Array.from(selectedSpecialites),
+      zones_intervention: zones,
+    });
+    if (profileError) throw profileError;
+
+    const documentFields = [
+      ['doc-identite', 'piece_identite'],
+      ['doc-decennale', 'assurance_decennale'],
+      ['doc-rcpro', 'rc_pro'],
+      ['doc-kbis', 'kbis'],
+    ];
+    for (const [inputId, typeDocument] of documentFields) {
+      const file = document.getElementById(inputId).files[0];
+      if (!file) continue;
+      const path = `${artisanId}/${typeDocument}-${Date.now()}-${file.name}`;
+      const { error: uploadError } = await sb.storage.from('artisan-documents').upload(path, file);
+      if (uploadError) throw uploadError;
+      await sb.from('artisan_documents').insert({ artisan_id: artisanId, type_document: typeDocument, chemin_fichier: path });
     }
 
-    // 2. Insertion de la demande
-    const payload = {
-      zone: 'parties_communes',
-      adresse: document.getElementById('adresse_lieu').value,
-      code_postal: document.getElementById('code_postal').value,
-      ville: document.getElementById('ville').value,
-      etage: document.getElementById('complement_lieu').value || null,
-      categorie: prestations[0] || 'autre',
-      urgence: data.demandType === 'ponctuel' ? data.urgence : 'faible',
-      description: descriptionParts.filter(Boolean).join('\n\n'),
-      photos: photoPaths,
-      profil_demandeur: profilDemandeur,
-      nom: document.getElementById('nom').value,
-      prenom: document.getElementById('prenom').value,
-      telephone: document.getElementById('tel').value,
-      email: document.getElementById('email').value || null,
-      // Colonnes complémentaires (voir ALTER TABLE fourni séparément)
-      profil_structure: data.profile,
-      nom_site: document.getElementById('nom_site').value || null,
-      prestations: prestations,
-      type_demande: data.demandType,
-      mode_demande: data.modeDemande,
-      frequence: data.demandType === 'recurrent' ? data.frequence : null,
-      date_debut_souhaitee: document.getElementById('date_debut').value || null,
-      surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
-    };
-
-    // Coordonnées GPS pour la carte artisan (via sélection ou géocodage de secours)
-    let coords = place;
-    if (!coords) coords = await geocodeText([payload.adresse, payload.code_postal, payload.ville].join(' '));
-    if (coords) { payload.latitude = coords.lat; payload.longitude = coords.lng; }
-
-    const acces = document.getElementById('acces_info').value.trim();
-    if (acces) payload.description += `\n\nAccès / contact sur place : ${acces}`;
-
-    // La référence est générée ici : un visiteur anonyme n'a pas le droit de relire la table
-    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let suffix = '';
-    for (let i = 0; i < 5; i++) suffix += alphabet[Math.floor(Math.random() * alphabet.length)];
-    payload.reference = `GD-${new Date().getFullYear()}-${suffix}`;
-    let suiviToken = null;
-    // Chaque demande reçoit un lien privé de suivi : devis ou mission classique.
-    suiviToken = randomAccessToken();
-    payload.suivi_token_hash = await hashToken(suiviToken);
-
-    const { error } = await sb.from('interventions').insert(payload);
-    if (error) throw error;
-
-    document.getElementById('ticket-number').textContent = payload.reference;
-    document.getElementById('confirm-note').textContent = data.modeDemande === 'devis'
-      ? 'Votre demande est transmise aux entreprises partenaires. Vous pourrez comparer leurs devis et choisir celui qui vous convient. Le prix est proposé par les artisans.'
-      : "Votre demande est transmise au réseau d’artisans. Un artisan intéressé pourra vous contacter ; le prix et les modalités seront convenus directement avec lui.";
-    const trackingLink = document.getElementById('tracking-link');
-    if (suiviToken) {
-      const pageSuivi = data.modeDemande === 'devis' ? 'suivi-devis.html' : 'suivi-intervention.html';
-      const suiviUrl = new URL(pageSuivi, 'https://e3-ecru.vercel.app/');
-      suiviUrl.searchParams.set('reference', payload.reference);
-      suiviUrl.searchParams.set('token', suiviToken);
-      trackingLink.href = suiviUrl.href;
-      trackingLink.textContent = data.modeDemande === 'devis' ? '🔐 Voir et comparer mes devis' : '🔐 Suivre ma demande';
-      trackingLink.hidden = false;
-      document.getElementById('tracking-hint').hidden = false;
-    } else { trackingLink.hidden = true; document.getElementById('tracking-hint').hidden = true; }
-
-    step = 6;
-    showStep();
+    toast('Dossier envoyé ! Vous serez notifié dès sa validation.', 'success');
+    await lancerApplication();
   } catch (err) {
     console.error(err);
-    errorBox.textContent = "Envoi impossible : " + (err.message || err.error_description || JSON.stringify(err)) + (err.hint ? " — " + err.hint : "");
-    errorBox.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Confirmer la demande';
+    errorEl.textContent = err.message || "Une erreur est survenue lors de l'inscription.";
+    errorEl.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Envoyer mon dossier';
   }
+});
+
+/* =========================================================================
+   LANCEMENT DE L'APPLICATION
+   ========================================================================= */
+async function lancerApplication() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { afficherEcran('login'); return; }
+
+  const { data: artisan, error } = await sb.from('artisans').select('*').eq('id', session.user.id).single();
+  if (error || !artisan) {
+    toast("Impossible de charger votre profil. Vérifiez que Supabase est configuré (schema.sql exécuté).", 'error');
+    afficherEcran('login');
+    return;
+  }
+  currentArtisan = artisan;
+  await demarrerApplication();
+}
+
+async function demarrerApplication() {
+
+  document.getElementById('login-screen').hidden = true;
+  document.getElementById('register-screen').hidden = true;
+  document.getElementById('app-screen').classList.add('is-active');
+  document.getElementById('logout-btn').textContent = 'Déconnexion';
+
+  const pill = document.getElementById('verif-pill');
+  pill.textContent = currentArtisan.statut_verification === 'valide' ? '✓ Compte validé'
+    : currentArtisan.statut_verification === 'refuse' ? 'Dossier refusé' : 'En vérification';
+  pill.className = `status-pill status-pill--${currentArtisan.statut_verification}`;
+
+  const banner = document.getElementById('verify-banner');
+  if (currentArtisan.statut_verification !== 'valide') {
+    banner.hidden = false;
+    banner.textContent = currentArtisan.statut_verification === 'refuse'
+      ? "Votre dossier n'a pas été validé. Contactez le support pour plus d'informations."
+      : "Votre dossier est en cours de vérification. Vous aurez accès aux chantiers dès sa validation.";
+  } else {
+    banner.hidden = true;
+  }
+
+  initCategoryToolbar();
+  initMap();
+  renderProfile();
+
+  await chargerChantiers();
+  await chargerMesMissions();
+  subscribeRealtime();
+  localiserArtisan();
 }
 
 /* =========================================================================
-   RÉINITIALISATION
+   NAVIGATION ENTRE VUES
    ========================================================================= */
-function resetForm() {
-  step = 1;
-  photoFiles = [];
-  selectedPrestations = new Set();
-  data = { profile:null, occupant:null, demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null };
-  document.getElementById('wizard-form').reset();
-  document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card,#particulier-toggle button').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
-  document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
-  document.querySelector('#demand-type [data-v="recurrent"]').hidden = false;
-  document.querySelectorAll('#demand-mode .demand-card').forEach((card, i) => { card.classList.toggle('sel', i === 0); card.setAttribute('aria-checked', i === 0 ? 'true' : 'false'); });
-  document.querySelector('.urg-card[data-u="faible"]').classList.add('sel');
-  document.getElementById('urgence-wrap').hidden = false;
-  document.getElementById('frequence-wrap').hidden = true;
-  document.getElementById('copro-details').hidden = true;
-  document.getElementById('copro-contract-end-wrap').hidden = true;
-  document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
-  document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
-  document.getElementById('particulier-toggle').hidden = true;
-  document.getElementById('prestations-container').innerHTML = '';
-  document.getElementById('preview-wrap').innerHTML = '';
-  document.getElementById('desc-count').textContent = '0';
-  document.getElementById('global-error').style.display = 'none';
-  document.getElementById('tracking-link').hidden = true;
-  document.getElementById('tracking-hint').hidden = true;
-  renderSyndicServiceDetails();
-  const btn = document.getElementById('btn-next');
-  btn.disabled = false; btn.textContent = 'Continuer';
-  resetAddressState();
-  showStep();
-}
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.view;
+    document.querySelectorAll('.nav-item').forEach(b => { b.classList.toggle('is-active', b === btn); b.removeAttribute('aria-current'); });
+    btn.setAttribute('aria-current', 'page');
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('is-active', v.id === `view-${target}`));
+    if (target === 'map' && map) setTimeout(() => map.invalidateSize(), 50);
+    if (target === 'missions') renderMissionsList();
+  });
+});
 
 /* =========================================================================
-   OUTILS : échappement HTML, noms de fichiers sûrs, compression photo
+   CARTE
    ========================================================================= */
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const safeName = n => String(n || 'photo.jpg').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_').slice(-60);
-function randomAccessToken() {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
-}
-async function hashToken(token) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
-  return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+function initMap() {
+  map = L.map('map', { zoomControl: false }).setView([48.8566, 2.3522], 11);
+  L.control.zoom({ position: 'bottomleft' }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
 }
 
-function compressImage(file, maxSide = 1600, quality = 0.82) {
-  return new Promise((resolve) => {
-    if (!file.type || !file.type.startsWith('image/')) return resolve(file);
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const ratio = Math.min(1, maxSide / Math.max(img.width, img.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(img.width * ratio);
-      canvas.height = Math.round(img.height * ratio);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        URL.revokeObjectURL(url);
-        if (!blob || blob.size >= file.size) return resolve(file);
-        resolve(new File([blob], safeName(file.name).replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }));
-      }, 'image/jpeg', quality);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
-    img.src = url;
+function initCategoryToolbar() {
+  const toolbar = document.getElementById('category-toolbar');
+  toolbar.innerHTML = `<button class="chip is-selected" data-value="">Toutes</button>` +
+    CATEGORIES.map(c => `<button class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`).join('');
+  toolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    toolbar.querySelectorAll('.chip').forEach(c => c.classList.remove('is-selected'));
+    btn.classList.add('is-selected');
+    categorieFiltre = btn.dataset.value || null;
+    renderMarkers();
+    renderChantierList();
   });
 }
 
-async function copyRef() {
-  const ref = document.getElementById('ticket-number').textContent;
-  const btn = document.getElementById('copy-ref');
-  try { await navigator.clipboard.writeText(ref); btn.textContent = '✓ Référence copiée'; }
-  catch { btn.textContent = 'Sélectionnez et copiez la référence ci-dessus'; }
+function markerIcon(urgence, mine = false) {
+  const cls = mine ? 'mine' : urgence;
+  const symbol = urgence === 'urgent' ? '!' : '•';
+  return L.divIcon({ className: '', html: `<div class="marker-pin marker-pin--${cls}"><span>${symbol}</span></div>`, iconSize:[36,36], iconAnchor:[18,36] });
+}
+
+function fitToChantiers(force = false) {
+  const pts = filteredInterventions().filter(i => i.latitude && i.longitude).map(i => [i.latitude, i.longitude]);
+  if (!pts.length) return;
+  if (!force && hasAutoFit) return;
+  hasAutoFit = true;
+  if (pts.length === 1) map.setView(pts[0], 14);
+  else map.fitBounds(pts, { padding: [50, 90] });
+}
+document.getElementById('fit-btn').addEventListener('click', () => fitToChantiers(true));
+
+function distanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function localiserArtisan() {
+  if (!navigator.geolocation) {
+    toast("La géolocalisation n'est pas supportée par votre navigateur.", "error");
+    return;
+  }
+  toast("Recherche de votre position...", "info");
+  navigator.geolocation.getCurrentPosition((pos) => {
+    userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (userMarker) map.removeLayer(userMarker);
+    userMarker = L.circleMarker([userPosition.lat, userPosition.lng], { radius: 8, color:'#fff', weight:3, fillColor:'#2c4d80', fillOpacity:1 }).addTo(map);
+    map.setView([userPosition.lat, userPosition.lng], 13);
+    renderChantierList();
+    toast("Position actualisée avec succès.", "success");
+  }, () => { 
+    toast("Impossible d'obtenir votre position. Vérifiez vos paramètres.", "error"); 
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+
+document.getElementById('locate-btn').addEventListener('click', () => {
+  if (userPosition) map.setView([userPosition.lat, userPosition.lng], 13);
+  else localiserArtisan();
+});
+
+/* =========================================================================
+   CHARGEMENT DES CHANTIERS DISPONIBLES
+   ========================================================================= */
+async function chargerChantiers() {
+  const list = document.getElementById('chantier-list');
+  list.innerHTML = `<div class="skeleton" style="height:64px;margin-bottom:.6rem;"></div>`.repeat(3);
+
+  const { data, error } = await sb.from('interventions').select(INTERVENTION_PUBLIC_COLUMNS).eq('statut', 'nouveau').order('created_at', { ascending: false });
+  if (error) { toast('Impossible de charger les chantiers.', 'error'); interventions = []; }
+  else {
+    interventions = data || [];
+    if (currentArtisan) {
+      const [{ data: mesDevis }, { data: mesInterets }] = await Promise.all([
+        sb.from('intervention_devis').select('intervention_id').eq('artisan_id', currentArtisan.id),
+        sb.from('intervention_interets').select('intervention_id,statut').eq('artisan_id', currentArtisan.id)
+      ]);
+      const devisIds = new Set((mesDevis || []).map(d => d.intervention_id));
+      const interetIds = new Set((mesInterets || []).filter(i => i.statut !== 'annule').map(i => i.intervention_id));
+      interventions = interventions.map(i => ({ ...i, _interested: interetIds.has(i.id) }));
+      interventions = interventions.map(i => ({ ...i, _hasQuote: devisIds.has(i.id) }));
+    }
+  }
+
+  renderMarkers();
+  renderChantierList();
+}
+
+function filteredInterventions() {
+  let list = interventions;
+  if (categorieFiltre) list = list.filter(i => (i.prestations?.length ? i.prestations.includes(categorieFiltre) : i.categorie === categorieFiltre));
+  if (urgentOnly) list = list.filter(i => i.urgence === 'urgent');
+  if (userPosition) {
+    list = list.map(i => ({ ...i, _distance: (i.latitude && i.longitude) ? distanceKm(userPosition.lat, userPosition.lng, i.latitude, i.longitude) : null }));
+  }
+  if (sortMode === 'distance' && userPosition) list.sort((a, b) => (a._distance ?? 999) - (b._distance ?? 999));
+  else list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  return list;
+}
+
+document.getElementById('sort-toggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  if (btn.dataset.sort === 'distance' && !userPosition) { localiserArtisan(); }
+  document.querySelectorAll('#sort-toggle button').forEach(b => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  sortMode = btn.dataset.sort;
+  renderChantierList();
+});
+document.getElementById('urgent-toggle').addEventListener('click', (e) => {
+  urgentOnly = !urgentOnly;
+  e.currentTarget.setAttribute('aria-pressed', String(urgentOnly));
+  renderMarkers(); renderChantierList();
+});
+
+function renderMarkers() {
+  markers.forEach(m => map.removeLayer(m));
+  markers.clear();
+  filteredInterventions().filter(i => i.latitude && i.longitude).forEach(i => {
+    const cat = categorieMeta(i.categorie);
+    const marker = L.marker([i.latitude, i.longitude], { icon: markerIcon(i.urgence) }).addTo(map);
+    marker.bindTooltip(`${cat.icone} ${cat.label} · ${i.ville ?? ''}`, { direction: 'top', offset: [0, -30], className: 'marker-tooltip' });
+    marker.on('click', () => ouvrirModaleChantier(i));
+    markers.set(i.id, marker);
+  });
+  fitToChantiers();
+}
+
+function categorieMeta(value) { return CATEGORIES.find(c => c.value === value) ?? { label: value, icone: '🛠️' }; }
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const escNl = s => esc(s).replace(/\n/g, '<br>');
+const PROFIL_STRUCTURE_LABELS = { syndic_copro:'Syndic de copropriété', agence_immo:'Agence immobilière', commerce:'Commerce / Boutique', bureau_entreprise:'Bureau / Entreprise', ecole:'Établissement', particulier:'Particulier' };
+const FREQUENCE_LABELS = { hebdomadaire:'1× par semaine', bihebdomadaire:'2× par semaine', quotidienne:'Quotidienne', mensuelle:'Mensuelle', trimestrielle:'Tous les 3 mois', a_definir:'À définir' };
+
+function renderChantierList() {
+  const list = document.getElementById('chantier-list');
+  const filtered = filteredInterventions();
+  document.getElementById('chantiers-count').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<p class="empty-state">Aucun chantier disponible pour ce filtre actuellement.</p>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(i => {
+    const cat = categorieMeta(i.categorie);
+    const dist = i._distance != null ? ` · ${i._distance.toFixed(1)} km` : '';
+    const nbExtra = (i.prestations?.length || 1) - 1;
+    const titre = cat.label + (nbExtra > 0 ? ` +${nbExtra}` : '');
+    return `
+    <button class="chantier-card" data-id="${i.id}">
+      <span class="chantier-card__icon">${cat.icone}</span>
+      <span class="chantier-card__info">
+        ${i.nom_site ? `<span class="chantier-card__site">${esc(i.nom_site)}</span>` : ''}
+        <span class="chantier-card__title">${titre}</span>
+        <span class="chantier-card__meta">${esc(i.adresse ?? '')}${i.ville ? ', ' + esc(i.ville) : ''}${dist}</span>
+      </span>
+      ${i.mode_demande === 'devis' ? '<span class="contrat-tag">📄 Devis multiples</span>' : i.type_demande === 'recurrent' ? '<span class="contrat-tag">🔁 Contrat</span>' : `<span class="urgence-tag urgence-tag--${i.urgence}">${URGENCES[i.urgence]?.label ?? i.urgence}</span>`}
+    </button>`;
+  }).join('');
+
+  list.querySelectorAll('.chantier-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const i = interventions.find(x => x.id === card.dataset.id);
+      if (i) ouvrirModaleChantier(i);
+    });
+  });
 }
 
 /* =========================================================================
-   ADRESSE — autocomplétion + géolocalisation + mini-carte de confirmation
-   (Base Adresse Nationale — api-adresse.data.gouv.fr, gratuite, sans clé)
+   MODALE — DÉTAIL D'UN CHANTIER (nouveau -> acceptation)
    ========================================================================= */
-const BAN = 'https://api-adresse.data.gouv.fr';
-let place = null, acItems = [], acIndex = -1, acTimer = null, miniMap = null, miniMarker = null;
-const adrInput = document.getElementById('adresse_lieu');
-const acList = document.getElementById('ac-list');
+const overlay = document.getElementById('modal-overlay');
+const modalBody = document.getElementById('modal-body');
 
-function closeAc() { acList.hidden = true; adrInput.setAttribute('aria-expanded', 'false'); acIndex = -1; }
-function renderAc() {
-  if (!acItems.length) return closeAc();
-  acList.innerHTML = acItems.map((it, i) =>
-    `<li role="option" id="ac-opt-${i}" data-i="${i}" aria-selected="${i === acIndex}">${esc(it.street)}<small>${esc(it.cp)} ${esc(it.city)}</small></li>`).join('');
-  acList.hidden = false; adrInput.setAttribute('aria-expanded', 'true');
+async function photoUrl(path) { return sb.storage.from('intervention-photos').getPublicUrl(path).data.publicUrl; }
+
+async function ouvrirModaleChantier(intervention) {
+  const cat = categorieMeta(intervention.categorie);
+  const photos = await Promise.all((intervention.photos || []).map(photoUrl));
+
+  const prestaLabels = (intervention.prestations?.length ? intervention.prestations : [intervention.categorie]).map(v => categorieMeta(v).label);
+  const profilLabel = PROFIL_STRUCTURE_LABELS[intervention.profil_structure];
+
+  modalBody.innerHTML = `
+    <h2 class="modal__title" id="modal-title">${cat.icone} ${esc(intervention.nom_site) || cat.label}</h2>
+    <div class="modal__meta">
+      ${intervention.type_demande === 'recurrent'
+        ? `<span class="contrat-tag">🔁 Contrat ${intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || '' : ''}</span>`
+        : `<span class="urgence-tag urgence-tag--${intervention.urgence}">${URGENCES[intervention.urgence]?.label}</span>`}
+      ${intervention.mode_demande === 'devis' ? '<span class="contrat-tag">📄 Plusieurs devis attendus</span>' : ''}
+      ${profilLabel ? `<span>${profilLabel}</span>` : ''}
+      <span>Réf. ${esc(intervention.reference ?? '—')}</span>
+    </div>
+    <div class="modal__section">
+      <h4>Prestations demandées</h4>
+      <div class="spec-tags">${prestaLabels.map(l => `<span class="spec-tag">${esc(l)}</span>`).join('')}</div>
+    </div>
+    ${intervention.surface_m2 ? `<div class="modal__section"><h4>Surface</h4><p>${intervention.surface_m2} m²</p></div>` : ''}
+    <div class="modal__section">
+      <h4>Adresse</h4>
+      <p>${esc(intervention.adresse ?? '')}${intervention.etage ? `, ${esc(intervention.etage)}` : ''}<br>${esc(intervention.code_postal ?? '')} ${esc(intervention.ville ?? '')}</p>
+    </div>
+    <div class="action-grid-2">
+      <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((intervention.adresse||'')+' '+(intervention.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
+      <span class="btn-action">Coordonnées après sélection</span>
+    </div>
+    <div class="modal__section">
+      <h4>Description</h4>
+      <p>${escNl(intervention.description)}</p>
+    </div>
+    ${photos.length ? `<div class="modal__section"><h4>Photos</h4><div class="modal__photos">${photos.map(u => `<img src="${u}" alt="Photo du chantier" />`).join('')}</div></div>` : ''}
+    <div class="modal__section">
+      <h4>Réponse attendue</h4>
+      <p>${intervention.mode_demande === 'devis' ? 'Envoyez votre prix et les détails de votre proposition. Le demandeur comparera les devis.' : 'Manifestez votre intérêt : le client verra vos coordonnées et pourra vous choisir. Ce clic ne bloque pas le chantier.'}</p>
+      <p class="hint">Le prix et les modalités sont convenus entre le client et l’artisan.</p>
+    </div>
+    <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' ? 'disabled' : ''}>
+      ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : intervention.mode_demande === 'devis' ? intervention._hasQuote ? 'Devis déjà envoyé' : 'Répondre avec un devis' : intervention._interested ? 'Intérêt déjà envoyé' : 'Je suis intéressé'}
+    </button>
+  `;
+  const acceptButton = document.getElementById('accept-btn');
+  if (intervention._interested || intervention._hasQuote) acceptButton.disabled = true;
+  acceptButton?.addEventListener('click', () => intervention.mode_demande === 'devis' ? ouvrirFormulaireDevis(intervention) : manifesterInteret(intervention.id));
+  ouvrirOverlay();
 }
-function showMiniMap(lat, lng) {
-  const el = document.getElementById('mini-map');
-  el.hidden = false;
-  if (!miniMap) {
-    miniMap = L.map('mini-map', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
+
+function ouvrirFormulaireDevis(intervention) {
+  const cat = categorieMeta(intervention.categorie);
+  const servicesDevis = (intervention.prestations?.length ? intervention.prestations : [intervention.categorie]).map(value => ({ value, ...categorieMeta(value) }));
+  const renderQuoteLine = (name = '') => `
+    <article class="quote-line">
+      <div class="quote-line-head"><span>Prestation</span><button type="button" class="btn btn-ghost btn-sm" data-remove-line>Supprimer</button></div>
+      <div class="quote-line-grid">
+        <div class="field wide"><label>Prestation / travail</label><input data-line-name type="text" maxlength="120" value="${esc(name)}" placeholder="Ex. remplacement d’un robinet" required /></div>
+        <div class="field wide"><label>Description de ce qui est compris</label><textarea data-line-description rows="2" maxlength="500" placeholder="Détaillez les travaux et fournitures inclus" required></textarea></div>
+        <div class="field"><label>Quantité</label><input data-line-quantity type="number" min="0.01" step="0.01" value="1" required /></div>
+        <div class="field"><label>Unité</label><select data-line-unit><option>forfait</option><option>heure</option><option>unité</option><option>m²</option><option>mois</option><option>an</option></select></div>
+        <div class="field"><label>Prix unitaire TTC (€)</label><input data-line-price type="number" min="0.01" step="0.01" inputmode="decimal" required /></div>
+      </div>
+      <div class="quote-line-total">Total ligne : <span data-line-total>0,00 €</span></div>
+    </article>`;
+  const dateValidite = new Date();
+  dateValidite.setDate(dateValidite.getDate() + 30);
+  const dateValiditeLocale = new Date(dateValidite.getTime() - dateValidite.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const artisan = currentArtisan || {};
+  modalBody.innerHTML = `
+    <h2 class="modal__title">${cat.icone} Envoyer un devis</h2>
+    <p class="modal__meta">Réf. ${esc(intervention.reference ?? '—')} · ${esc(intervention.ville ?? '')}</p>
+    <form id="quote-form">
+      <div class="quote-company-card">
+        <strong>Vos coordonnées (préremplies depuis votre profil)</strong>
+        <div class="field"><label for="quote-company">Nom de l’entreprise</label><input id="quote-company" type="text" maxlength="150" value="${esc(artisan.nom_entreprise || '')}" required /></div>
+        <div class="field"><label for="quote-siret">SIRET (14 chiffres)</label><input id="quote-siret" type="text" inputmode="numeric" maxlength="14" pattern="[0-9]{14}" value="${esc(String(artisan.siret || '').replace(/\D/g, ''))}" placeholder="14 chiffres" required /></div>
+        <div class="field"><label for="quote-phone">Téléphone communiqué au demandeur</label><input id="quote-phone" type="tel" maxlength="20" value="${esc(artisan.telephone || '')}" required /></div>
+        <p class="hint">Ces informations seront enregistrées dans votre profil et jointes à votre réponse.</p>
+      </div>
+      <div class="field">
+        <label for="quote-unit">Période du prix</label>
+        <select id="quote-unit" required>
+          <option value="forfait" ${intervention.type_demande !== 'recurrent' ? 'selected' : ''}>Prix forfaitaire</option>
+          <option value="par_intervention">Prix par intervention</option>
+          <option value="mensuel" ${intervention.type_demande === 'recurrent' ? 'selected' : ''}>Prix mensuel</option>
+          <option value="annuel">Prix annuel</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="quote-frequency">Fréquence / durée incluse</label>
+        <input id="quote-frequency" type="text" maxlength="120" value="${esc(intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || intervention.frequence : '')}" placeholder="Ex. entretien hebdomadaire" />
+      </div>
+      <div class="field">
+        <label for="quote-validity">Devis valable jusqu’au</label>
+        <input id="quote-validity" type="date" value="${dateValiditeLocale}" />
+      </div>
+      <h3>Lignes du devis</h3>
+      <p class="hint">Une ligne est créée pour chaque prestation demandée. Ajoutez ou supprimez-en pour détailler votre offre.</p>
+      <div id="quote-lines" class="quote-lines">${servicesDevis.map(service => renderQuoteLine(`${service.icone} ${service.label}`)).join('')}</div>
+      <button type="button" class="btn btn-ghost btn-block" id="quote-add-line">+ Ajouter une ligne</button>
+      <div class="quote-total"><span>Total TTC</span><span id="quote-total">0,00 €</span></div>
+      <div class="field">
+        <label for="quote-notes">Délais, conditions ou précisions (facultatif)</label>
+        <textarea id="quote-notes" rows="3" maxlength="800" placeholder="Ex. intervention sous 10 jours, fournitures comprises…"></textarea>
+      </div>
+      <p class="hint">Le demandeur recevra votre prix, le détail de votre offre et vos coordonnées d’entreprise. Vérifiez-les dans votre profil avant l’envoi.</p>
+      <button class="btn btn-gold btn-block" id="quote-submit" type="submit">Envoyer ma proposition</button>
+    </form>`;
+  const linesBox = document.getElementById('quote-lines');
+  const formatEuro = value => new Intl.NumberFormat('fr-FR', { style:'currency', currency:'EUR' }).format(value || 0);
+  const updateQuoteTotal = () => {
+    let total = 0;
+    linesBox.querySelectorAll('.quote-line').forEach(line => {
+      const quantity = Number(line.querySelector('[data-line-quantity]').value) || 0;
+      const price = Number(line.querySelector('[data-line-price]').value) || 0;
+      const lineTotal = quantity * price;
+      total += lineTotal;
+      line.querySelector('[data-line-total]').textContent = formatEuro(lineTotal);
+    });
+    document.getElementById('quote-total').textContent = formatEuro(total);
+  };
+  document.getElementById('quote-add-line').addEventListener('click', () => {
+    linesBox.insertAdjacentHTML('beforeend', renderQuoteLine());
+    updateQuoteTotal();
+  });
+  linesBox.addEventListener('input', updateQuoteTotal);
+  linesBox.addEventListener('change', updateQuoteTotal);
+  linesBox.addEventListener('click', event => {
+    const removeButton = event.target.closest('[data-remove-line]');
+    if (!removeButton) return;
+    removeButton.closest('.quote-line').remove();
+    updateQuoteTotal();
+  });
+  updateQuoteTotal();
+  document.getElementById('quote-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const button = document.getElementById('quote-submit');
+    button.disabled = true; button.textContent = 'Envoi en cours…';
+    const profileUpdate = {
+      nom_entreprise: document.getElementById('quote-company').value.trim(),
+      siret: document.getElementById('quote-siret').value.trim(),
+      telephone: document.getElementById('quote-phone').value.trim()
+    };
+    const offreDetaillee = {
+      format: 'e3_quote_v2',
+      entreprise: profileUpdate.nom_entreprise,
+      siret: profileUpdate.siret,
+      telephone: profileUpdate.telephone,
+      email: currentArtisan.email || '',
+      prestations: Array.from(linesBox.querySelectorAll('.quote-line')).map(line => {
+        const quantite = Number(line.querySelector('[data-line-quantity]').value);
+        const prixUnitaire = Number(line.querySelector('[data-line-price]').value);
+        return {
+          nom: line.querySelector('[data-line-name]').value.trim(),
+          details: line.querySelector('[data-line-description]').value.trim(),
+          quantite,
+          unite: line.querySelector('[data-line-unit]').value,
+          prix_unitaire: prixUnitaire,
+          total: quantite * prixUnitaire
+        };
+      }),
+      notes: document.getElementById('quote-notes').value.trim()
+    };
+    if (!offreDetaillee.prestations.length) {
+      toast('Ajoutez au moins une ligne au devis.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
+    const montantTotal = offreDetaillee.prestations.reduce((sum, item) => sum + item.total, 0);
+    if (!Number.isFinite(montantTotal) || montantTotal <= 0) {
+      toast('Le total du devis doit être supérieur à 0 €.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
+    const detailsDevis = JSON.stringify(offreDetaillee);
+    if (detailsDevis.length > 3900) {
+      toast('Le détail est trop long. Raccourcissez les descriptions des prestations.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
+    const offer = {
+      intervention_id: intervention.id,
+      artisan_id: currentArtisan.id,
+      montant: Number(montantTotal.toFixed(2)),
+      unite_tarifaire: document.getElementById('quote-unit').value,
+      details: detailsDevis,
+      frequence: document.getElementById('quote-frequency').value.trim() || null,
+      validite_jusquau: document.getElementById('quote-validity').value || null
+    };
+    const { error: profileError } = await sb.from('artisans').update(profileUpdate).eq('id', currentArtisan.id);
+    if (profileError) {
+      console.error(profileError);
+      toast('Impossible d’enregistrer vos coordonnées. Vérifiez votre profil puis réessayez.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
+    currentArtisan = { ...currentArtisan, ...profileUpdate };
+    const { error } = await sb.from('intervention_devis').insert(offer);
+    if (error) {
+      console.error(error);
+      toast(error.code === '23505' ? 'Vous avez déjà répondu à cette demande.' : 'Impossible d’envoyer le devis.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
+    toast('Votre devis a été transmis au demandeur.', 'success');
+    fermerModale();
+    await chargerChantiers();
+  });
+  ouvrirOverlay();
+}
+
+function ouvrirOverlay() {
+  overlay.hidden = false;
+  document.getElementById('modal-close').focus();
+}
+function fermerModale() { overlay.hidden = true; modalBody.innerHTML = ''; }
+document.getElementById('modal-close').addEventListener('click', fermerModale);
+overlay.addEventListener('click', (e) => { if (e.target === overlay) fermerModale(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) fermerModale(); });
+
+async function manifesterInteret(interventionId) {
+  const { error } = await sb.rpc('manifester_interet', { p_intervention_id: interventionId });
+  if (error) {
+    toast(error.message || 'Impossible d’envoyer votre intérêt.', 'error');
+  } else {
+    toast('Votre intérêt est transmis au demandeur. Le chantier reste disponible aux autres artisans.', 'success');
   }
-  setTimeout(() => miniMap.invalidateSize(), 50);
-  miniMap.setView([lat, lng], 16);
-  if (miniMarker) miniMap.removeLayer(miniMarker);
-  miniMarker = L.marker([lat, lng]).addTo(miniMap);
+  fermerModale();
+  await chargerChantiers();
 }
-function pickAddress(it) {
-  adrInput.value = it.street;
-  document.getElementById('code_postal').value = it.cp || '';
-  document.getElementById('ville').value = it.city || '';
-  place = { lat: it.lat, lng: it.lng };
-  document.getElementById('geo-ok').hidden = false;
-  document.getElementById('geo-msg').hidden = true;
-  document.getElementById('err-adresse').classList.remove('show');
-  showMiniMap(it.lat, it.lng);
-  closeAc();
+
+/* =========================================================================
+   MES MISSIONS (assignées à cet artisan)
+   ========================================================================= */
+async function chargerMesMissions() {
+  const { data, error } = await sb.from('interventions').select(INTERVENTION_PUBLIC_COLUMNS).eq('artisan_id', currentArtisan.id).order('assigned_at', { ascending: false });
+  if (error) { toast('Impossible de charger vos missions.', 'error'); return; }
+  missions = data || [];
+  const dot = document.getElementById('missions-dot');
+  dot.classList.toggle('show', missions.some(m => m.statut === 'assigne'));
+  renderMissionsList();
 }
-function featureToItem(f) {
-  return { label: f.properties.label, street: f.properties.name || f.properties.label, cp: f.properties.postcode, city: f.properties.city,
-           lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
+
+document.getElementById('missions-filter').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  document.querySelectorAll('#missions-filter button').forEach(b => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  missionsFiltre = btn.dataset.filter;
+  renderMissionsList();
+});
+
+function renderMissionsList() {
+  const container = document.getElementById('missions-list');
+  let list = missions;
+  if (missionsFiltre === 'actif') list = list.filter(m => ['assigne','en_cours'].includes(m.statut));
+  if (missionsFiltre === 'termine') list = list.filter(m => m.statut === 'termine');
+
+  if (list.length === 0) {
+    container.innerHTML = `<p class="empty-state">Aucune mission dans cette catégorie.</p>`;
+    return;
+  }
+
+  container.innerHTML = list.map(m => {
+    const cat = categorieMeta(m.categorie);
+    return `
+    <button class="mission-item" data-id="${m.id}">
+      <div class="mission-item__top">
+        <span class="mission-item__title">${cat.icone} ${cat.label}</span>
+        <span class="statut-tag">${esc(STATUTS[m.statut] ?? m.statut)}</span>
+      </div>
+      <p class="mission-item__addr">${esc(m.adresse ?? '')}${m.ville ? ', ' + esc(m.ville) : ''}</p>
+    </button>`;
+  }).join('');
+
+  container.querySelectorAll('.mission-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const m = missions.find(x => x.id === item.dataset.id);
+      if (m) ouvrirModaleMission(m);
+    });
+  });
 }
-async function searchAddress(q) {
+
+/* =========================================================================
+   MODALE — SUIVI D'UNE MISSION ASSIGNÉE (progression + clôture photo)
+   ========================================================================= */
+async function ouvrirModaleMission(mission) {
+  const cat = categorieMeta(mission.categorie);
+  let contact = { nom: '', prenom: '', telephone: '', email: '' };
+  let planning = { creneaux_proposes: [], creneau_retenu: null };
+  const { data, error } = await sb.rpc('coordonnees_mission', { p_intervention_id: mission.id });
+  if (!error && data) contact = data;
+  const { data: p } = await sb.from('intervention_interets').select('id,creneaux_proposes,creneau_retenu').eq('intervention_id', mission.id).eq('artisan_id', currentArtisan.id).maybeSingle();
+  if (p) planning = p;
+  const steps = ['assigne', 'en_cours', 'termine'];
+  const currentIdx = steps.indexOf(mission.statut);
+
+  modalBody.innerHTML = `
+    <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
+    <div class="modal__meta"><span>Réf. ${esc(mission.reference ?? '—')}</span></div>
+
+    <div class="progress-steps">
+      ${steps.map((s, i) => `<div class="seg ${i <= currentIdx ? 'done' : ''}"></div>`).join('')}
+    </div>
+
+    <div class="modal__section">
+      <h4>Adresse</h4>
+      <p>${esc(mission.adresse ?? '')}${mission.ville ? ', ' + esc(mission.ville) : ''}</p>
+    </div>
+    <div class="action-grid-2">
+      <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((mission.adresse||'')+' '+(mission.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
+      <a class="btn-action btn-call" href="tel:${esc(contact.telephone)}">📞 Appeler</a>
+    </div>
+    <div class="modal__section">
+      <h4>Contact du demandeur</h4>
+      <p>${esc(contact.prenom)} ${esc(contact.nom)} · ${esc(contact.telephone)}</p>
+    </div>
+    <div class="modal__section">
+      <h4>Description</h4>
+      <p>${escNl(mission.description)}</p>
+    </div>
+
+    ${mission.statut === 'assigne' ? `
+      ${planning.creneau_retenu ? `<div class="form-success">✓ Créneau choisi par le client : ${new Date(planning.creneau_retenu).toLocaleString('fr-FR',{dateStyle:'full',timeStyle:'short'})}</div>` : `
+        <div class="modal__section"><h4>Proposer des créneaux</h4><p class="hint">Le client choisira un créneau parmi vos propositions.</p>
+          <input type="datetime-local" class="schedule-input" aria-label="Premier créneau" />
+          <input type="datetime-local" class="schedule-input" aria-label="Deuxième créneau (facultatif)" />
+          <input type="datetime-local" class="schedule-input" aria-label="Troisième créneau (facultatif)" />
+          <button class="btn btn-gold btn-block" id="proposer-creneaux-btn">Envoyer mes créneaux</button>
+        </div>`}
+      <button class="btn btn-block" id="annuler-mission-btn" style="background:#9d241e">Annuler ma participation avant le démarrage</button>
+    ` : ''}
+
+    ${mission.statut === 'termine' ? `
+      <div class="form-success">✓ Mission clôturée le ${new Date(mission.updated_at).toLocaleDateString('fr-FR')}.</div>
+    ` : mission.statut === 'en_cours' ? `
+      <div class="photo-zone">
+        <h5>📸 Photo de fin de chantier (preuve pour le syndic)</h5>
+        <input type="file" id="photo-fin-input" accept="image/*" />
+      </div>
+      <button class="btn btn-gold btn-block" id="cloturer-btn">Clôturer le chantier</button>
+    ` : `
+      <button class="btn btn-primary btn-block" id="demarrer-btn">Démarrer l'intervention</button>
+    `}
+  `;
+
+  document.getElementById('demarrer-btn')?.addEventListener('click', () => changerStatutMission(mission.id, 'en_cours'));
+  document.getElementById('cloturer-btn')?.addEventListener('click', () => cloturerMission(mission.id));
+  document.getElementById('proposer-creneaux-btn')?.addEventListener('click', () => envoyerCreneaux(mission.id));
+  document.getElementById('annuler-mission-btn')?.addEventListener('click', () => annulerMission(mission.id));
+  ouvrirOverlay();
+}
+
+async function envoyerCreneaux(id) {
+  const values = [...document.querySelectorAll('.schedule-input')].map(input => input.value).filter(Boolean);
+  if (!values.length) { toast('Choisissez au moins un créneau.', 'error'); return; }
+  const creneaux = values.map(value => new Date(value).toISOString());
+  const { error } = await sb.rpc('proposer_creneaux_intervention', { p_intervention_id: id, p_creneaux: creneaux });
+  if (error) { toast(error.message || 'Impossible d’envoyer les créneaux.', 'error'); return; }
+  toast('Vos créneaux ont été transmis au client.', 'success');
+  fermerModale();
+  await chargerMesMissions();
+}
+
+async function annulerMission(id) {
+  if (!confirm('Annuler votre participation avant de démarrer ? Le chantier redeviendra disponible aux artisans.')) return;
+  const { error } = await sb.rpc('annuler_mission_artisan', { p_intervention_id: id });
+  if (error) { toast(error.message || 'Impossible d’annuler cette mission.', 'error'); return; }
+  toast('Votre participation est annulée. Le chantier est de nouveau disponible.', 'success');
+  fermerModale(); await chargerMesMissions(); await chargerChantiers();
+}
+
+async function changerStatutMission(id, statut) {
+  const { error } = await sb.from('interventions').update({ statut }).eq('id', id);
+  if (error) { toast('Une erreur est survenue.', 'error'); return; }
+  toast(statut === 'en_cours' ? 'Intervention démarrée.' : 'Statut mis à jour.', 'success');
+  fermerModale();
+  await chargerMesMissions();
+}
+
+async function cloturerMission(id) {
+  const fileInput = document.getElementById('photo-fin-input');
+  const btn = document.getElementById('cloturer-btn');
+  btn.disabled = true; btn.textContent = 'Clôture en cours…';
+
   try {
-    const r = await fetch(`${BAN}/search/?q=${encodeURIComponent(q)}&limit=5&autocomplete=1`);
-    const j = await r.json();
-    acItems = (j.features || []).map(featureToItem); acIndex = -1; renderAc();
-  } catch { closeAc(); }
-}
-adrInput.addEventListener('input', () => {
-  place = null; document.getElementById('geo-ok').hidden = true;
-  clearTimeout(acTimer);
-  const q = adrInput.value.trim();
-  if (q.length < 3) return closeAc();
-  acTimer = setTimeout(() => searchAddress(q), 220);
-});
-adrInput.addEventListener('keydown', (e) => {
-  if (acList.hidden) return;
-  if (e.key === 'ArrowDown') { e.preventDefault(); acIndex = Math.min(acIndex + 1, acItems.length - 1); renderAc(); }
-  else if (e.key === 'ArrowUp') { e.preventDefault(); acIndex = Math.max(acIndex - 1, 0); renderAc(); }
-  else if (e.key === 'Enter' && acIndex >= 0) { e.preventDefault(); pickAddress(acItems[acIndex]); }
-  else if (e.key === 'Escape') closeAc();
-});
-acList.addEventListener('mousedown', (e) => {
-  const li = e.target.closest('li'); if (!li) return;
-  e.preventDefault(); pickAddress(acItems[Number(li.dataset.i)]);
-});
-adrInput.addEventListener('blur', () => setTimeout(closeAc, 150));
+    const updates = { statut: 'termine', updated_at: new Date().toISOString() };
+    if (fileInput?.files[0]) {
+      const file = fileInput.files[0];
+      const path = `preuve-fin/${id}-${Date.now()}-${file.name}`;
+      const { error: uploadError } = await sb.storage.from('intervention-photos').upload(path, file);
+      if (uploadError) throw uploadError;
+      updates.photos_fin = [path];
+    }
+    const { error } = await sb.from('interventions').update(updates).eq('id', id);
+    if (error) throw error;
 
-document.getElementById('geo-btn').addEventListener('click', () => {
-  const msg = document.getElementById('geo-msg');
-  msg.hidden = false; msg.textContent = 'Localisation en cours…';
-  if (!navigator.geolocation) { msg.textContent = "La géolocalisation n'est pas disponible sur cet appareil."; return; }
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    try {
-      const { latitude: lat, longitude: lng } = pos.coords;
-      const r = await fetch(`${BAN}/reverse/?lon=${lng}&lat=${lat}`);
-      const f = (await r.json()).features?.[0];
-      if (!f) { msg.textContent = "Adresse introuvable ici. Saisissez-la manuellement."; return; }
-      const it = featureToItem(f); it.lat = lat; it.lng = lng;
-      pickAddress(it);
-      msg.hidden = true;
-    } catch { msg.textContent = "Impossible de récupérer l'adresse. Saisissez-la manuellement."; }
-  }, () => { msg.textContent = "Autorisation refusée. Saisissez l'adresse manuellement."; }, { enableHighAccuracy: true, timeout: 10000 });
-});
-
-async function geocodeText(q) {
-  try {
-    const r = await fetch(`${BAN}/search/?q=${encodeURIComponent(q)}&limit=1`);
-    const f = (await r.json()).features?.[0];
-    if (f && f.properties.score > 0.45) return { lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
-  } catch {}
-  return null;
-}
-function resetAddressState() {
-  place = null; acItems = []; closeAc();
-  document.getElementById('geo-ok').hidden = true; document.getElementById('geo-msg').hidden = true;
-  document.getElementById('mini-map').hidden = true;
-  const c = document.getElementById('copy-ref'); if (c) c.textContent = '📋 Copier la référence';
+    toast('Chantier clôturé, rapport transmis.', 'success');
+    fermerModale();
+    await chargerMesMissions();
+  } catch (err) {
+    console.error(err);
+    toast("Erreur lors de la clôture. Réessayez.", 'error');
+    btn.disabled = false; btn.textContent = 'Clôturer le chantier';
+  }
 }
 
-showStep();
+/* =========================================================================
+   PROFIL
+   ========================================================================= */
+function renderProfile() {
+  const a = currentArtisan;
+  document.getElementById('profile-page').innerHTML = `
+    <div class="profile-card">
+      <h3>${esc(a.nom_entreprise)}</h3>
+      <dl>
+        <div class="profile-row"><dt>Gérant</dt><dd>${esc(a.nom_gerant)}</dd></div>
+        <div class="profile-row"><dt>Téléphone</dt><dd>${esc(a.telephone)}</dd></div>
+        <div class="profile-row"><dt>E-mail</dt><dd>${esc(a.email)}</dd></div>
+        <div class="profile-row"><dt>SIRET</dt><dd>${esc(a.siret ?? '—')}</dd></div>
+        <div class="profile-row"><dt>Zones</dt><dd>${esc((a.zones_intervention||[]).join(', ') || '—')}</dd></div>
+      </dl>
+      <div class="spec-tags">
+        ${(a.specialites||[]).map(s => `<span class="spec-tag">${categorieMeta(s).icone}${categorieMeta(s).label}</span>`).join('')}
+      </div>
+    </div>
+    <div class="profile-card">
+      <h3>Statut du dossier</h3>
+      <span class="status-pill status-pill--${a.statut_verification}">${a.statut_verification === 'valide' ? '✓ Validé' : a.statut_verification === 'refuse' ? 'Refusé' : 'En vérification'}</span>
+    </div>
+  `;
+}
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  window.location.reload();
+});
+
+/* =========================================================================
+   TEMPS RÉEL
+   ========================================================================= */
+function subscribeRealtime() {
+  // Poll instead of subscribing to whole-row events, which can include private columns.
+  if (window.e3RefreshTimer) clearInterval(window.e3RefreshTimer);
+  window.e3RefreshTimer = setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      chargerChantiers();
+      chargerMesMissions();
+    }
+  }, 45000);
+}
+
+/* =========================================================================
+   INITIALISATION — reprise de session existante
+   ========================================================================= */
+(async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await lancerApplication();
+})();
 </script>
 </body>
 </html>
