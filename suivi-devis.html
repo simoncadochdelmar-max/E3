@@ -8,16 +8,15 @@
   <meta name="referrer" content="no-referrer" />
   <title>Mes devis — Entreprise 3</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/jspdf@4.2.1/dist/jspdf.umd.min.js"></script>
   <style>
     :root{font-family:Arial,sans-serif;color:#202b3c;background:#f5f2ec;--navy:#102541;--gold:#c9963a;--line:#dedbd4;--muted:#657186}
     *{box-sizing:border-box}body{margin:0;padding:24px 16px}.wrap{max-width:820px;margin:auto}.brand{color:white;background:var(--navy);padding:20px 24px;border-radius:16px 16px 0 0}.brand strong{font-size:20px;letter-spacing:.02em}.body{background:white;padding:24px;border-radius:0 0 16px 16px;box-shadow:0 10px 28px #10254112}
     h1{font-size:25px;margin:0 0 7px;color:var(--navy)}.sub{color:var(--muted);line-height:1.5;margin:0}.status{padding:12px 14px;background:#fbeecb;border-radius:10px;margin:18px 0}.status.error{background:#fdf0ef;color:#9d241e}
     .offer{border:1px solid var(--line);border-radius:14px;padding:22px;margin:18px 0;background:#fff}.quote-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid var(--navy);padding-bottom:15px}.quote-label{font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--gold);text-transform:uppercase}.offer h2{font-size:22px;color:var(--navy);margin:5px 0}.quote-number,.quote-date{font-size:13px;color:var(--muted);margin:4px 0}.company-grid,.project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}.info-box{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fcfbf9;min-width:0}.info-box small{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:5px}.info-box strong,.info-box span{overflow-wrap:anywhere}.info-box a{color:var(--navy)}
-    .section-title{font-size:15px;color:var(--navy);margin:20px 0 9px}.scope-list{display:grid;gap:9px}.scope-box{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:12px 14px;break-inside:avoid}.scope-box h3{font-size:15px;margin:0 0 6px;color:var(--navy)}.scope-box p{margin:0;white-space:pre-wrap;line-height:1.5}.details{white-space:pre-wrap;line-height:1.5;margin:0}.price-box{display:flex;justify-content:space-between;gap:16px;align-items:center;background:#f4f6f8;border-radius:12px;padding:16px;margin:18px 0}.price-box small{display:block;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}.amount{font-size:27px;font-weight:800;color:var(--navy);margin-top:4px}.validity{font-size:13px;color:var(--muted);text-align:right}.contact{margin:14px 0 0;padding:13px;background:#eaf6f0;border-radius:10px;line-height:1.55}.contact p{margin:3px 0}.status-tag{font-size:12px;font-weight:700;color:#28543b;background:#eaf6f0;border-radius:99px;padding:7px 10px;white-space:nowrap}
+    .section-title{font-size:15px;color:var(--navy);margin:20px 0 9px}.scope-list{display:grid;gap:9px}.scope-box{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:12px 14px;break-inside:avoid}.scope-box h3{font-size:15px;margin:0 0 6px;color:var(--navy)}.scope-box p{margin:0;white-space:pre-wrap;line-height:1.5}.scope-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:13px;color:var(--muted)}.details{white-space:pre-wrap;line-height:1.5;margin:0}.price-box{display:flex;justify-content:space-between;gap:16px;align-items:center;background:#f4f6f8;border-radius:12px;padding:16px;margin:18px 0}.price-box small{display:block;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}.amount{font-size:27px;font-weight:800;color:var(--navy);margin-top:4px}.validity{font-size:13px;color:var(--muted);text-align:right}.contact{margin:14px 0 0;padding:13px;background:#eaf6f0;border-radius:10px;line-height:1.55}.contact p{margin:3px 0}.status-tag{font-size:12px;font-weight:700;color:#28543b;background:#eaf6f0;border-radius:99px;padding:7px 10px;white-space:nowrap}
     .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.btn{width:100%;border:0;border-radius:10px;background:var(--navy);color:white;padding:13px;font-size:15px;font-weight:700;cursor:pointer}.btn.secondary{background:#fff;color:var(--navy);border:1px solid var(--navy)}.btn:disabled{opacity:.6;cursor:wait}.empty{padding:14px;background:#f5f3ef;border-radius:10px}.fineprint{font-size:12px;color:var(--muted);margin-top:18px}
     @media(max-width:560px){body{padding:12px 8px}.body{padding:18px 14px}.offer{padding:16px}.quote-head{display:block}.status-tag{display:inline-block;margin-top:8px}.company-grid,.project-grid{grid-template-columns:1fr 1fr}.price-box{align-items:flex-start;flex-direction:column}.validity{text-align:left}.actions{grid-template-columns:1fr}}
-    @page{size:A4;margin:15mm}
-    @media print{body{padding:0;background:#fff;color:#111}.wrap{max-width:none}.brand{border-radius:0;padding:0 0 10px;background:#fff;color:var(--navy)}.body{padding:0;border-radius:0;box-shadow:none}.body>h1,.body>.sub,.body>#status,.fineprint{display:none}.offer{display:none;border:0;border-radius:0;padding:0;margin:0;box-shadow:none}.offer.printing{display:block}.actions{display:none}.quote-head,.info-box,.scope-box,.price-box,.contact{-webkit-print-color-adjust:exact;print-color-adjust:exact}.scope-box{break-inside:avoid}.contact{break-inside:avoid}a{color:inherit;text-decoration:none}}
   </style>
 </head>
 <body>
@@ -49,7 +48,7 @@
       if (typeof raw !== 'string') return null;
       try {
         const value = JSON.parse(raw);
-        return value && value.format === 'e3_quote_v1' ? value : null;
+        return value && ['e3_quote_v1','e3_quote_v2'].includes(value.format) ? value : null;
       } catch { return null; }
     }
 
@@ -85,7 +84,7 @@
             <div class="info-box"><small>Lieu</small><strong>${esc(data.ville || '—')}</strong></div>
           </div>
           <h3 class="section-title">Prestations et travaux compris</h3>
-          ${prestations.length ? `<div class="scope-list">${prestations.map(item => `<section class="scope-box"><h3>${esc(item.nom || 'Prestation')}</h3><p>${esc(item.details || 'Détail non précisé')}</p></section>`).join('')}</div>` : `<div class="scope-box"><p class="details">${esc(legacyDetails || 'Détail des prestations non renseigné.')}</p></div>`}
+          ${prestations.length ? `<div class="scope-list">${prestations.map(item => `<section class="scope-box"><h3>${esc(item.nom || 'Prestation')}</h3><p>${esc(item.details || 'Détail non précisé')}</p>${item.quantite != null || item.prix_unitaire != null ? `<div class="scope-meta"><span>${esc(item.quantite ?? 1)} ${esc(item.unite || 'unité')} × ${money(item.prix_unitaire || 0)} TTC</span><strong>${money(item.total ?? (Number(item.quantite || 1) * Number(item.prix_unitaire || 0)))}</strong></div>` : ''}</section>`).join('')}</div>` : `<div class="scope-box"><p class="details">${esc(legacyDetails || 'Détail des prestations non renseigné.')}</p></div>`}
           ${snapshot?.notes ? `<h3 class="section-title">Délais et conditions</h3><div class="scope-box"><p class="details">${esc(snapshot.notes)}</p></div>` : ''}
           ${o.frequence ? `<div class="info-box" style="margin-top:12px"><small>Fréquence / durée</small><strong>${esc(o.frequence)}</strong></div>` : ''}
           <div class="price-box"><div><small>Prix proposé · ${esc(priceUnits[o.unite_tarifaire] || '')} · TTC</small><div class="amount">${money(o.montant)}</div></div>
@@ -126,23 +125,77 @@
         offersBox.innerHTML = '<p class="empty">Aucun devis reçu pour le moment. Revenez plus tard avec ce lien privé.</p>';
         return;
       }
+      window.currentOffers = offers;
+      window.currentRequest = data;
       offersBox.innerHTML = offers.map((o, index) => renderOffer(o, data, index)).join('');
       offersBox.querySelectorAll('[data-quote]').forEach(button => button.addEventListener('click', () => choose(button)));
       offersBox.querySelectorAll('[data-download]').forEach(button => button.addEventListener('click', () => downloadOffer(button.dataset.download)));
     }
 
     function downloadOffer(id) {
-      const offer = offersBox.querySelector(`[data-offer="${CSS.escape(id)}"]`);
+      const offer = (window.currentOffers || []).find(item => String(item.id) === String(id));
       if (!offer) return;
-      document.querySelectorAll('.offer').forEach(card => card.classList.remove('printing'));
-      offer.classList.add('printing');
-      const clearPrint = () => {
-        offer.classList.remove('printing');
-        window.removeEventListener('afterprint', clearPrint);
+      if (!window.jspdf?.jsPDF) {
+        statusBox.className = 'status error';
+        statusBox.textContent = 'Le PDF ne peut pas être créé. Vérifiez votre connexion Internet puis actualisez la page.';
+        return;
+      }
+      const data = window.currentRequest || {};
+      const snapshot = parseQuoteDetails(offer.details);
+      const pdf = new window.jspdf.jsPDF({unit:'mm',format:'a4'});
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 16;
+      const contentWidth = pageWidth - margin * 2;
+      let y = 18;
+      const ensureRoom = height => { if (y + height > pageHeight - margin) { pdf.addPage(); y = margin; } };
+      const addText = (value, x = margin, width = contentWidth, fontSize = 10, style = 'normal', color = [32,43,60]) => {
+        pdf.setFont('helvetica', style); pdf.setFontSize(fontSize); pdf.setTextColor(...color);
+        const lines = pdf.splitTextToSize(String(value || ''), width);
+        ensureRoom(lines.length * (fontSize * .45) + 2);
+        pdf.text(lines, x, y); y += lines.length * (fontSize * .45) + 2;
       };
-      window.addEventListener('afterprint', clearPrint);
-      window.print();
-      setTimeout(clearPrint, 1200);
+      const rule = () => { pdf.setDrawColor(222,219,212); pdf.line(margin,y,pageWidth-margin,y); y += 6; };
+      const entreprise = snapshot?.entreprise || offer.entreprise || 'Entreprise non renseignée';
+      const siret = snapshot?.siret || offer.siret || 'Non renseigné';
+      const telephone = snapshot?.telephone || offer.telephone || 'Non renseigné';
+      const email = snapshot?.email || offer.email || '';
+      const prestations = snapshot?.prestations || [];
+      pdf.setFillColor(16,37,65); pdf.rect(0,0,pageWidth,36,'F');
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(11); pdf.setTextColor(255,255,255); pdf.text('ENTREPRISE 3',margin,14);
+      pdf.setFontSize(22); pdf.text('DEVIS',margin,27);
+      pdf.setFontSize(10); pdf.text(`Demande ${data.reference || ''}`,pageWidth-margin,27,{align:'right'});
+      y = 47;
+      addText(entreprise,margin,contentWidth,16,'bold',[16,37,65]);
+      addText(`SIRET : ${siret}`);
+      addText(`Téléphone : ${telephone}`);
+      if (email) addText(`E-mail : ${email}`);
+      y += 2; rule();
+      addText('DEMANDE CONCERNÉE',margin,contentWidth,10,'bold',[16,37,65]);
+      addText(`Référence : ${data.reference || '—'}    Ville : ${data.ville || '—'}`);
+      if (offer.created_at) addText(`Date du devis : ${prettyDate(offer.created_at)}`);
+      if (offer.validite_jusquau) addText(`Valable jusqu’au : ${prettyDate(offer.validite_jusquau)}`);
+      y += 2; rule();
+      addText('DÉTAIL DES PRESTATIONS',margin,contentWidth,10,'bold',[16,37,65]);
+      if (prestations.length) {
+        prestations.forEach(item => {
+          ensureRoom(22);
+          addText(item.nom || 'Prestation',margin,contentWidth,11,'bold',[16,37,65]);
+          addText(item.details || 'Détail non précisé',margin+2,contentWidth-2,9);
+          if (item.quantite != null || item.prix_unitaire != null) {
+            const lineTotal = item.total ?? Number(item.quantite || 1) * Number(item.prix_unitaire || 0);
+            addText(`${item.quantite ?? 1} ${item.unite || 'unité'} × ${money(item.prix_unitaire || 0)} TTC = ${money(lineTotal)}`,margin+2,contentWidth-2,9,'bold');
+          }
+          y += 2;
+        });
+      } else addText(offer.details || 'Détail non renseigné');
+      if (snapshot?.notes) { y += 2; addText('DÉLAIS ET CONDITIONS',margin,contentWidth,10,'bold',[16,37,65]); addText(snapshot.notes); }
+      y += 4; ensureRoom(28); pdf.setFillColor(244,246,248); pdf.roundedRect(margin,y,contentWidth,22,2,2,'F');
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(10); pdf.setTextColor(32,43,60); pdf.text(`TOTAL TTC · ${priceUnits[offer.unite_tarifaire] || ''}`.trim(),margin+5,y+8);
+      pdf.setFontSize(18); pdf.setTextColor(16,37,65); pdf.text(money(offer.montant),pageWidth-margin-5,y+16,{align:'right'}); y += 30;
+      addText('Le prix et les modalités définitives sont à confirmer directement avec l’entreprise.',margin,contentWidth,8,'normal',[101,113,134]);
+      const safeName = String(entreprise).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-|-$/g,'') || 'entreprise';
+      pdf.save(`devis-${data.reference || 'demande'}-${safeName}.pdf`);
     }
 
     async function choose(button) {
@@ -163,7 +216,6 @@
       }
       await loadOffers();
     }
-    window.addEventListener('afterprint', () => document.querySelectorAll('.offer.printing').forEach(card => card.classList.remove('printing')));
     loadOffers();
   </script>
 </body>
