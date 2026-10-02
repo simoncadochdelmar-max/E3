@@ -1049,6 +1049,15 @@ async function ouvrirModaleChantier(intervention) {
 
 function ouvrirFormulaireDevis(intervention) {
   const cat = categorieMeta(intervention.categorie);
+  const servicesDevis = (intervention.prestations?.length ? intervention.prestations : [intervention.categorie]).map(value => ({ value, ...categorieMeta(value) }));
+  const serviceFields = servicesDevis.map((service, index) => `
+    <section class="quote-company-card">
+      <strong>${service.icone} ${esc(service.label)}</strong>
+      <div class="field">
+        <label for="quote-service-${index}">Ce que vous réaliserez</label>
+        <textarea id="quote-service-${index}" rows="3" maxlength="700" required placeholder="Indiquez les tâches comprises pour ${esc(service.label.toLowerCase())}…"></textarea>
+      </div>
+    </section>`).join('');
   const dateValidite = new Date();
   dateValidite.setDate(dateValidite.getDate() + 30);
   const dateValiditeLocale = new Date(dateValidite.getTime() - dateValidite.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -1085,9 +1094,12 @@ function ouvrirFormulaireDevis(intervention) {
         <label for="quote-validity">Devis valable jusqu’au</label>
         <input id="quote-validity" type="date" value="${dateValiditeLocale}" />
       </div>
+      <h3>Prestations demandées</h3>
+      <p class="hint">Précisez ce qui est inclus pour chaque prestation demandée.</p>
+      ${serviceFields}
       <div class="field">
-        <label for="quote-details">Détail des prestations proposées</label>
-        <textarea id="quote-details" rows="5" minlength="10" maxlength="4000" required placeholder="Décrivez ce qui est compris dans votre prix…"></textarea>
+        <label for="quote-notes">Délais, conditions ou précisions (facultatif)</label>
+        <textarea id="quote-notes" rows="3" maxlength="800" placeholder="Ex. intervention sous 10 jours, fournitures comprises…"></textarea>
       </div>
       <p class="hint">Le demandeur recevra votre prix, le détail de votre offre et vos coordonnées d’entreprise. Vérifiez-les dans votre profil avant l’envoi.</p>
       <button class="btn btn-gold btn-block" id="quote-submit" type="submit">Envoyer ma proposition</button>
@@ -1096,19 +1108,37 @@ function ouvrirFormulaireDevis(intervention) {
     event.preventDefault();
     const button = document.getElementById('quote-submit');
     button.disabled = true; button.textContent = 'Envoi en cours…';
+    const profileUpdate = {
+      nom_entreprise: document.getElementById('quote-company').value.trim(),
+      siret: document.getElementById('quote-siret').value.trim(),
+      telephone: document.getElementById('quote-phone').value.trim()
+    };
+    const offreDetaillee = {
+      format: 'e3_quote_v1',
+      entreprise: profileUpdate.nom_entreprise,
+      siret: profileUpdate.siret,
+      telephone: profileUpdate.telephone,
+      email: currentArtisan.email || '',
+      prestations: servicesDevis.map((service, index) => ({
+        nom: service.label,
+        details: document.getElementById(`quote-service-${index}`).value.trim()
+      })),
+      notes: document.getElementById('quote-notes').value.trim()
+    };
+    const detailsDevis = JSON.stringify(offreDetaillee);
+    if (detailsDevis.length > 3900) {
+      toast('Le détail est trop long. Raccourcissez les descriptions des prestations.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
     const offer = {
       intervention_id: intervention.id,
       artisan_id: currentArtisan.id,
       montant: Number(document.getElementById('quote-amount').value),
       unite_tarifaire: document.getElementById('quote-unit').value,
-      details: document.getElementById('quote-details').value.trim(),
+      details: detailsDevis,
       frequence: document.getElementById('quote-frequency').value.trim() || null,
       validite_jusquau: document.getElementById('quote-validity').value || null
-    };
-    const profileUpdate = {
-      nom_entreprise: document.getElementById('quote-company').value.trim(),
-      siret: document.getElementById('quote-siret').value.trim(),
-      telephone: document.getElementById('quote-phone').value.trim()
     };
     const { error: profileError } = await sb.from('artisans').update(profileUpdate).eq('id', currentArtisan.id);
     if (profileError) {
