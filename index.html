@@ -306,6 +306,15 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 .quote-company-card strong{display:block;margin-bottom:7px;color:var(--navy-700)}
 .quote-company-card p{margin:4px 0;font-size:.9rem}
 .quote-company-card a{color:inherit}
+.quote-lines{display:grid;gap:.8rem;margin:.8rem 0}
+.quote-line{padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.quote-line-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-bottom:.6rem;color:var(--navy-700);font-weight:700}
+.quote-line-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.quote-line-grid .field{margin-bottom:.55rem}
+.quote-line-grid .wide{grid-column:1/-1}
+.quote-line-total{font-weight:800;text-align:right;color:var(--navy-950);padding:.35rem 0}
+.quote-total{display:flex;justify-content:space-between;padding:14px 0;margin:.6rem 0;border-top:2px solid var(--border);font-size:1.05rem;font-weight:800}
+@media(max-width:560px){.quote-line-grid{grid-template-columns:1fr 1fr}.quote-line-grid .wide{grid-column:1/-1}}
 .modal__section{margin-bottom:1.2rem;}
 .modal__section h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.4rem;font-weight:700;}
 .modal__photos{display:flex;gap:.6rem;flex-wrap:wrap;}
@@ -1050,14 +1059,18 @@ async function ouvrirModaleChantier(intervention) {
 function ouvrirFormulaireDevis(intervention) {
   const cat = categorieMeta(intervention.categorie);
   const servicesDevis = (intervention.prestations?.length ? intervention.prestations : [intervention.categorie]).map(value => ({ value, ...categorieMeta(value) }));
-  const serviceFields = servicesDevis.map((service, index) => `
-    <section class="quote-company-card">
-      <strong>${service.icone} ${esc(service.label)}</strong>
-      <div class="field">
-        <label for="quote-service-${index}">Ce que vous réaliserez</label>
-        <textarea id="quote-service-${index}" rows="3" maxlength="700" required placeholder="Indiquez les tâches comprises pour ${esc(service.label.toLowerCase())}…"></textarea>
+  const renderQuoteLine = (name = '') => `
+    <article class="quote-line">
+      <div class="quote-line-head"><span>Prestation</span><button type="button" class="btn btn-ghost btn-sm" data-remove-line>Supprimer</button></div>
+      <div class="quote-line-grid">
+        <div class="field wide"><label>Prestation / travail</label><input data-line-name type="text" maxlength="120" value="${esc(name)}" placeholder="Ex. remplacement d’un robinet" required /></div>
+        <div class="field wide"><label>Description de ce qui est compris</label><textarea data-line-description rows="2" maxlength="500" placeholder="Détaillez les travaux et fournitures inclus" required></textarea></div>
+        <div class="field"><label>Quantité</label><input data-line-quantity type="number" min="0.01" step="0.01" value="1" required /></div>
+        <div class="field"><label>Unité</label><select data-line-unit><option>forfait</option><option>heure</option><option>unité</option><option>m²</option><option>mois</option><option>an</option></select></div>
+        <div class="field"><label>Prix unitaire TTC (€)</label><input data-line-price type="number" min="0.01" step="0.01" inputmode="decimal" required /></div>
       </div>
-    </section>`).join('');
+      <div class="quote-line-total">Total ligne : <span data-line-total>0,00 €</span></div>
+    </article>`;
   const dateValidite = new Date();
   dateValidite.setDate(dateValidite.getDate() + 30);
   const dateValiditeLocale = new Date(dateValidite.getTime() - dateValidite.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -1072,10 +1085,6 @@ function ouvrirFormulaireDevis(intervention) {
         <div class="field"><label for="quote-siret">SIRET (14 chiffres)</label><input id="quote-siret" type="text" inputmode="numeric" maxlength="14" pattern="[0-9]{14}" value="${esc(String(artisan.siret || '').replace(/\D/g, ''))}" placeholder="14 chiffres" required /></div>
         <div class="field"><label for="quote-phone">Téléphone communiqué au demandeur</label><input id="quote-phone" type="tel" maxlength="20" value="${esc(artisan.telephone || '')}" required /></div>
         <p class="hint">Ces informations seront enregistrées dans votre profil et jointes à votre réponse.</p>
-      </div>
-      <div class="field">
-        <label for="quote-amount">Montant proposé (€ TTC)</label>
-        <input id="quote-amount" type="number" min="0.01" step="0.01" inputmode="decimal" required />
       </div>
       <div class="field">
         <label for="quote-unit">Période du prix</label>
@@ -1094,9 +1103,11 @@ function ouvrirFormulaireDevis(intervention) {
         <label for="quote-validity">Devis valable jusqu’au</label>
         <input id="quote-validity" type="date" value="${dateValiditeLocale}" />
       </div>
-      <h3>Prestations demandées</h3>
-      <p class="hint">Précisez ce qui est inclus pour chaque prestation demandée.</p>
-      ${serviceFields}
+      <h3>Lignes du devis</h3>
+      <p class="hint">Une ligne est créée pour chaque prestation demandée. Ajoutez ou supprimez-en pour détailler votre offre.</p>
+      <div id="quote-lines" class="quote-lines">${servicesDevis.map(service => renderQuoteLine(`${service.icone} ${service.label}`)).join('')}</div>
+      <button type="button" class="btn btn-ghost btn-block" id="quote-add-line">+ Ajouter une ligne</button>
+      <div class="quote-total"><span>Total TTC</span><span id="quote-total">0,00 €</span></div>
       <div class="field">
         <label for="quote-notes">Délais, conditions ou précisions (facultatif)</label>
         <textarea id="quote-notes" rows="3" maxlength="800" placeholder="Ex. intervention sous 10 jours, fournitures comprises…"></textarea>
@@ -1104,6 +1115,32 @@ function ouvrirFormulaireDevis(intervention) {
       <p class="hint">Le demandeur recevra votre prix, le détail de votre offre et vos coordonnées d’entreprise. Vérifiez-les dans votre profil avant l’envoi.</p>
       <button class="btn btn-gold btn-block" id="quote-submit" type="submit">Envoyer ma proposition</button>
     </form>`;
+  const linesBox = document.getElementById('quote-lines');
+  const formatEuro = value => new Intl.NumberFormat('fr-FR', { style:'currency', currency:'EUR' }).format(value || 0);
+  const updateQuoteTotal = () => {
+    let total = 0;
+    linesBox.querySelectorAll('.quote-line').forEach(line => {
+      const quantity = Number(line.querySelector('[data-line-quantity]').value) || 0;
+      const price = Number(line.querySelector('[data-line-price]').value) || 0;
+      const lineTotal = quantity * price;
+      total += lineTotal;
+      line.querySelector('[data-line-total]').textContent = formatEuro(lineTotal);
+    });
+    document.getElementById('quote-total').textContent = formatEuro(total);
+  };
+  document.getElementById('quote-add-line').addEventListener('click', () => {
+    linesBox.insertAdjacentHTML('beforeend', renderQuoteLine());
+    updateQuoteTotal();
+  });
+  linesBox.addEventListener('input', updateQuoteTotal);
+  linesBox.addEventListener('change', updateQuoteTotal);
+  linesBox.addEventListener('click', event => {
+    const removeButton = event.target.closest('[data-remove-line]');
+    if (!removeButton) return;
+    removeButton.closest('.quote-line').remove();
+    updateQuoteTotal();
+  });
+  updateQuoteTotal();
   document.getElementById('quote-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     const button = document.getElementById('quote-submit');
@@ -1114,17 +1151,36 @@ function ouvrirFormulaireDevis(intervention) {
       telephone: document.getElementById('quote-phone').value.trim()
     };
     const offreDetaillee = {
-      format: 'e3_quote_v1',
+      format: 'e3_quote_v2',
       entreprise: profileUpdate.nom_entreprise,
       siret: profileUpdate.siret,
       telephone: profileUpdate.telephone,
       email: currentArtisan.email || '',
-      prestations: servicesDevis.map((service, index) => ({
-        nom: service.label,
-        details: document.getElementById(`quote-service-${index}`).value.trim()
-      })),
+      prestations: Array.from(linesBox.querySelectorAll('.quote-line')).map(line => {
+        const quantite = Number(line.querySelector('[data-line-quantity]').value);
+        const prixUnitaire = Number(line.querySelector('[data-line-price]').value);
+        return {
+          nom: line.querySelector('[data-line-name]').value.trim(),
+          details: line.querySelector('[data-line-description]').value.trim(),
+          quantite,
+          unite: line.querySelector('[data-line-unit]').value,
+          prix_unitaire: prixUnitaire,
+          total: quantite * prixUnitaire
+        };
+      }),
       notes: document.getElementById('quote-notes').value.trim()
     };
+    if (!offreDetaillee.prestations.length) {
+      toast('Ajoutez au moins une ligne au devis.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
+    const montantTotal = offreDetaillee.prestations.reduce((sum, item) => sum + item.total, 0);
+    if (!Number.isFinite(montantTotal) || montantTotal <= 0) {
+      toast('Le total du devis doit être supérieur à 0 €.', 'error');
+      button.disabled = false; button.textContent = 'Envoyer ma proposition';
+      return;
+    }
     const detailsDevis = JSON.stringify(offreDetaillee);
     if (detailsDevis.length > 3900) {
       toast('Le détail est trop long. Raccourcissez les descriptions des prestations.', 'error');
@@ -1134,7 +1190,7 @@ function ouvrirFormulaireDevis(intervention) {
     const offer = {
       intervention_id: intervention.id,
       artisan_id: currentArtisan.id,
-      montant: Number(document.getElementById('quote-amount').value),
+      montant: Number(montantTotal.toFixed(2)),
       unite_tarifaire: document.getElementById('quote-unit').value,
       details: detailsDevis,
       frequence: document.getElementById('quote-frequency').value.trim() || null,
