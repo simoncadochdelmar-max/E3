@@ -988,7 +988,7 @@ function renderMarkers() {
 function categorieMeta(value) { return CATEGORIES.find(c => c.value === value) ?? { label: value, icone: '🛠️' }; }
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const escNl = s => esc(s).replace(/\n/g, '<br>');
-const PROFIL_STRUCTURE_LABELS = { syndic_copro:'Syndic de copropriété', agence_immo:'Agence immobilière', commerce:'Commerce / Boutique', bureau_entreprise:'Bureau / Entreprise', ecole:'Établissement', particulier:'Particulier' };
+const PROFIL_STRUCTURE_LABELS = { gestionnaire_immo:'Syndic / Agence immobilière', etablissement:'Établissement', syndic_copro:'Syndic de copropriété', agence_immo:'Agence immobilière', commerce:'Commerce / Boutique', bureau_entreprise:'Bureau / Entreprise', ecole:'Établissement', particulier:'Particulier' };
 const FREQUENCE_LABELS = { hebdomadaire:'1× par semaine', bihebdomadaire:'2× par semaine', quotidienne:'Quotidienne', mensuelle:'Mensuelle', trimestrielle:'Tous les 3 mois', a_definir:'À définir' };
 
 function renderChantierList() {
