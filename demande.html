@@ -7,6 +7,7 @@
 <title>Entreprise 3 — Faire une demande</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
 
@@ -156,6 +157,11 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
   margin-bottom:9px;display:flex;align-items:center;gap:6px;
 }
 .service-group-title::after{content:'';flex:1;height:1px;background:var(--border);}
+details.service-group > summary{list-style:none;cursor:pointer;}
+details.service-group > summary::-webkit-details-marker{display:none;}
+details.service-group > summary::before{content:'＋';font-size:14px;color:var(--navy);}
+details.service-group[open] > summary::before{content:'－';}
+details.service-group[open] > summary{margin-bottom:9px;}
 .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .cat-card{
   border:1.5px solid var(--border);border-radius:var(--radius-m);padding:13px 8px;background:white;
@@ -313,14 +319,16 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
 
 <!-- ÉTAPE 1 — PROFIL -->
 <section class="section active" id="s1" aria-labelledby="s1-title">
-  <h2 class="section-title" id="s1-title">Quel lieu est concerné ?</h2>
-  <p class="section-sub">Choisissez le cas qui correspond le mieux.</p>
+  <h2 class="section-title" id="s1-title">Vous êtes…</h2>
+  <p class="section-sub">Choisissez votre profil : les questions s’adapteront à votre besoin.</p>
 
   <div class="picker-grid" id="profile-grid" role="radiogroup" aria-label="Profil"></div>
 
-  <div class="subtoggle" id="particulier-toggle" hidden role="radiogroup" aria-label="Vous êtes">
-    <button type="button" data-v="proprietaire" onclick="pickOccupant(this)">Propriétaire</button>
-    <button type="button" data-v="locataire" onclick="pickOccupant(this)">Locataire</button>
+  <div class="subtoggle" id="particulier-toggle" hidden role="radiogroup" aria-label="Vous êtes propriétaire ou locataire ?">
+    <p class="section-sub" style="grid-column:1/-1;margin:0 0 8px;">Pour votre logement, vous êtes…</p>
+    <button type="button" role="radio" aria-checked="false" data-v="proprietaire" onclick="pickOccupant(this)">Propriétaire</button>
+    <button type="button" role="radio" aria-checked="false" data-v="locataire" onclick="pickOccupant(this)">Locataire</button>
+    <p class="grid-err" id="err-occupant" style="grid-column:1/-1;margin:0;">Choisissez « Propriétaire » ou « Locataire » pour continuer.</p>
   </div>
 
   <p class="grid-err" id="err-profile">Veuillez sélectionner un profil pour continuer.</p>
@@ -398,8 +406,8 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
     </div>
     <div class="demand-card" data-v="recurrent" onclick="pickDemandType(this)" role="radio" aria-checked="false" tabindex="0">
       <div class="demand-icon">🔁</div>
-      <div class="demand-title">Contrat d'entretien</div>
-      <div class="demand-sub">Nettoyage régulier, espaces verts, parties communes…</div>
+      <div class="demand-title" id="recurring-title">Entretien régulier / contrat</div>
+      <div class="demand-sub" id="recurring-subtitle">Choix disponible pour les professionnels.</div>
     </div>
   </div>
 
@@ -580,7 +588,7 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
   <button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer</button>
 </div>
 
-<p style="text-align:center;font-size:11px;color:#8896a8;padding:6px 0 18px;">Version du formulaire : v4 — adresse intelligente</p>
+<p style="text-align:center;font-size:11px;color:#8896a8;padding:6px 0 18px;">Version du formulaire : v5 — parcours adapté à votre profil</p>
 </form>
 
 <script>
@@ -734,15 +742,22 @@ function selectProfile(value, el) {
 
   const particulierToggle = document.getElementById('particulier-toggle');
   particulierToggle.hidden = value !== 'particulier';
-  if (value !== 'particulier') data.occupant = null;
+  if (value !== 'particulier') {
+    data.occupant = null;
+    particulierToggle.querySelectorAll('button').forEach(button => { button.classList.remove('sel'); button.setAttribute('aria-checked','false'); });
+  }
 
   const recurrentCard = document.querySelector('#demand-type [data-v="recurrent"]');
   recurrentCard.hidden = value === 'particulier';
-  document.getElementById('copro-details').hidden = value !== 'gestionnaire_immo';
   if (value === 'particulier' && data.demandType === 'recurrent') {
     pickDemandType(document.querySelector('#demand-type [data-v="ponctuel"]'));
     data.frequence = null;
   }
+  document.getElementById('recurring-title').textContent = value === 'gestionnaire_immo'
+    ? 'Contrat d’entretien des parties communes' : 'Entretien régulier de vos locaux';
+  document.getElementById('recurring-subtitle').textContent = value === 'gestionnaire_immo'
+    ? 'Nettoyage, espaces verts et équipements de l’immeuble.'
+    : 'Nettoyage ou maintenance à fréquence régulière.';
 
   document.getElementById('label-nomsite').textContent = NOMSITE_LABELS[value] || "Nom (facultatif)";
   document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
@@ -762,9 +777,11 @@ function selectProfile(value, el) {
 }
 
 function pickOccupant(el) {
-  document.querySelectorAll('#particulier-toggle button').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('#particulier-toggle button').forEach(b => { b.classList.remove('sel'); b.setAttribute('aria-checked','false'); });
   el.classList.add('sel');
+  el.setAttribute('aria-checked','true');
   data.occupant = el.dataset.v;
+  document.getElementById('err-occupant').classList.remove('show');
 }
 
 /* =========================================================================
@@ -785,7 +802,6 @@ function pickDemandType(el) {
   data.demandType = el.dataset.v;
   document.getElementById('urgence-wrap').hidden = data.demandType !== 'ponctuel';
   document.getElementById('frequence-wrap').hidden = data.demandType !== 'recurrent';
-  document.getElementById('copro-details').hidden = data.profile !== 'gestionnaire_immo';
   renderSyndicServiceDetails();
 }
 document.querySelectorAll('#demand-type .demand-card').forEach(card => {
@@ -806,11 +822,11 @@ function pickFreq(el) {
 function renderPrestations() {
   const order = PROFILE_GROUP_ORDER[data.profile] || Object.keys(SERVICE_GROUPS);
   const container = document.getElementById('prestations-container');
-  container.innerHTML = order.map(groupId => {
+  container.innerHTML = order.map((groupId, index) => {
     const group = SERVICE_GROUPS[groupId];
     return `
-    <div class="service-group">
-      <div class="service-group-title">${group.label}</div>
+    <details class="service-group" ${index === 0 ? 'open' : ''}>
+      <summary class="service-group-title">${group.label}</summary>
       <div class="cat-grid">
         ${group.items.map(it => `
           <button type="button" class="cat-card ${selectedPrestations.has(it.v) ? 'sel' : ''}" data-v="${it.v}" aria-pressed="${selectedPrestations.has(it.v)}" onclick="togglePrestation('${it.v}', this)">
@@ -818,7 +834,7 @@ function renderPrestations() {
             <span class="cat-label">${it.l}</span>
           </button>`).join('')}
       </div>
-    </div>`;
+    </details>`;
   }).join('');
 }
 
@@ -853,6 +869,7 @@ function renderSyndicServiceDetails() {
     container.dataset.ready = 'true';
   }
   const isSyndicContract = data.profile === 'gestionnaire_immo' && data.demandType === 'recurrent';
+  document.getElementById('copro-details').hidden = !isSyndicContract;
   document.getElementById('copro-contract-base').hidden = !isSyndicContract;
   document.getElementById('copro-multiservice-wrap').hidden = !isSyndicContract || selectedPrestations.size < 2;
   document.getElementById('err-syndic-scope').classList.remove('show');
@@ -897,6 +914,7 @@ function validateStep() {
   clearErrors();
   if (step === 1) {
     if (!data.profile) { document.getElementById('err-profile').classList.add('show'); return false; }
+    if (data.profile === 'particulier' && !data.occupant) { document.getElementById('err-occupant').classList.add('show'); return false; }
     return true;
   }
   if (step === 2) {
@@ -1194,6 +1212,8 @@ function resetForm() {
   document.getElementById('copro-contract-end-wrap').hidden = true;
   document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
   document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
+  document.getElementById('recurring-title').textContent = 'Entretien régulier / contrat';
+  document.getElementById('recurring-subtitle').textContent = 'Choix disponible pour les professionnels.';
   document.getElementById('particulier-toggle').hidden = true;
   document.getElementById('prestations-container').innerHTML = '';
   document.getElementById('preview-wrap').innerHTML = '';
