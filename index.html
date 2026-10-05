@@ -662,6 +662,9 @@ let userMarker = null;
 let userPosition = null;
 let interventions = [];
 let missions = [];
+const NEARBY_ALERT_RADIUS_KM = 10;
+let knownAvailableInterventionIds = new Set();
+let nearbyAlertsInitialized = false;
 let categorieFiltre = null;
 let missionsFiltre = 'actif';
 let sortMode = 'recent';
@@ -952,10 +955,43 @@ async function chargerChantiers() {
       interventions = interventions.map(i => ({ ...i, _interested: interetIds.has(i.id) }));
       interventions = interventions.map(i => ({ ...i, _hasQuote: devisIds.has(i.id) }));
     }
+    notifierNouvellesDemandesProches(interventions);
   }
 
   renderMarkers();
   renderChantierList();
+}
+
+function notifierNouvellesDemandesProches(currentRequests) {
+  const currentIds = new Set(currentRequests.map(request => request.id));
+  // Au premier chargement, on mémorise les chantiers déjà présents sans alerter.
+  if (!nearbyAlertsInitialized) {
+    knownAvailableInterventionIds = currentIds;
+    nearbyAlertsInitialized = true;
+    return;
+  }
+
+  const freshRequests = currentRequests.filter(request => !knownAvailableInterventionIds.has(request.id));
+  currentIds.forEach(id => knownAvailableInterventionIds.add(id));
+  if (!freshRequests.length || !userPosition) return;
+
+  const nearby = freshRequests.map(request => ({
+    request,
+    distance: request.latitude != null && request.longitude != null
+      ? distanceKm(userPosition.lat, userPosition.lng, Number(request.latitude), Number(request.longitude))
+      : null
+  })).filter(item => item.distance != null && item.distance <= NEARBY_ALERT_RADIUS_KM);
+
+  if (!nearby.length) return;
+  if (nearby.length === 1) {
+    const { request, distance } = nearby[0];
+    const service = categorieMeta(request.categorie).label;
+    const location = request.ville ? ` à ${request.ville}` : '';
+    toast(`Nouvelle demande proche de vous : ${service}${location} · ${distance.toFixed(1)} km`, 'success');
+  } else {
+    toast(`${nearby.length} nouvelles demandes à moins de ${NEARBY_ALERT_RADIUS_KM} km de vous.`, 'success');
+  }
+  if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
 }
 
 function filteredInterventions() {
@@ -998,6 +1034,20 @@ function renderMarkers() {
 }
 
 function categorieMeta(value) { return CATEGORIES.find(c => c.value === value) ?? { label: value, icone: '🛠️' }; }
+function urlWaze(destination) {
+  const waze = new URL('https://waze.com/ul');
+  const lat = destination.latitude;
+  const lng = destination.longitude;
+  if (lat != null && lng != null && lat !== '' && lng !== '' && Number.isFinite(Number(lat)) && Number.isFinite(Number(lng))) {
+    waze.searchParams.set('ll', `${Number(lat)},${Number(lng)}`);
+  } else {
+    const address = [destination.adresse, destination.code_postal, destination.ville].filter(Boolean).join(' ');
+    waze.searchParams.set('q', address);
+  }
+  waze.searchParams.set('navigate', 'yes');
+  waze.searchParams.set('utm_source', 'entreprise3');
+  return waze.href;
+}
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const escNl = s => esc(s).replace(/\n/g, '<br>');
 const PROFIL_STRUCTURE_LABELS = { gestionnaire_immo:'Syndic / Agence immobilière', etablissement:'Établissement', syndic_copro:'Syndic de copropriété', agence_immo:'Agence immobilière', commerce:'Commerce / Boutique', bureau_entreprise:'Bureau / Entreprise', ecole:'Établissement', particulier:'Particulier' };
@@ -1073,7 +1123,7 @@ async function ouvrirModaleChantier(intervention) {
       <p>${esc(intervention.adresse ?? '')}${intervention.etage ? `, ${esc(intervention.etage)}` : ''}<br>${esc(intervention.code_postal ?? '')} ${esc(intervention.ville ?? '')}</p>
     </div>
     <div class="action-grid-2">
-      <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((intervention.adresse||'')+' '+(intervention.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
+      <a class="btn-action" href="${urlWaze(intervention)}" target="_blank" rel="noopener">🚗 Aller avec Waze</a>
       <span class="btn-action">Coordonnées après sélection</span>
     </div>
     <div class="modal__section">
@@ -1435,7 +1485,7 @@ async function ouvrirModaleMission(mission) {
       <p>${esc(mission.adresse ?? '')}${mission.ville ? ', ' + esc(mission.ville) : ''}</p>
     </div>
     <div class="action-grid-2">
-      <a class="btn-action" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((mission.adresse||'')+' '+(mission.ville||''))}" target="_blank" rel="noopener">🗺️ Itinéraire</a>
+      <a class="btn-action" href="${urlWaze(mission)}" target="_blank" rel="noopener">🚗 Aller avec Waze</a>
       <a class="btn-action btn-call" href="tel:${esc(contact.telephone)}">📞 Appeler</a>
     </div>
     <div class="modal__section">
