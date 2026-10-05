@@ -901,6 +901,10 @@ function localiserArtisan() {
     toast("La géolocalisation n'est pas supportée par votre navigateur.", "error");
     return;
   }
+  if (!window.isSecureContext && location.protocol !== 'file:') {
+    toast("La localisation nécessite une adresse sécurisée en https. Ouvrez l’espace artisan sur Vercel.", "error");
+    return;
+  }
   toast("Recherche de votre position...", "info");
   navigator.geolocation.getCurrentPosition((pos) => {
     userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -909,9 +913,17 @@ function localiserArtisan() {
     map.setView([userPosition.lat, userPosition.lng], 13);
     renderChantierList();
     toast("Position actualisée avec succès.", "success");
-  }, () => { 
-    toast("Impossible d'obtenir votre position. Vérifiez vos paramètres.", "error"); 
-  }, { enableHighAccuracy: true, timeout: 8000 });
+  }, (error) => {
+    if (error.code === error.PERMISSION_DENIED) {
+      toast("Accès à la position refusé. Autorisez la localisation pour le site dans les réglages du navigateur, puis réessayez.", "error");
+    } else if (error.code === error.POSITION_UNAVAILABLE) {
+      toast("Position introuvable. Activez la localisation du téléphone et vérifiez que le navigateur y a accès.", "error");
+    } else if (error.code === error.TIMEOUT) {
+      toast("La recherche prend trop de temps. Vérifiez le GPS et le réseau, puis appuyez de nouveau sur 📍.", "error");
+    } else {
+      toast("Localisation impossible. Vérifiez les autorisations du navigateur et le GPS du téléphone.", "error");
+    }
+  }, { enableHighAccuracy: false, timeout: 20000, maximumAge: 30000 });
 }
 
 document.getElementById('locate-btn').addEventListener('click', () => {
