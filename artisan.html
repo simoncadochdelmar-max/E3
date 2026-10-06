@@ -599,7 +599,7 @@ const SUPABASE_URL = 'https://yqjeqcomrubelahrvizd.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_hKaiVb_fWBPRgESxpwWNCA_iAN9acMe';
 const CODE_PARTENAIRE = 'ENTREPRISE3';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const INTERVENTION_PUBLIC_COLUMNS = 'id,reference,zone,adresse,code_postal,ville,etage,categorie,urgence,description,photos,statut,artisan_id,assigned_at,updated_at,profil_demandeur,profil_structure,nom_site,prestations,type_demande,frequence,date_debut_souhaitee,surface_m2,created_at,latitude,longitude,mode_demande';
+const INTERVENTION_PUBLIC_COLUMNS = 'id,reference,zone,adresse,code_postal,ville,etage,categorie,urgence,description,photos,statut,artisan_id,assigned_at,updated_at,profil_demandeur,profil_structure,type_bien_gestion,nom_site,prestations,type_demande,frequence,date_debut_souhaitee,surface_m2,created_at,latitude,longitude,mode_demande';
 
 const CATEGORIES = [
   { value:'plomberie', label:'Plomberie', icone:'🔧' },
@@ -1110,7 +1110,7 @@ async function ouvrirModaleChantier(intervention) {
         ? `<span class="contrat-tag">🔁 Contrat ${intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || '' : ''}</span>`
         : `<span class="urgence-tag urgence-tag--${intervention.urgence}">${URGENCES[intervention.urgence]?.label}</span>`}
       ${intervention.mode_demande === 'devis' ? '<span class="contrat-tag">📄 Plusieurs devis attendus</span>' : ''}
-      ${profilLabel ? `<span>${profilLabel}</span>` : ''}
+      ${profilLabel ? `<span>${profilLabel}${intervention.type_bien_gestion ? ` · ${intervention.type_bien_gestion === 'copro' ? 'Copropriété / résidence' : 'Bien en gestion'}` : ''}</span>` : ''}
       <span>Réf. ${esc(intervention.reference ?? '—')}</span>
     </div>
     <div class="modal__section">
@@ -1492,6 +1492,7 @@ async function ouvrirModaleMission(mission) {
       <h4>Contact du demandeur</h4>
       <p>${esc(contact.prenom)} ${esc(contact.nom)} · ${esc(contact.telephone)}</p>
     </div>
+    ${contact.acces_info ? `<div class="modal__section"><h4>Informations d’accès privées</h4><p>${esc(contact.acces_info)}</p></div>` : ''}
     <div class="modal__section">
       <h4>Description</h4>
       <p>${escNl(mission.description)}</p>
