@@ -385,7 +385,7 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
       </div>
       <button type="submit" class="btn btn-primary btn-block" id="login-btn">Se connecter</button>
     </form>
-    <p class="auth-switch">Pas encore de compte ? <button type="button" onclick="afficherEcran('register')">S'inscrire avec un code partenaire</button></p>
+    <p class="auth-switch">Pas encore de compte ? <button type="button" onclick="afficherEcran('register')">Créer un compte d’essai</button></p>
   </div>
 </div>
 
@@ -396,19 +396,11 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
   <div class="auth-card">
     <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
     <h1>Rejoindre le réseau</h1>
-    <p class="lead">Votre dossier sera vérifié avant validation de votre accès aux chantiers.</p>
-    <p class="hint">Abonnement artisan : 60 € TTC par mois. Le prix des travaux et les modalités sont convenus directement entre l’artisan et le client.</p>
+    <p class="lead">Pour la phase d’essai, créez votre compte avec votre e-mail professionnel, un mot de passe, le nom de votre entreprise et votre téléphone.</p>
+    <p class="hint">L’accès aux demandes sera activé après validation de votre compte. Aucun document n’est demandé pendant l’essai.</p>
     <p class="form-error" id="register-error" hidden></p>
 
     <form id="register-form">
-      <fieldset>
-        <legend>Accès partenaire</legend>
-        <div class="field">
-          <label for="reg-code">Code d'accès partenaire</label>
-          <input type="text" id="reg-code" required placeholder="ENTREPRISE3" />
-        </div>
-      </fieldset>
-
       <fieldset>
         <legend>Identifiants</legend>
         <div class="field">
@@ -423,54 +415,18 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
       </fieldset>
 
       <fieldset>
-        <legend>Entreprise</legend>
+        <legend>Votre entreprise</legend>
         <div class="field">
           <label for="reg-company">Nom de l'entreprise</label>
           <input type="text" id="reg-company" required />
         </div>
         <div class="field">
-          <label for="reg-gerant">Nom du gérant</label>
-          <input type="text" id="reg-gerant" required />
-        </div>
-        <div class="field">
           <label for="reg-tel">Téléphone</label>
           <input type="tel" id="reg-tel" required />
         </div>
-        <div class="field">
-          <label for="reg-siret">SIRET <span style="font-weight:400;">(facultatif)</span></label>
-          <input type="text" id="reg-siret" inputmode="numeric" pattern="[0-9]{14}" />
-        </div>
-        <div class="field">
-          <label>Spécialités</label>
-          <div class="chip-group" id="reg-specialites"></div>
-        </div>
-        <div class="field">
-          <label for="reg-zones">Zone d'intervention (départements)</label>
-          <input type="text" id="reg-zones" placeholder="75, 92, 93" required />
-        </div>
       </fieldset>
 
-      <fieldset>
-        <legend>Dossier de vérification</legend>
-        <div class="field">
-          <label for="doc-identite">Pièce d'identité du gérant</label>
-          <input type="file" id="doc-identite" class="file-field" accept="image/*,application/pdf" required />
-        </div>
-        <div class="field">
-          <label for="doc-decennale">Attestation d'assurance décennale</label>
-          <input type="file" id="doc-decennale" class="file-field" accept="image/*,application/pdf" required />
-        </div>
-        <div class="field">
-          <label for="doc-rcpro">Attestation RC Pro</label>
-          <input type="file" id="doc-rcpro" class="file-field" accept="image/*,application/pdf" required />
-        </div>
-        <div class="field">
-          <label for="doc-kbis">Extrait Kbis / justificatif d'activité</label>
-          <input type="file" id="doc-kbis" class="file-field" accept="image/*,application/pdf" required />
-        </div>
-      </fieldset>
-
-      <button type="submit" class="btn btn-gold btn-block" id="register-btn">Envoyer mon dossier</button>
+      <button type="submit" class="btn btn-gold btn-block" id="register-btn">Créer mon compte</button>
     </form>
     <p class="auth-switch">Déjà inscrit ? <button type="button" onclick="afficherEcran('login')">Se connecter</button></p>
   </div>
@@ -679,21 +635,6 @@ function afficherEcran(mode) {
   document.getElementById('register-screen').hidden = mode !== 'register';
 }
 
-// Chips de spécialités à l'inscription
-const selectedSpecialites = new Set();
-(function initSpecialitesChips() {
-  const container = document.getElementById('reg-specialites');
-  container.innerHTML = CATEGORIES.filter(c => c.value !== 'autre').map(c =>
-    `<button type="button" class="chip" data-value="${c.value}">${c.icone} ${c.label}</button>`
-  ).join('');
-  container.addEventListener('click', (e) => {
-    const btn = e.target.closest('.chip');
-    if (!btn) return;
-    btn.classList.toggle('is-selected');
-    btn.classList.contains('is-selected') ? selectedSpecialites.add(btn.dataset.value) : selectedSpecialites.delete(btn.dataset.value);
-  });
-})();
-
 /* =========================================================================
    CONNEXION
    ========================================================================= */
@@ -726,65 +667,39 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
   const btn = document.getElementById('register-btn');
   errorEl.hidden = true;
 
-  if (document.getElementById('reg-code').value.trim().toUpperCase() !== CODE_PARTENAIRE) {
-    errorEl.textContent = "Code d'accès partenaire invalide.";
-    errorEl.hidden = false;
-    return;
-  }
-  if (selectedSpecialites.size === 0) {
-    errorEl.textContent = 'Sélectionnez au moins une spécialité.';
-    errorEl.hidden = false;
-    return;
-  }
-
   btn.disabled = true; btn.textContent = 'Envoi en cours…';
 
   try {
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-pass').value;
+    const companyName = document.getElementById('reg-company').value.trim();
+    const telephone = document.getElementById('reg-tel').value.trim();
 
     const { data: signUpData, error: signUpError } = await sb.auth.signUp({ email, password });
     if (signUpError) throw signUpError;
     const artisanId = signUpData.user.id;
 
-    const zones = document.getElementById('reg-zones').value.split(',').map(z => z.trim()).filter(Boolean);
-
     const { error: profileError } = await sb.from('artisans').insert({
       id: artisanId,
       code_partenaire: CODE_PARTENAIRE,
-      nom_entreprise: document.getElementById('reg-company').value,
-      nom_gerant: document.getElementById('reg-gerant').value,
-      telephone: document.getElementById('reg-tel').value,
+      nom_entreprise: companyName,
+      nom_gerant: companyName,
+      telephone,
       email,
-      siret: document.getElementById('reg-siret').value || null,
-      specialites: Array.from(selectedSpecialites),
-      zones_intervention: zones,
+      siret: null,
+      specialites: [],
+      zones_intervention: [],
     });
     if (profileError) throw profileError;
 
-    const documentFields = [
-      ['doc-identite', 'piece_identite'],
-      ['doc-decennale', 'assurance_decennale'],
-      ['doc-rcpro', 'rc_pro'],
-      ['doc-kbis', 'kbis'],
-    ];
-    for (const [inputId, typeDocument] of documentFields) {
-      const file = document.getElementById(inputId).files[0];
-      if (!file) continue;
-      const path = `${artisanId}/${typeDocument}-${Date.now()}-${file.name}`;
-      const { error: uploadError } = await sb.storage.from('artisan-documents').upload(path, file);
-      if (uploadError) throw uploadError;
-      await sb.from('artisan_documents').insert({ artisan_id: artisanId, type_document: typeDocument, chemin_fichier: path });
-    }
-
-    toast('Dossier envoyé ! Vous serez notifié dès sa validation.', 'success');
+    toast('Compte créé. Votre accès sera activé après validation.', 'success');
     await lancerApplication();
   } catch (err) {
     console.error(err);
     errorEl.textContent = err.message || "Une erreur est survenue lors de l'inscription.";
     errorEl.hidden = false;
   } finally {
-    btn.disabled = false; btn.textContent = 'Envoyer mon dossier';
+    btn.disabled = false; btn.textContent = 'Créer mon compte';
   }
 });
 
