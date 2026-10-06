@@ -857,7 +857,11 @@ async function chargerChantiers() {
   list.innerHTML = `<div class="skeleton" style="height:64px;margin-bottom:.6rem;"></div>`.repeat(3);
 
   const { data, error } = await sb.from('interventions').select(INTERVENTION_PUBLIC_COLUMNS).eq('statut', 'nouveau').order('created_at', { ascending: false });
-  if (error) { toast('Impossible de charger les chantiers.', 'error'); interventions = []; }
+  if (error) {
+    console.error('Erreur Supabase au chargement des chantiers :', error);
+    toast(`Impossible de charger les chantiers : ${error.message || error.code || 'erreur inconnue'}`, 'error');
+    interventions = [];
+  }
   else {
     interventions = data || [];
     if (currentArtisan) {
