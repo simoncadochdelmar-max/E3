@@ -324,6 +324,19 @@ details.service-group[open] > summary{margin-bottom:9px;}
 
   <div class="picker-grid" id="profile-grid" role="radiogroup" aria-label="Profil"></div>
 
+  <div class="field" id="gestionnaire-bien-wrap" hidden style="margin-top:16px;">
+    <label>Quel type de bien concerne la demande ?</label>
+    <div class="demand-type" id="gestionnaire-bien-choices" role="radiogroup" aria-label="Type de bien concerné">
+      <button type="button" class="demand-card" data-v="copro" role="radio" aria-checked="false" onclick="pickGestionnaireBien(this)">
+        <span class="demand-icon">🏢</span><span class="demand-title">Copropriété / résidence</span>
+      </button>
+      <button type="button" class="demand-card" data-v="bien_gere" role="radio" aria-checked="false" onclick="pickGestionnaireBien(this)">
+        <span class="demand-icon">🏠</span><span class="demand-title">Logement ou bien en gestion</span>
+      </button>
+    </div>
+    <p class="grid-err" id="err-gestionnaire-bien">Choisissez le type de bien concerné.</p>
+  </div>
+
   <div class="subtoggle" id="particulier-toggle" hidden role="radiogroup" aria-label="Vous êtes propriétaire ou locataire ?">
     <p class="section-sub" style="grid-column:1/-1;margin:0 0 8px;">Pour votre logement, vous êtes…</p>
     <button type="button" role="radio" aria-checked="false" data-v="proprietaire" onclick="pickOccupant(this)">Propriétaire</button>
@@ -375,9 +388,9 @@ details.service-group[open] > summary{margin-bottom:9px;}
   </div>
 
   <div class="field">
-    <label for="acces_info">Accès / contact sur place <span class="optional-tag">(facultatif)</span></label>
+    <label for="acces_info">Informations d’accès <span class="optional-tag">(facultatif)</span></label>
     <input type="text" id="acces_info" placeholder="Ex : digicode 1234A, gardien Mme Leroy, accès 8h-18h" maxlength="200" />
-    <p class="hint-small">Aide l'artisan à intervenir plus vite, sans vous rappeler.</p>
+    <p class="hint-small">Ces informations resteront privées et ne seront transmises qu’à l’artisan choisi.</p>
   </div>
 </section>
 
@@ -388,8 +401,8 @@ details.service-group[open] > summary{margin-bottom:9px;}
 
   <div class="demand-type" id="demand-mode" role="radiogroup" aria-label="Mode de mise en relation">
     <div class="demand-card sel" data-v="intervention" onclick="pickModeDemande(this)" role="radio" aria-checked="true" tabindex="0">
-      <div class="demand-icon">🤝</div><div class="demand-title">Trouver un artisan</div>
-      <div class="demand-sub">Un artisan intéressé prend en charge la demande.</div>
+      <div class="demand-icon">🤝</div><div class="demand-title">Être mis en relation avec un artisan</div>
+      <div class="demand-sub">Des artisans peuvent se signaler. Vous choisissez avant l’échange de coordonnées.</div>
     </div>
     <div class="demand-card" data-v="devis" onclick="pickModeDemande(this)" role="radio" aria-checked="false" tabindex="0">
       <div class="demand-icon">📄</div><div class="demand-title">Recevoir plusieurs devis</div>
@@ -511,6 +524,7 @@ details.service-group[open] > summary{margin-bottom:9px;}
   <div class="field">
     <label for="desc">Description</label>
     <textarea id="desc" rows="4" maxlength="600" placeholder="Détaillez votre besoin : nature du problème, fréquence souhaitée, contraintes d'accès..."></textarea>
+    <p class="hint-small">Pour votre sécurité, ne mettez pas de digicode ni de numéro de téléphone dans cette description.</p>
     <p class="char-count"><span id="desc-count">0</span>/600</p>
     <p class="field-err" id="err-desc">Merci de décrire votre besoin.</p>
   </div>
@@ -712,7 +726,7 @@ const TOTAL_NODES = 4;
 let photoFiles = [];
 let selectedPrestations = new Set();
 let data = {
-  profile:null, occupant:null,
+  profile:null, occupant:null, gestionnaireBien:null,
   demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null,
 };
 
@@ -733,6 +747,12 @@ function selectProfile(value, el) {
   document.querySelectorAll('#profile-grid .picker-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
   el.classList.add('sel'); el.setAttribute('aria-checked','true');
   data.profile = value;
+  if (value !== 'gestionnaire_immo') data.gestionnaireBien = null;
+  const gestionnaireWrap = document.getElementById('gestionnaire-bien-wrap');
+  gestionnaireWrap.hidden = value !== 'gestionnaire_immo';
+  if (value !== 'gestionnaire_immo') {
+    document.querySelectorAll('#gestionnaire-bien-choices .demand-card').forEach(card => { card.classList.remove('sel'); card.setAttribute('aria-checked','false'); });
+  }
   selectedPrestations.clear();
   document.getElementById('err-profile').classList.remove('show');
 
@@ -753,11 +773,7 @@ function selectProfile(value, el) {
     pickDemandType(document.querySelector('#demand-type [data-v="ponctuel"]'));
     data.frequence = null;
   }
-  document.getElementById('recurring-title').textContent = value === 'gestionnaire_immo'
-    ? 'Contrat d’entretien des parties communes' : 'Entretien régulier de vos locaux';
-  document.getElementById('recurring-subtitle').textContent = value === 'gestionnaire_immo'
-    ? 'Nettoyage, espaces verts et équipements de l’immeuble.'
-    : 'Nettoyage ou maintenance à fréquence régulière.';
+  updateRecurringCopy();
 
   document.getElementById('label-nomsite').textContent = NOMSITE_LABELS[value] || "Nom (facultatif)";
   document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
@@ -773,6 +789,23 @@ function selectProfile(value, el) {
       : 'Décrivez le besoin, les horaires d’accès et les éventuelles contraintes du lieu…';
 
   renderPrestations();
+  renderSyndicServiceDetails();
+}
+
+function updateRecurringCopy() {
+  const copro = data.profile === 'gestionnaire_immo' && data.gestionnaireBien === 'copro';
+  const bienGere = data.profile === 'gestionnaire_immo' && data.gestionnaireBien === 'bien_gere';
+  document.getElementById('recurring-title').textContent = copro ? 'Contrat d’entretien de la copropriété' : bienGere ? 'Entretien régulier du bien en gestion' : 'Entretien régulier de vos locaux';
+  document.getElementById('recurring-subtitle').textContent = copro ? 'Parties communes, espaces verts et équipements de la résidence.' : bienGere ? 'Entretien régulier d’un logement ou local confié à votre agence.' : 'Nettoyage ou maintenance à fréquence régulière.';
+}
+
+function pickGestionnaireBien(el) {
+  document.querySelectorAll('#gestionnaire-bien-choices .demand-card').forEach(card => { card.classList.remove('sel'); card.setAttribute('aria-checked','false'); });
+  el.classList.add('sel');
+  el.setAttribute('aria-checked','true');
+  data.gestionnaireBien = el.dataset.v;
+  document.getElementById('err-gestionnaire-bien').classList.remove('show');
+  updateRecurringCopy();
   renderSyndicServiceDetails();
 }
 
@@ -868,7 +901,7 @@ function renderSyndicServiceDetails() {
       }).join('');
     container.dataset.ready = 'true';
   }
-  const isSyndicContract = data.profile === 'gestionnaire_immo' && data.demandType === 'recurrent';
+  const isSyndicContract = data.profile === 'gestionnaire_immo' && data.gestionnaireBien === 'copro' && data.demandType === 'recurrent';
   document.getElementById('copro-details').hidden = !isSyndicContract;
   document.getElementById('copro-contract-base').hidden = !isSyndicContract;
   document.getElementById('copro-multiservice-wrap').hidden = !isSyndicContract || selectedPrestations.size < 2;
@@ -914,6 +947,7 @@ function validateStep() {
   clearErrors();
   if (step === 1) {
     if (!data.profile) { document.getElementById('err-profile').classList.add('show'); return false; }
+    if (data.profile === 'gestionnaire_immo' && !data.gestionnaireBien) { document.getElementById('err-gestionnaire-bien').classList.add('show'); return false; }
     if (data.profile === 'particulier' && !data.occupant) { document.getElementById('err-occupant').classList.add('show'); return false; }
     return true;
   }
@@ -928,7 +962,7 @@ function validateStep() {
     let ok = true;
     if (selectedPrestations.size === 0) { document.getElementById('err-cat').classList.add('show'); ok = false; }
     if (!descField.value.trim()) { document.getElementById('err-desc').classList.add('show'); ok = false; }
-    if (data.profile === 'gestionnaire_immo' && data.demandType === 'recurrent') {
+    if (data.profile === 'gestionnaire_immo' && data.gestionnaireBien === 'copro' && data.demandType === 'recurrent') {
       const missingScope = Array.from(selectedPrestations).some(serviceId => {
         const config = SYNDIC_SCOPE_CONFIG[serviceId];
         if (!config) return false;
@@ -1000,8 +1034,8 @@ function showStep() {
    RÉCAPITULATIF
    ========================================================================= */
 function collectSyndicDetailLines() {
-  if (data.profile !== 'gestionnaire_immo') return [];
-  const lines = [];
+  if (data.profile !== 'gestionnaire_immo' || data.gestionnaireBien !== 'copro') return [];
+  const lines = ['Type de bien : Copropriété / résidence'];
   const addField = (id, label) => {
     const value = document.getElementById(id)?.value?.trim();
     if (value) lines.push(`${label} : ${value}`);
@@ -1053,7 +1087,7 @@ function buildSummary() {
 
   const blocks = [
     { title:'Profil', step:1, rows:[
-      ['Type', profileMeta.label + (data.occupant ? ` (${data.occupant === 'proprietaire' ? 'Propriétaire' : 'Locataire'})` : '')],
+      ['Type', profileMeta.label + (data.gestionnaireBien ? ` — ${data.gestionnaireBien === 'copro' ? 'Copropriété / résidence' : 'Logement ou bien en gestion'}` : '') + (data.occupant ? ` (${data.occupant === 'proprietaire' ? 'Propriétaire' : 'Locataire'})` : '')],
     ]},
     { title:'Lieu', step:2, rows:[
       ['Nom du site', document.getElementById('nom_site').value || '—'],
@@ -1064,7 +1098,7 @@ function buildSummary() {
     ]},
     { title:'Besoin', step:3, rows:[
       ['Prestations', prestaLabels.join(', ')],
-      ['Mode de mise en relation', data.modeDemande === 'devis' ? 'Recevoir plusieurs devis' : 'Trouver un artisan'],
+      ['Mode de mise en relation', data.modeDemande === 'devis' ? 'Recevoir plusieurs devis' : 'Choisir un artisan parmi ceux intéressés'],
       ['Type de prestation', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
       ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
         : [['Fréquence', data.frequence ? { hebdomadaire:'1× par semaine', bihebdomadaire:'2× par semaine', quotidienne:'Quotidienne', mensuelle:'Mensuelle', trimestrielle:'Tous les 3 mois', a_definir:'À définir' }[data.frequence] : 'Non précisée']]),
@@ -1135,6 +1169,7 @@ async function submitDemand() {
       email: document.getElementById('email').value || null,
       // Colonnes complémentaires (voir ALTER TABLE fourni séparément)
       profil_structure: data.profile,
+      type_bien_gestion: data.profile === 'gestionnaire_immo' ? data.gestionnaireBien : null,
       nom_site: document.getElementById('nom_site').value || null,
       prestations: prestations,
       type_demande: data.demandType,
@@ -1142,15 +1177,13 @@ async function submitDemand() {
       frequence: data.demandType === 'recurrent' ? data.frequence : null,
       date_debut_souhaitee: document.getElementById('date_debut').value || null,
       surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
+      acces_prive: document.getElementById('acces_info').value.trim() || null,
     };
 
     // Coordonnées GPS pour la carte artisan (via sélection ou géocodage de secours)
     let coords = place;
     if (!coords) coords = await geocodeText([payload.adresse, payload.code_postal, payload.ville].join(' '));
     if (coords) { payload.latitude = coords.lat; payload.longitude = coords.lng; }
-
-    const acces = document.getElementById('acces_info').value.trim();
-    if (acces) payload.description += `\n\nAccès / contact sur place : ${acces}`;
 
     // La référence est générée ici : un visiteur anonyme n'a pas le droit de relire la table
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -1199,7 +1232,7 @@ function resetForm() {
   step = 1;
   photoFiles = [];
   selectedPrestations = new Set();
-  data = { profile:null, occupant:null, demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null };
+  data = { profile:null, occupant:null, gestionnaireBien:null, demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null };
   document.getElementById('wizard-form').reset();
   document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card,#particulier-toggle button').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
   document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
@@ -1215,6 +1248,8 @@ function resetForm() {
   document.getElementById('recurring-title').textContent = 'Entretien régulier / contrat';
   document.getElementById('recurring-subtitle').textContent = 'Choix disponible pour les professionnels.';
   document.getElementById('particulier-toggle').hidden = true;
+  document.getElementById('gestionnaire-bien-wrap').hidden = true;
+  document.querySelectorAll('#gestionnaire-bien-choices .demand-card').forEach(card => { card.classList.remove('sel'); card.setAttribute('aria-checked','false'); });
   document.getElementById('prestations-container').innerHTML = '';
   document.getElementById('preview-wrap').innerHTML = '';
   document.getElementById('desc-count').textContent = '0';
