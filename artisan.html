@@ -801,6 +801,7 @@ function initMap() {
   if (map) { map.invalidateSize({ pan: false }); return; }
   map = L.map('map', { zoomControl: false, scrollWheelZoom: false, zoomSnap: 0.5, zoomDelta: 0.5, markerZoomAnimation: true })
     .setView([48.8566, 2.3522], 11);
+  map.attributionControl.setPrefix(false);
   map.attributionControl.setPosition('topright');
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
