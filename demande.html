@@ -133,6 +133,13 @@ input,textarea,select{font-family:inherit;font-size:inherit;}
 
 /* ---- Champs de formulaire -------------------------------------------------- */
 .field{margin-bottom:16px;}
+.optional-details{border:1px solid var(--border);border-radius:var(--radius-s);padding:12px 14px;margin:4px 0 16px;background:#fff;}
+.optional-details>summary{list-style:none;cursor:pointer;color:var(--navy);font-weight:700;font-size:14px;}
+.optional-details>summary::-webkit-details-marker{display:none;}
+.optional-details>summary::before{content:'＋';display:inline-block;margin-right:8px;color:var(--navy-soft);}
+.optional-details[open]>summary::before{content:'－';}
+.optional-details[open]>summary{margin-bottom:14px;}
+.optional-details .field:last-of-type{margin-bottom:8px;}
 .field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px;color:var(--text-mid);}
 .field .optional-tag{text-transform:none;font-weight:400;color:var(--muted);}
 .field input,.field textarea{
@@ -264,8 +271,22 @@ details.service-group[open] > summary{margin-bottom:9px;}
 .ac-list li[aria-selected="true"],.ac-list li:hover{background:var(--gold-pale);}
 .geo-btn{margin-top:9px;background:none;border:none;color:var(--navy-soft);font-size:12.5px;font-weight:700;padding:4px 0;}
 .geo-msg{margin-top:8px;font-size:12px;color:var(--text-mid);}
-.mini-map{margin-top:10px;height:160px;border-radius:var(--radius-s);border:1.5px solid var(--border);overflow:hidden;}
-.mini-map[hidden]{display:none;}
+.map-frame{position:relative;margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid #d8e1e5;box-shadow:0 8px 22px rgba(14,33,64,.1);isolation:isolate;}
+.map-frame[hidden]{display:none;}
+.mini-map{height:220px;background:#e9f0eb;}
+.map-label-chip{position:absolute;z-index:500;top:12px;left:12px;display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #ffffffc9;border-radius:999px;background:#fffefaed;color:var(--navy);font-size:11px;font-weight:800;box-shadow:0 3px 12px #0e214022;pointer-events:none;}
+.map-label-chip span{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px #c9963a26;}
+.map-center-btn{position:absolute;z-index:500;right:12px;top:12px;width:38px;height:38px;display:grid;place-items:center;border:1px solid #ffffffc9;border-radius:12px;background:#fffefaed;color:var(--navy);font-size:20px;box-shadow:0 3px 12px #0e214022;cursor:pointer;transition:transform .15s ease,background .15s ease;}
+.map-center-btn:hover{background:#fff;transform:translateY(-1px);}
+.location-marker{position:relative;width:34px;height:34px;border:3px solid white;border-radius:50% 50% 50% 12px;background:linear-gradient(145deg,#1a3a6b,#0e2140);box-shadow:0 5px 14px #0e214055;transform:rotate(-45deg);}
+.location-marker::after{content:'';position:absolute;left:10px;top:10px;width:8px;height:8px;border-radius:50%;background:#f0c060;}
+.leaflet-control-zoom{border:0!important;border-radius:11px!important;overflow:hidden;box-shadow:0 3px 12px #0e214022!important;}
+.leaflet-control-zoom a{color:var(--navy)!important;}
+.leaflet-control-attribution{font-size:9px!important;background:#fffefaed!important;}
+.leaflet-container{font:inherit;}
+@keyframes map-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.map-frame:not([hidden]){animation:map-enter .22s ease-out;}
+@media(prefers-reduced-motion:reduce){.map-frame:not([hidden]){animation:none}.map-center-btn{transition:none}}
 .geo-ok{margin-top:8px;font-size:12px;font-weight:700;color:var(--success);background:var(--success-bg);padding:8px 10px;border-radius:8px;}
 .hint-small{font-size:11.5px;color:var(--muted);margin-top:5px;}
 .consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--text-mid);line-height:1.45;margin:6px 0 4px;cursor:pointer;}
@@ -337,13 +358,6 @@ details.service-group[open] > summary{margin-bottom:9px;}
     <p class="grid-err" id="err-gestionnaire-bien">Choisissez le type de bien concerné.</p>
   </div>
 
-  <div class="subtoggle" id="particulier-toggle" hidden role="radiogroup" aria-label="Vous êtes propriétaire ou locataire ?">
-    <p class="section-sub" style="grid-column:1/-1;margin:0 0 8px;">Pour votre logement, vous êtes…</p>
-    <button type="button" role="radio" aria-checked="false" data-v="proprietaire" onclick="pickOccupant(this)">Propriétaire</button>
-    <button type="button" role="radio" aria-checked="false" data-v="locataire" onclick="pickOccupant(this)">Locataire</button>
-    <p class="grid-err" id="err-occupant" style="grid-column:1/-1;margin:0;">Choisissez « Propriétaire » ou « Locataire » pour continuer.</p>
-  </div>
-
   <p class="grid-err" id="err-profile">Veuillez sélectionner un profil pour continuer.</p>
 </section>
 
@@ -352,19 +366,28 @@ details.service-group[open] > summary{margin-bottom:9px;}
   <h2 class="section-title" id="s2-title">Localisation</h2>
   <p class="section-sub" id="sub-lieu">Précisez l'adresse concernée par la demande.</p>
 
+  <div class="field" id="field-agence" hidden>
+    <label for="nom_agence">Nom du syndic / de l’agence <span class="optional-tag">(facultatif)</span></label>
+    <input type="text" id="nom_agence" placeholder="Ex : Cabinet Dupont" autocomplete="organization" maxlength="120" />
+  </div>
+
   <div class="field" id="field-nomsite">
-    <label for="nom_site" id="label-nomsite">Nom de la copropriété / résidence</label>
+    <label for="nom_site" id="label-nomsite">Nom du site <span class="optional-tag">(facultatif)</span></label>
     <input type="text" id="nom_site" placeholder="Ex : Résidence Les Tilleuls" autocomplete="organization" />
   </div>
 
   <div class="field ac-wrap">
-    <label for="adresse_lieu">Adresse</label>
+    <label for="adresse_lieu" id="label-adresse-lieu">Adresse</label>
     <input type="text" id="adresse_lieu" placeholder="Commencez à taper : 12 rue de la Ré…" autocomplete="off"
            role="combobox" aria-expanded="false" aria-controls="ac-list" aria-autocomplete="list" />
     <ul id="ac-list" class="ac-list" role="listbox" hidden></ul>
     <button type="button" class="geo-btn" id="geo-btn">📍 Utiliser ma position actuelle</button>
     <p class="geo-msg" id="geo-msg" hidden></p>
-    <div id="mini-map" class="mini-map" hidden></div>
+    <div id="map-frame" class="map-frame" hidden>
+      <div id="mini-map" class="mini-map"></div>
+      <div class="map-label-chip"><span aria-hidden="true"></span>Emplacement de l’intervention</div>
+      <button type="button" class="map-center-btn" id="map-center-btn" aria-label="Recentrer la carte sur l’adresse choisie" title="Recentrer la carte">◎</button>
+    </div>
     <p class="geo-ok" id="geo-ok" hidden>✓ Position confirmée — les artisans la verront sur la carte.</p>
     <p class="field-err" id="err-adresse">Merci de renseigner l'adresse.</p>
   </div>
@@ -387,11 +410,22 @@ details.service-group[open] > summary{margin-bottom:9px;}
     <input type="text" id="complement_lieu" placeholder="Ex : Bâtiment B, 3ème étage, Lot 42" />
   </div>
 
-  <div class="field">
-    <label for="acces_info">Informations d’accès <span class="optional-tag">(facultatif)</span></label>
-    <input type="text" id="acces_info" placeholder="Ex : digicode 1234A, gardien Mme Leroy, accès 8h-18h" maxlength="200" />
-    <p class="hint-small">Ces informations resteront privées et ne seront transmises qu’à l’artisan choisi.</p>
-  </div>
+  <details class="optional-details" id="details-acces">
+    <summary><span id="summary-acces-title">Ajouter des informations d’accès</span> <span class="optional-tag">(facultatif)</span></summary>
+    <div class="field">
+      <label for="acces_info">Code, gardien ou consigne d’accès</label>
+      <input type="text" id="acces_info" placeholder="Ex. : digicode, consigne pour entrer" maxlength="200" />
+    </div>
+    <div class="field" id="field-contact-sur-place" hidden>
+      <label for="contact_sur_place">Personne à contacter sur place</label>
+      <input type="text" id="contact_sur_place" placeholder="Nom et téléphone, si différent du demandeur" maxlength="160" />
+    </div>
+    <div class="field" id="field-disponibilites" hidden>
+      <label for="disponibilites">Créneaux possibles pour accéder au lieu</label>
+      <input type="text" id="disponibilites" placeholder="Ex. : du lundi au vendredi, 9 h–17 h" maxlength="160" />
+    </div>
+    <p class="hint-small">Ces informations restent privées et ne seront transmises qu’à l’artisan retenu.</p>
+  </details>
 </section>
 
 <!-- ÉTAPE 3 — BESOIN -->
@@ -705,7 +739,7 @@ const HEADER_TITLES = {
   particulier:'Faire une<br><em>demande</em>',
 };
 const NOMSITE_LABELS = {
-  gestionnaire_immo:'Nom de la copropriété / résidence / agence',
+  gestionnaire_immo:'Nom de la copropriété / résidence',
   commerce:'Enseigne du commerce',
   bureau_entreprise:"Nom de l'entreprise",
   etablissement:"Nom de l'établissement",
@@ -726,7 +760,7 @@ const TOTAL_NODES = 4;
 let photoFiles = [];
 let selectedPrestations = new Set();
 let data = {
-  profile:null, occupant:null, gestionnaireBien:null,
+  profile:null, gestionnaireBien:null,
   demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null,
 };
 
@@ -760,13 +794,6 @@ function selectProfile(value, el) {
   document.getElementById('header-profile-label').textContent = meta.label;
   document.getElementById('header-title').innerHTML = HEADER_TITLES[value];
 
-  const particulierToggle = document.getElementById('particulier-toggle');
-  particulierToggle.hidden = value !== 'particulier';
-  if (value !== 'particulier') {
-    data.occupant = null;
-    particulierToggle.querySelectorAll('button').forEach(button => { button.classList.remove('sel'); button.setAttribute('aria-checked','false'); });
-  }
-
   const recurrentCard = document.querySelector('#demand-type [data-v="recurrent"]');
   recurrentCard.hidden = value === 'particulier';
   if (value === 'particulier' && data.demandType === 'recurrent') {
@@ -775,15 +802,27 @@ function selectProfile(value, el) {
   }
   updateRecurringCopy();
 
-  document.getElementById('label-nomsite').textContent = NOMSITE_LABELS[value] || "Nom (facultatif)";
+  if (value !== 'gestionnaire_immo') {
+    document.getElementById('label-nomsite').innerHTML = `${NOMSITE_LABELS[value] || 'Nom'} <span class="optional-tag">(facultatif)</span>`;
+  }
   document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
+  document.getElementById('field-agence').hidden = value !== 'gestionnaire_immo';
+  document.getElementById('field-contact-sur-place').hidden = value !== 'gestionnaire_immo';
+  document.getElementById('field-disponibilites').hidden = value !== 'gestionnaire_immo';
+  document.getElementById('summary-acces-title').textContent = value === 'gestionnaire_immo'
+    ? 'Ajouter un contact ou des informations d’accès'
+    : 'Ajouter des informations d’accès';
+  document.getElementById('label-adresse-lieu').textContent = value === 'gestionnaire_immo'
+    ? 'Adresse de la copropriété / du bien concerné'
+    : 'Adresse';
+  updateLocationLabels();
   document.getElementById('label-complement').innerHTML = `${COMPLEMENT_LABELS[value] || 'Complément'} <span class="optional-tag">(facultatif)</span>`;
 
   document.getElementById('sub-lieu').textContent = value === 'particulier'
     ? 'Indiquez l\'adresse où se situe le problème.'
     : "Indiquez l'adresse exacte de l'intervention.";
   document.getElementById('desc').placeholder = value === 'gestionnaire_immo'
-    ? 'Décrivez le besoin, les contraintes d’accès, les horaires possibles ou le cahier des charges…'
+    ? 'Décrivez les travaux ou l’entretien souhaité, et ce que l’artisan doit prévoir…'
     : value === 'particulier'
       ? 'Décrivez le problème : ce qui ne fonctionne pas, depuis quand, et ce que vous avez constaté…'
       : 'Décrivez le besoin, les horaires d’accès et les éventuelles contraintes du lieu…';
@@ -805,16 +844,18 @@ function pickGestionnaireBien(el) {
   el.setAttribute('aria-checked','true');
   data.gestionnaireBien = el.dataset.v;
   document.getElementById('err-gestionnaire-bien').classList.remove('show');
+  updateLocationLabels();
   updateRecurringCopy();
   renderSyndicServiceDetails();
 }
 
-function pickOccupant(el) {
-  document.querySelectorAll('#particulier-toggle button').forEach(b => { b.classList.remove('sel'); b.setAttribute('aria-checked','false'); });
-  el.classList.add('sel');
-  el.setAttribute('aria-checked','true');
-  data.occupant = el.dataset.v;
-  document.getElementById('err-occupant').classList.remove('show');
+function updateLocationLabels() {
+  if (data.profile !== 'gestionnaire_immo') return;
+  const isCopro = data.gestionnaireBien === 'copro';
+  document.getElementById('label-nomsite').innerHTML = isCopro
+    ? 'Nom de la copropriété / résidence <span class="optional-tag">(facultatif)</span>'
+    : 'Nom ou référence du bien <span class="optional-tag">(facultatif)</span>';
+  document.getElementById('nom_site').placeholder = isCopro ? 'Ex. : Résidence Les Tilleuls' : 'Ex. : Appartement rue Victor-Hugo';
 }
 
 /* =========================================================================
@@ -948,7 +989,6 @@ function validateStep() {
   if (step === 1) {
     if (!data.profile) { document.getElementById('err-profile').classList.add('show'); return false; }
     if (data.profile === 'gestionnaire_immo' && !data.gestionnaireBien) { document.getElementById('err-gestionnaire-bien').classList.add('show'); return false; }
-    if (data.profile === 'particulier' && !data.occupant) { document.getElementById('err-occupant').classList.add('show'); return false; }
     return true;
   }
   if (step === 2) {
@@ -1087,14 +1127,15 @@ function buildSummary() {
 
   const blocks = [
     { title:'Profil', step:1, rows:[
-      ['Type', profileMeta.label + (data.gestionnaireBien ? ` — ${data.gestionnaireBien === 'copro' ? 'Copropriété / résidence' : 'Logement ou bien en gestion'}` : '') + (data.occupant ? ` (${data.occupant === 'proprietaire' ? 'Propriétaire' : 'Locataire'})` : '')],
+      ['Type', profileMeta.label + (data.gestionnaireBien ? ` — ${data.gestionnaireBien === 'copro' ? 'Copropriété / résidence' : 'Logement ou bien en gestion'}` : '')],
     ]},
     { title:'Lieu', step:2, rows:[
+      ...(data.profile === 'gestionnaire_immo' ? [['Nom du syndic / de l’agence', document.getElementById('nom_agence').value || '—']] : []),
       ['Nom du site', document.getElementById('nom_site').value || '—'],
       ['Adresse', document.getElementById('adresse_lieu').value],
       ['Ville', `${document.getElementById('code_postal').value} ${document.getElementById('ville').value}`],
       ['Complément', document.getElementById('complement_lieu').value || '—'],
-      ['Accès sur place', document.getElementById('acces_info').value || '—'],
+      ['Informations privées sur place', data.profile === 'gestionnaire_immo' ? ([document.getElementById('acces_info').value, document.getElementById('contact_sur_place').value, document.getElementById('disponibilites').value].filter(Boolean).join(' · ') || '—') : (document.getElementById('acces_info').value || '—')],
     ]},
     { title:'Besoin', step:3, rows:[
       ['Prestations', prestaLabels.join(', ')],
@@ -1137,8 +1178,10 @@ async function submitDemand() {
   try {
     const prestations = Array.from(selectedPrestations);
     const profileMeta = PROFILES.find(p => p.v === data.profile);
-    const profilDemandeur = data.profile === 'particulier' ? (data.occupant || 'proprietaire') : profileMeta.profil_demandeur;
+    const profilDemandeur = data.profile === 'particulier' ? 'particulier' : profileMeta.profil_demandeur;
     const descriptionParts = [document.getElementById('desc').value];
+    const nomAgence = document.getElementById('nom_agence').value.trim();
+    if (data.profile === 'gestionnaire_immo' && nomAgence) descriptionParts.push(`Syndic / agence : ${nomAgence}`);
     const syndicLines = collectSyndicDetailLines();
     if (syndicLines.length) descriptionParts.push(`Informations complémentaires pour le devis :\n${syndicLines.join('\n')}`);
 
@@ -1177,7 +1220,11 @@ async function submitDemand() {
       frequence: data.demandType === 'recurrent' ? data.frequence : null,
       date_debut_souhaitee: document.getElementById('date_debut').value || null,
       surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
-      acces_prive: document.getElementById('acces_info').value.trim() || null,
+      acces_prive: [
+        document.getElementById('acces_info').value.trim(),
+        data.profile === 'gestionnaire_immo' && document.getElementById('contact_sur_place').value.trim() ? `Contact sur place : ${document.getElementById('contact_sur_place').value.trim()}` : '',
+        data.profile === 'gestionnaire_immo' && document.getElementById('disponibilites').value.trim() ? `Disponibilités / horaires d’accès : ${document.getElementById('disponibilites').value.trim()}` : '',
+      ].filter(Boolean).join('\n') || null,
     };
 
     // Coordonnées GPS pour la carte artisan (via sélection ou géocodage de secours)
@@ -1232,9 +1279,9 @@ function resetForm() {
   step = 1;
   photoFiles = [];
   selectedPrestations = new Set();
-  data = { profile:null, occupant:null, gestionnaireBien:null, demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null };
+  data = { profile:null, gestionnaireBien:null, demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null };
   document.getElementById('wizard-form').reset();
-  document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card,#particulier-toggle button').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
+  document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
   document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
   document.querySelector('#demand-type [data-v="recurrent"]').hidden = false;
   document.querySelectorAll('#demand-mode .demand-card').forEach((card, i) => { card.classList.toggle('sel', i === 0); card.setAttribute('aria-checked', i === 0 ? 'true' : 'false'); });
@@ -1243,12 +1290,15 @@ function resetForm() {
   document.getElementById('frequence-wrap').hidden = true;
   document.getElementById('copro-details').hidden = true;
   document.getElementById('copro-contract-end-wrap').hidden = true;
+  document.getElementById('details-acces').open = false;
   document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
   document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
   document.getElementById('recurring-title').textContent = 'Entretien régulier / contrat';
   document.getElementById('recurring-subtitle').textContent = 'Choix disponible pour les professionnels.';
-  document.getElementById('particulier-toggle').hidden = true;
   document.getElementById('gestionnaire-bien-wrap').hidden = true;
+  document.getElementById('field-agence').hidden = true;
+  document.getElementById('field-contact-sur-place').hidden = true;
+  document.getElementById('field-disponibilites').hidden = true;
   document.querySelectorAll('#gestionnaire-bien-choices .demand-card').forEach(card => { card.classList.remove('sel'); card.setAttribute('aria-checked','false'); });
   document.getElementById('prestations-container').innerHTML = '';
   document.getElementById('preview-wrap').innerHTML = '';
@@ -1323,16 +1373,27 @@ function renderAc() {
   acList.hidden = false; adrInput.setAttribute('aria-expanded', 'true');
 }
 function showMiniMap(lat, lng) {
-  const el = document.getElementById('mini-map');
-  el.hidden = false;
-  if (!miniMap) {
-    miniMap = L.map('mini-map', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
+  const frame = document.getElementById('map-frame');
+  frame.hidden = false;
+  const wasCreated = !miniMap;
+  if (wasCreated) {
+    miniMap = L.map('mini-map', { zoomControl: false, attributionControl: true, scrollWheelZoom: false, zoomSnap: 0.5, zoomDelta: 0.5 });
+    L.control.zoom({ position: 'bottomleft' }).addTo(miniMap);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(miniMap);
+    miniMap.setView([lat, lng], 16);
   }
-  setTimeout(() => miniMap.invalidateSize(), 50);
-  miniMap.setView([lat, lng], 16);
-  if (miniMarker) miniMap.removeLayer(miniMarker);
-  miniMarker = L.marker([lat, lng]).addTo(miniMap);
+  setTimeout(() => {
+    miniMap.invalidateSize({ pan: false });
+    if (!wasCreated) miniMap.flyTo([lat, lng], 16, { animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches, duration: 0.45 });
+  }, 80);
+  if (miniMarker) miniMarker.setLatLng([lat, lng]);
+  else {
+    const icon = L.divIcon({ className: '', html: '<div class="location-marker" aria-hidden="true"></div>', iconSize: [34, 42], iconAnchor: [17, 38] });
+    miniMarker = L.marker([lat, lng], { icon, keyboard: false, riseOnHover: true }).addTo(miniMap);
+  }
 }
 function pickAddress(it) {
   adrInput.value = it.street;
@@ -1357,7 +1418,11 @@ async function searchAddress(q) {
   } catch { closeAc(); }
 }
 adrInput.addEventListener('input', () => {
-  place = null; document.getElementById('geo-ok').hidden = true;
+  place = null;
+  document.getElementById('geo-ok').hidden = true;
+  document.getElementById('map-frame').hidden = true;
+  document.getElementById('code_postal').value = '';
+  document.getElementById('ville').value = '';
   clearTimeout(acTimer);
   const q = adrInput.value.trim();
   if (q.length < 3) return closeAc();
@@ -1393,6 +1458,10 @@ document.getElementById('geo-btn').addEventListener('click', () => {
   }, () => { msg.textContent = "Autorisation refusée. Saisissez l'adresse manuellement."; }, { enableHighAccuracy: true, timeout: 10000 });
 });
 
+document.getElementById('map-center-btn').addEventListener('click', () => {
+  if (miniMap && place) miniMap.flyTo([place.lat, place.lng], 16, { animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches, duration: 0.45 });
+});
+
 async function geocodeText(q) {
   try {
     const r = await fetch(`${BAN}/search/?q=${encodeURIComponent(q)}&limit=1`);
@@ -1404,7 +1473,7 @@ async function geocodeText(q) {
 function resetAddressState() {
   place = null; acItems = []; closeAc();
   document.getElementById('geo-ok').hidden = true; document.getElementById('geo-msg').hidden = true;
-  document.getElementById('mini-map').hidden = true;
+  document.getElementById('map-frame').hidden = true;
   const c = document.getElementById('copy-ref'); if (c) c.textContent = '📋 Copier la référence';
 }
 
