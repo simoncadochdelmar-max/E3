@@ -467,12 +467,12 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
       <p class="verify-banner" id="verify-banner" hidden></p>
 
       <div id="map"></div>
-      <details id="prospect-controls" style="position:absolute;top:130px;right:12px;z-index:450;background:#fff;padding:10px;border-radius:12px;box-shadow:0 3px 14px #0002;max-width:225px;font-size:12px;color:#1a2332">
-        <summary style="cursor:pointer;font-weight:700">Syndics / agences · contacts</summary>
+      <details id="prospect-controls" style="position:absolute;top:130px;right:12px;z-index:450;background:#fff;padding:10px;border-radius:12px;box-shadow:0 3px 14px #0002;max-width:225px;max-height:calc(100dvh - 200px);overflow:auto;font-size:12px;color:#1a2332">
+        <summary style="cursor:pointer;font-weight:700">Carte · contacts et appels d’offres</summary>
         <label for="contact-city" style="display:block;margin-top:8px">Voir une ville</label><select id="contact-city" style="max-width:100%;padding:6px"><option value="">Choisir une ville</option></select><button id="contact-france" type="button" style="margin-top:5px">Vue France</button><button id="prospect-directory-open" type="button" style="display:block;margin-top:8px;padding:6px">Annuaire contacts France</button><p id="verified-count" role="status" style="margin:6px 0"></p><label style="display:block;margin-top:8px"><input id="syndic-visible" type="checkbox" checked> 🟣 Syndics</label>
         <label style="display:block;margin-top:6px"><input id="agency-visible" type="checkbox" checked> 🔵 Agences immobilières</label>
         <button id="syndic-refresh" type="button" style="display:block;margin-top:8px;padding:6px">Rechercher dans cette zone</button>
-        <p id="syndic-status" role="status" style="margin:6px 0 0">Recherche autour du centre de la carte.</p>
+        <hr style="margin:10px 0"><label style="display:block"><input id="tender-visible" type="checkbox" checked> ▲ Appels d’offres BTP / entretien</label><button id="tender-open" type="button" style="display:block;margin-top:8px;padding:6px">Voir les appels d’offres France</button><p id="tender-status" role="status" style="margin:6px 0">Source officielle : BOAMP.</p><p id="syndic-status" role="status" style="margin:6px 0 0">Recherche autour du centre de la carte.</p>
         <p style="margin:6px 0 0">Collecte France non exhaustive. Coordonnées publiques sourcées ; certains établissements restent sans contact.</p>
       </details>
       <div class="map-toolbar" style="top:calc(76px + env(safe-area-inset-top,0px));" id="category-toolbar"></div>
@@ -485,6 +485,7 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
         </div>
       </div>
       <div class="map-legend" id="map-legend" style="flex-wrap:wrap">
+        <span style="color:#c2410c">▲ Appel d’offres</span>
         <span><i class="dot" style="background:#6d28d9"></i>Syndic</span>
         <span><i class="dot" style="background:#0369a1"></i>Agence immo</span>
         <span><i class="dot dot--urgent"></i>Urgent</span>
@@ -595,6 +596,7 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
     <div id="prospect-directory-results" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px"></div>
   </div>
 </div>
+<div id="tender-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="tender-title" style="position:fixed;inset:0;z-index:3000;background:#f6f6f6;overflow:auto;padding:20px;color:#171717"><div style="max-width:1100px;margin:auto"><button id="tender-close" type="button" style="float:right;padding:10px">Fermer ✕</button><h2 id="tender-title">Appels d’offres publics · BTP et entretien</h2><p>France · avis BOAMP dont la date limite est à venir. Travaux, entretien du bâtiment, nettoyage et espaces verts. Sélection non exhaustive.</p><label for="tender-query">Métier, lieu ou acheteur</label><input id="tender-query" type="search" placeholder="Plomberie, nettoyage, Lyon…" style="padding:12px;margin:8px 0;max-width:100%"><button id="tender-refresh" type="button" style="padding:10px">Actualiser</button><p id="tender-list-count" role="status"></p><div id="tender-results" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px"></div><button id="tender-more" type="button" hidden style="padding:12px;margin-top:14px">Charger les annonces suivantes</button></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* =========================================================================
@@ -835,6 +837,7 @@ function initMap() {
   initSyndicLayer();
   initNationalContacts();
   initProspectDirectory();
+  initTenderLayer();
   if ('ResizeObserver' in window && !mapSheetObserver) {
     mapSheetObserver = new ResizeObserver(syncMapChrome);
     mapSheetObserver.observe(document.getElementById('bottom-sheet'));
@@ -3707,6 +3710,134 @@ function initProspectDirectory() {
       else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
     }
   });
+}
+
+
+// Public procurement notices: no writes to E3 requests or quotes.
+const BOAMP_ENDPOINT = 'https://www.boamp.fr/api/explore/v2.1/catalog/datasets/boamp/records';
+let tenderLayer = null, tenderNotices = new Map(), tenderOffset = 0, tenderLoading = false;
+let tenderController = null, tenderReturnFocus = null;
+const tenderGeoCache = new Map(), tenderMarkers = new Map();
+function tenderText(value) { return typeof value === 'object' && value ? String(value['#text'] || '') : String(value || ''); }
+function tenderWalk(value, visit) {
+  if (!value || typeof value !== 'object') return;
+  for (const [key,item] of Object.entries(value)) { visit(key,item); if (item && typeof item === 'object') tenderWalk(item,visit); }
+}
+function normalizeTender(record, now = Date.now()) {
+  if (record.nature !== 'APPEL_OFFRE' || !/^\d{2}-\d+$/.test(record.idweb || '')) return null;
+  const deadline = Date.parse(record.datelimitereponse || '');
+  if (!Number.isFinite(deadline) || deadline <= now) return null;
+  let data = {}; try { data = typeof record.donnees === 'string' ? JSON.parse(record.donnees) : record.donnees || {}; } catch (_) {}
+  const cpv = new Set(), locations = [];
+  tenderWalk(data, (key,value) => {
+    if (key === 'cbc:ItemClassificationCode' && /^\d{8}$/.test(tenderText(value))) cpv.add(tenderText(value));
+    if (key === 'CPV') tenderWalk(value,(k,v)=>{ if (['PRINCIPAL','SUPPLEMENTAIRE'].includes(k) && /^\d{8}$/.test(tenderText(v))) cpv.add(tenderText(v)); });
+    if (key === 'cac:RealizedLocation') {
+      const entries = Array.isArray(value) ? value : [value];
+      entries.forEach(location => {
+        const address=location && location['cac:Address'];
+        if (!address) return;
+        const city=tenderText(address['cbc:CityName']), postal=tenderText(address['cbc:PostalZone']);
+        const country=tenderText(address['cac:Country'] && address['cac:Country']['cbc:IdentificationCode']);
+        if (city && (!country || country === 'FRA')) locations.push({city,postal});
+      });
+    }
+    if (key === 'LIEU_EXEC_LIVR' || key === 'LIEU_EXECUTION') {
+      const city=tenderText(value && (value.VILLE || value.LOCALITE)),postal=tenderText(value && (value.CP || value.CODE_POSTAL));
+      if(city) locations.push({city,postal});
+    }
+  });
+  const types=Array.isArray(record.type_marche)?record.type_marche:[record.type_marche];
+  const works=types.includes('TRAVAUX') || [...cpv].some(code=>code.startsWith('45'));
+  const service=[...cpv].some(code=>/^(507|90910000|90911|90919|9092|7731|50413|505311)/.test(code));
+  const text=normalizeContactText([record.objet,...(record.descripteur_libelle||[])].join(' '));
+  const fallback=cpv.size===0 && !types.includes('FOURNITURES') && /nettoyage.{0,35}(batiment|locaux|vitre)|entretien.{0,35}(batiment|espace vert|jardin)|maintenance.{0,35}(batiment|chauffage|ascenseur)|plomberie|serrurerie|chauffage|ventilation/.test(text) && !/informatique|logiciel|medical|vehicule/.test(text);
+  if (!works && !service && !fallback) return null;
+  const unique=[...new Map(locations.map(l=>[l.city+' '+l.postal,l])).values()];
+  const dept=record.code_departement_prestation || (record.code_departement || []).join(', ');
+  return {id:record.idweb,title:record.objet||'Appel d’offres',buyer:record.nomacheteur||'Acheteur non renseigné',deadline,category:works?'BTP / travaux':'Entretien / maintenance',locations:unique,
+    place:unique.length?unique.map(l=>[l.city,l.postal].filter(Boolean).join(' ')).join(' · '):dept?'Département(s) mentionné(s) : '+dept+' · lieu exact à consulter':'Lieu d’exécution à consulter dans l’avis',
+    url:'https://www.boamp.fr/pages/avis/?q='+encodeURIComponent('idweb:'+record.idweb),cpv:[...cpv],points:[]};
+}
+function tenderHtml(notice) {
+  const date=new Intl.DateTimeFormat('fr-FR',{dateStyle:'short',timeStyle:'short',timeZone:'Europe/Paris'}).format(notice.deadline);
+  return '<strong>▲ Appel d’offres · '+esc(notice.category)+'</strong><h3 style="font-size:15px;margin:8px 0">'+esc(notice.title)+'</h3><p>Acheteur : '+esc(notice.buyer)+'</p><p>'+esc(notice.place)+'</p><p><strong>Date limite : '+esc(date)+' (heure de Paris)</strong></p><p><a href="'+esc(notice.url)+'" target="_blank" rel="noopener noreferrer">Consulter l’avis officiel et le dossier ↗</a></p><small>Source : BOAMP / DILA. Vérifier les lots, conditions et éventuels rectificatifs dans l’avis officiel. Candidature sur la plateforme indiquée dans le dossier.</small>';
+}
+function renderTenderLayer() {
+  if (!tenderLayer) return;
+  tenderLayer.clearLayers();tenderMarkers.clear();
+  const now=Date.now();
+  tenderNotices.forEach(notice=>{
+    if(notice.deadline<=now)return;
+    notice.points.forEach((point,index)=>{
+      const marker=L.marker([point.lat,point.lng],{icon:L.divIcon({className:'e3-tender-marker',html:'<span style="display:block;color:#c2410c;font-size:27px;text-shadow:0 1px 2px white" aria-label="Appel d’offres">▲</span>',iconSize:[28,28],iconAnchor:[14,24]})})
+        .bindTooltip('Appel d’offres · '+esc(notice.title)).bindPopup(tenderHtml(notice)+'<p>Position indicative : centre de la commune d’exécution.</p>').addTo(tenderLayer);
+      if(index===0)tenderMarkers.set(notice.id,marker);
+    });
+  });
+}
+function renderTenderList() {
+  const q=normalizeContactText(document.getElementById('tender-query').value);
+  const list=[...tenderNotices.values()].filter(n=>n.deadline>Date.now()&&(!q||normalizeContactText(n.title+' '+n.buyer+' '+n.place+' '+n.category).includes(q))).sort((a,b)=>a.deadline-b.deadline);
+  document.getElementById('tender-list-count').textContent=list.length+' avis ouverts affichés · sélection BOAMP non exhaustive';
+  document.getElementById('tender-results').innerHTML=list.map(n=>'<article style="padding:16px;border:1px solid #ddd;border-radius:12px;background:#fff">'+tenderHtml(n)+(n.points.length?'<p><button type="button" data-tender-id="'+esc(n.id)+'" style="padding:9px">Voir sur la carte</button></p>':'<p>Localisation non précisée ou non confirmée : avis consultable ci-dessus.</p>')+'</article>').join('')||'<p>Aucun avis chargé ne correspond à ce filtre. Actualisez ou chargez la suite.</p>';
+}
+async function locateTender(notice, signal) {
+  for(const location of notice.locations.slice(0,3)){
+    if(signal.aborted)return;
+    const key=location.city+' '+location.postal;
+    if(!tenderGeoCache.has(key)){
+      try{
+        const url=new URL('https://data.geopf.fr/geocodage/search');url.searchParams.set('q',key);url.searchParams.set('type','municipality');url.searchParams.set('limit','1');
+        const response=await fetch(url,{signal});if(!response.ok)continue;const data=await response.json(),point=data.features && data.features[0];
+        if(point && point.properties.type==='municipality' && point.properties.score>=0.65){
+          const [lng,lat]=point.geometry.coordinates;if(Number.isFinite(lat)&&Number.isFinite(lng))tenderGeoCache.set(key,{lat,lng});
+        }
+      }catch(error){if(signal.aborted)return;}
+      await new Promise(resolve=>setTimeout(resolve,150));
+    }
+    if(tenderGeoCache.has(key))notice.points.push(tenderGeoCache.get(key));
+  }
+}
+async function loadTenders(reset = true) {
+  if(tenderLoading)return;
+  tenderLoading=true;const status=document.getElementById('tender-status');status.textContent='Chargement des avis publics BTP et entretien…';
+  const controller=new AbortController();tenderController=controller;const timeout=setTimeout(()=>controller.abort(),45000);
+  document.getElementById('tender-refresh').disabled=true;document.getElementById('tender-more').disabled=true;
+  try{
+    const offset=reset?0:tenderOffset;
+    const url=new URL(BOAMP_ENDPOINT);
+    url.searchParams.set('where',"nature = 'APPEL_OFFRE' AND datelimitereponse > now() AND (type_marche = 'TRAVAUX' OR search(objet, 'nettoyage') OR search(objet, 'entretien') OR search(objet, 'maintenance') OR search(objet, 'espaces verts') OR search(objet, 'chauffage') OR search(objet, 'ascenseur'))");
+    url.searchParams.set('select','idweb,objet,nomacheteur,datelimitereponse,nature,type_marche,descripteur_libelle,code_departement,code_departement_prestation,donnees');
+    url.searchParams.set('order_by','dateparution DESC');url.searchParams.set('limit','20');url.searchParams.set('offset',String(offset));
+    const response=await fetch(url,{signal:controller.signal});if(!response.ok)throw Error('BOAMP indisponible');const data=await response.json();
+    if(!Array.isArray(data.results))throw Error('Réponse BOAMP inattendue');
+    if(reset){tenderNotices.clear();renderTenderLayer();}
+    const added=[];for(const record of data.results){const notice=normalizeTender(record);if(notice&&!tenderNotices.has(notice.id)){tenderNotices.set(notice.id,notice);added.push(notice);}}
+    tenderOffset=offset+data.results.length;
+    document.getElementById('tender-more').hidden=data.results.length<20||tenderOffset>=Math.min(data.total_count||0,10000);
+    renderTenderList();
+    status.textContent=tenderNotices.size+' avis BTP/entretien retenus · localisation en cours…';
+    // Two workers limit geocoding traffic; notices without location remain in the list.
+    let index=0;async function worker(){while(index<added.length&&!controller.signal.aborted){await locateTender(added[index++],controller.signal);}}
+    await Promise.all([worker(),worker()]);renderTenderLayer();renderTenderList();
+    status.textContent=[...tenderNotices.values()].filter(n=>n.deadline>Date.now()).length+' avis ouverts chargés · '+tenderOffset+' annonces examinées. '+new Intl.DateTimeFormat('fr-FR',{timeStyle:'short',timeZone:'Europe/Paris'}).format(new Date())+' · Source BOAMP.';
+  }catch(error){status.textContent='Chargement BOAMP impossible. Réessayez. Les demandes E3 et contacts restent accessibles.';}
+  finally{clearTimeout(timeout);tenderLoading=false;tenderController=null;document.getElementById('tender-refresh').disabled=false;document.getElementById('tender-more').disabled=false;}
+}
+function closeTenderDialog(){document.getElementById('tender-dialog').hidden=true;if(tenderReturnFocus)tenderReturnFocus.focus();}
+function initTenderLayer(){
+  tenderLayer=L.layerGroup().addTo(map);
+  document.getElementById('tender-visible').addEventListener('change',event=>{if(event.target.checked)tenderLayer.addTo(map);else map.removeLayer(tenderLayer)});
+  document.getElementById('tender-refresh').addEventListener('click',()=>loadTenders(true));
+  document.getElementById('tender-more').addEventListener('click',()=>loadTenders(false));
+  document.getElementById('tender-open').addEventListener('click',()=>{tenderReturnFocus=document.activeElement;document.getElementById('tender-dialog').hidden=false;renderTenderList();document.getElementById('tender-query').focus();if(!tenderNotices.size)loadTenders(true)});
+  document.getElementById('tender-close').addEventListener('click',closeTenderDialog);
+  document.getElementById('tender-query').addEventListener('input',renderTenderList);
+  document.getElementById('tender-results').addEventListener('click',event=>{const button=event.target.closest('[data-tender-id]');if(!button)return;const notice=tenderNotices.get(button.dataset.tenderId);if(!notice||!notice.points.length||notice.deadline<=Date.now())return;document.getElementById('tender-visible').checked=true;tenderLayer.addTo(map);closeTenderDialog();map.setView([notice.points[0].lat,notice.points[0].lng],12);const marker=tenderMarkers.get(notice.id);if(marker)marker.openPopup()});
+  document.getElementById('tender-dialog').addEventListener('keydown',event=>{if(event.key==='Escape'){closeTenderDialog();return;}if(event.key!=='Tab')return;const items=[...document.getElementById('tender-dialog').querySelectorAll('button,input,a[href]')].filter(el=>!el.hidden&&!el.disabled);const first=items[0],last=items[items.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
+  setInterval(()=>{renderTenderLayer();renderTenderList()},60000);
+  loadTenders(true);
 }
 
 </script>
