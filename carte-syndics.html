@@ -1,0 +1,84 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101010">
+  <title>Carte des syndics — France</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#161616;background:#f5f5f5;--green:#06a85a;--line:#e8e8e8;--muted:#707070}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh}button,input{font:inherit}button{cursor:pointer}
+    .top{height:64px;background:#111;color:#fff;display:flex;align-items:center;padding:0 22px;gap:12px;box-shadow:0 2px 10px #0002;position:relative;z-index:3}
+    .logo{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--green);font-weight:800}.top strong{font-size:16px}.top span{color:#c7c7c7;font-size:13px}
+    .layout{height:calc(100vh - 64px);min-height:520px;display:grid;grid-template-columns:390px minmax(0,1fr)}
+    aside{background:#fff;display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line);z-index:2}
+    .panel-head{padding:24px 22px 16px}.eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--green)}
+    h1{font-size:25px;line-height:1.12;letter-spacing:-.04em;margin:8px 0}.intro{font-size:13px;color:#666;line-height:1.5;margin:0}
+    .search{padding:0 22px 16px;display:grid;gap:9px}.field{height:48px;border:1px solid #ddd;border-radius:11px;display:flex;align-items:center;padding:0 13px;gap:9px;background:#fff}.field:focus-within{border-color:#111;box-shadow:0 0 0 3px #1111}.field input{border:0;outline:0;width:100%;font-size:14px;color:#111}.field .icon{font-size:17px;color:#666}
+    .filters{display:flex;gap:8px}.filters .field{flex:1;min-width:0}.search-btn,.more-btn{height:48px;border:0;border-radius:11px;background:#111;color:white;font-weight:700}.search-btn:hover,.more-btn:hover{background:#292929}
+    .result-head{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:14px 22px 8px;font-size:13px;font-weight:700}.count{color:var(--muted);font-weight:600}
+    .results{overflow:auto;padding:0 12px 14px;flex:1}.result{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eee;background:white;padding:13px 10px;border-radius:10px;color:inherit}.result:hover,.result.active{background:#f4fbf7}.result.active{box-shadow:inset 3px 0 var(--green)}
+    .result-name{font-size:14px;font-weight:750;line-height:1.35}.result-meta{font-size:12px;color:#666;margin-top:5px;line-height:1.4}.tag{display:inline-block;margin-top:7px;background:#e9f7ef;color:#17633b;border-radius:6px;padding:3px 7px;font-size:10px;font-weight:700}
+    .message{padding:14px 10px;color:#666;font-size:13px;line-height:1.5}.more-wrap{padding:10px 22px 18px;background:#fff}.more-btn{width:100%;height:44px;background:#f1f1f1;color:#111}.more-btn:hover{background:#e8e8e8}.more-btn:disabled{opacity:.55;cursor:wait}
+    .map-wrap{position:relative;min-width:0}.map{position:absolute;inset:0;background:#e9efec}.map-badge{position:absolute;z-index:500;top:16px;left:16px;background:#fff;border-radius:11px;padding:10px 13px;box-shadow:0 3px 14px #0002;font-size:12px;font-weight:700}.map-badge small{display:block;font-weight:500;color:#666;margin-top:3px}
+    .notice{position:absolute;z-index:500;bottom:18px;left:18px;right:18px;max-width:660px;background:#fffefa;border:1px solid #e7e1d5;border-radius:12px;padding:11px 14px;color:#555;font-size:11px;line-height:1.45;box-shadow:0 3px 14px #0001}
+    .popup-name{font-size:14px;font-weight:800;margin-bottom:5px}.popup-meta{font-size:12px;color:#555;line-height:1.45}.popup-link{display:inline-block;margin-top:7px;color:#087443;font-weight:700;text-decoration:none}
+    .loading{display:inline-block;width:14px;height:14px;border:2px solid #ddd;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px}@keyframes spin{to{transform:rotate(360deg)}}
+    .leaflet-control-attribution{font-size:10px!important;background:#ffffffdd!important}.leaflet-control-zoom{border:0!important;border-radius:10px!important;overflow:hidden;box-shadow:0 2px 12px #0002!important}.leaflet-control-zoom a{color:#111!important}
+    @media(max-width:760px){.top{height:58px;padding:0 15px}.layout{height:calc(100dvh - 58px);min-height:0;grid-template-columns:1fr;grid-template-rows:minmax(285px,43dvh) 1fr}.map-wrap{grid-row:1}.map-badge{top:10px;left:10px}.notice{bottom:9px;left:9px;right:9px;padding:9px 11px;font-size:10px}aside{grid-row:2;border-right:0;border-top:1px solid var(--line)}.panel-head{padding:15px 16px 10px}h1{font-size:21px;margin:4px 0}.intro{font-size:12px}.search{padding:0 16px 10px;gap:7px}.field{height:43px}.search-btn{height:43px}.result-head{padding:10px 16px 5px}.results{padding:0 10px 9px}.more-wrap{padding:6px 16px 10px}.more-btn{height:40px}}
+    @media(max-width:380px){.filters{display:grid;grid-template-columns:1fr 1fr}.filters .field:last-child{grid-column:1/-1}.layout{grid-template-rows:minmax(250px,38dvh) 1fr}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="logo">S</div><strong>Repère Syndic</strong><span>— annuaire cartographique</span></header>
+  <main class="layout">
+    <aside>
+      <div class="panel-head"><div class="eyebrow">Annuaire national</div><h1>Les syndics près de vous</h1><p class="intro">Recherchez des cabinets de syndic ou d’administration de biens par ville, code postal ou département.</p></div>
+      <form class="search" id="search-form">
+        <label class="field"><span class="icon">⌕</span><input id="query" placeholder="Ville, code postal ou nom" autocomplete="off" aria-label="Ville, code postal ou nom"></label>
+        <div class="filters"><label class="field"><span class="icon">⌖</span><input id="department" inputmode="numeric" maxlength="3" placeholder="Département (ex. 93)" aria-label="Département"></label><button class="search-btn" type="submit">Rechercher</button></div>
+      </form>
+      <div class="result-head"><span id="result-title">Résultats</span><span class="count" id="result-count"></span></div>
+      <div class="results" id="results" aria-live="polite"><div class="message">Lance une recherche pour afficher les cabinets sur la carte.</div></div>
+      <div class="more-wrap"><button class="more-btn" id="more" hidden type="button">Afficher plus de résultats</button></div>
+    </aside>
+    <section class="map-wrap" aria-label="Carte des syndics"><div id="map" class="map"></div><div class="map-badge" id="map-badge">France <small>Recherche par activité et lieu</small></div><div class="notice">Clients potentiels : ces établissements n’ont pas nécessairement publié de demande de travaux. Les demandes actives sont consultables dans l’espace artisan. Les résultats proviennent des entreprises déclarées avec l’activité APE 68.32A. Cette catégorie comprend aussi l’administration de biens et ne recense pas parfaitement chaque syndic. Résultats publics, non vérifiés et non exhaustifs.</div></section>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const API='https://recherche-entreprises.api.gouv.fr/search';
+    const BAN='https://api-adresse.data.gouv.fr/search/';
+    const map=L.map('map',{zoomControl:false,scrollWheelZoom:true}).setView([46.6,2.3],6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+    L.control.zoom({position:'bottomright'}).addTo(map);
+    const cluster=L.layerGroup().addTo(map);
+    const $=id=>document.getElementById(id); const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    let page=1,total=0,lastParams=null,loading=false,markers=[],selected=null;
+    const results=$('results'),more=$('more');
+    function addressOf(item){const s=item.siege||item.matching_etablissements?.[0]||{};return [s.numero_voie,s.type_voie,s.libelle_voie,s.code_postal,s.libelle_commune||s.commune].filter(Boolean).join(' ')}
+    function displayName(item){return item.nom_complet||item.nom_raison_sociale||item.denomination||'Cabinet immobilier'}
+    function companyUrl(item){return item.siren?`https://annuaire-entreprises.data.gouv.fr/entreprise/${encodeURIComponent(item.siren)}`:''}
+    function escAddress(a){return escapeHtml(a||'Adresse non renseignée')}
+    function addCard(item,index){const s=item.siege||item.matching_etablissements?.[0]||{};const name=displayName(item);const address=addressOf(item);const card=document.createElement('button');card.type='button';card.className='result';card.dataset.index=index;card.innerHTML=`<div class="result-name">${escapeHtml(name)}</div><div class="result-meta">${escAddress(address)}</div><span class="tag">Client potentiel · Administration de biens · ${escapeHtml(item.siren||'SIREN indisponible')}</span>`;card.addEventListener('click',()=>focusResult(index));results.append(card)}
+    function focusResult(index){selected=index;document.querySelectorAll('.result').forEach(x=>x.classList.toggle('active',Number(x.dataset.index)===index));const m=markers[index];if(m){map.flyTo(m.getLatLng(),Math.max(map.getZoom(),14),{duration:.45});m.openPopup()}}
+    async function locate(item,index){const address=addressOf(item);if(!address||address==='Adresse non renseignée')return;try{const url=new URL(BAN);url.searchParams.set('q',address);url.searchParams.set('limit','1');const response=await fetch(url);if(!response.ok)return;const geo=await response.json();const point=geo.features?.[0];if(!point)return;const [lng,lat]=point.geometry.coordinates;const name=displayName(item);const popup=`<div class="popup-name">${escapeHtml(name)}</div><div class="popup-meta"><strong>Client potentiel</strong> · Aucun besoin de travaux attesté par cet annuaire.</div><div class="popup-meta">${escAddress(address)}</div>${companyUrl(item)?`<a class="popup-link" target="_blank" rel="noopener" href="${companyUrl(item)}">Voir la fiche officielle ↗</a>`:''}`;const marker=L.circleMarker([lat,lng],{radius:8,color:'#fff',weight:2,fillColor:'#06a85a',fillOpacity:.95}).bindPopup(popup);marker.on('click',()=>{selected=index;document.querySelectorAll('.result').forEach(x=>x.classList.toggle('active',Number(x.dataset.index)===index))});marker.addTo(cluster);markers[index]=marker}catch(e){console.warn('Géocodage indisponible',e)}}
+    const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+    async function search(reset=true){if(loading)return;if(reset){page=1;total=0;markers=[];selected=null;cluster.clearLayers();results.innerHTML='<div class="message"><span class="loading"></span>Recherche des entreprises…</div>';$('result-count').textContent='';$('result-title').textContent='Recherche en cours';}
+      loading=true;more.disabled=true;more.textContent='Chargement…';
+      const query=$('query').value.trim()||'syndic';const dept=$('department').value.trim();const params=new URLSearchParams({q:query,activite_principale:'68.32A',per_page:'25',page:String(page),etat_administratif:'A'});if(dept)params.set('departement',dept);
+      lastParams=params.toString();
+      try{const response=await fetch(`${API}?${params}`);if(!response.ok)throw new Error('Service de recherche momentanément indisponible.');const data=await response.json();const list=data.results||[];total=data.total_results||0;if(reset)results.innerHTML='';if(!list.length&&page===1){results.innerHTML='<div class="message">Aucun résultat trouvé. Essaie une autre ville, un autre département ou simplement « syndic ».</div>';}
+        const offset=(page-1)*25;for(let i=0;i<list.length;i++){const item=list[i];addCard(item,offset+i);await locate(item,offset+i);if(i<list.length-1)await sleep(180)}
+        $('result-title').textContent=dept?`Département ${dept}`:(query||'France');$('result-count').textContent=total?`${Math.min(page*25,total).toLocaleString('fr-FR')} / ${total.toLocaleString('fr-FR')}`:`${results.querySelectorAll('.result').length} résultat(s)`;
+        more.hidden=!(list.length===25&&(total===0||page*25<total));more.disabled=false;more.textContent='Afficher plus de résultats';
+        $('map-badge').innerHTML=`${total?total.toLocaleString('fr-FR')+' résultats':'Résultats'}<small>${dept?'Département '+escapeHtml(dept):'France'} · code APE 68.32A</small>`;
+        const points=markers.filter(Boolean).map(m=>m.getLatLng());if(points.length){const bounds=L.latLngBounds(points);if(reset)map.flyToBounds(bounds.pad(.12),{duration:.5,maxZoom:12});}
+      }catch(error){if(reset)results.innerHTML=`<div class="message">${escapeHtml(error.message||'Impossible de charger les résultats. Vérifie ta connexion et réessaie.')}</div>`;more.hidden=true;}
+      finally{loading=false;more.disabled=false;more.textContent='Afficher plus de résultats';}
+    }
+    $('search-form').addEventListener('submit',event=>{event.preventDefault();search(true)});more.addEventListener('click',()=>{page++;search(false)});
+  </script>
+</body>
+</html>
