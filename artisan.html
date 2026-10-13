@@ -378,6 +378,65 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 @keyframes skeleton-loading{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
 
 @media (max-width:360px){.field-row{grid-template-columns:1fr;}.action-grid-2{grid-template-columns:1fr;}}
+
+/* Espace artisan : une carte dégagée et des outils à la demande. */
+#view-map.is-active{display:flex;flex-direction:column;overflow:hidden;background:#f5f7fb}
+#view-map .top-bar{position:relative;flex:0 0 auto;min-height:64px;box-shadow:none;padding:calc(12px + env(safe-area-inset-top,0px)) 22px 12px;background:#101f36;color:#fff;z-index:2}
+#view-map .top-bar .brand-name{color:#fff;font-family:var(--font-body);font-size:16px;font-weight:700}
+#view-map .brand-mark{border-radius:12px;background:#d7b983;color:#14243b;width:36px;height:36px}
+#view-map .verify-banner{position:relative;top:auto;flex:0 0 auto;font-size:12px;padding:9px 18px;z-index:1}
+.artisan-actions{display:flex;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid #e3e8ef;flex:0 0 auto;overflow-x:auto;scrollbar-width:none}
+.artisan-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e2e7ee;border-radius:10px;padding:11px 15px;background:#fff;color:#263750;font-weight:600;font-size:13px;white-space:nowrap;min-height:42px}
+.artisan-actions button:hover{background:#f1f5fa;border-color:#c7d1de}
+.artisan-actions button[aria-expanded="true"]{background:#14243b;color:#fff;border-color:#14243b}
+.action-dot{height:8px;width:8px;border-radius:50%;display:inline-block}.contact-dot{background:#0369a1}.tender-dot{background:#c2410c}
+.map-workspace{flex:1;min-height:0;display:grid;grid-template-columns:0 minmax(0,1fr);position:relative}
+.map-workspace.is-panel-open{grid-template-columns:344px minmax(0,1fr)}
+.map-stage{grid-column:2;position:relative;min-width:0;min-height:0;overflow:hidden}
+#map{inset:0;position:absolute}
+.map-sidebar{grid-column:1;display:flex;flex-direction:column;gap:0;min-height:0;overflow-y:auto;background:#fff;border-right:1px solid #e3e8ef;z-index:3;overscroll-behavior:contain}
+.map-sidebar[hidden]{display:none!important}
+.sidebar-heading{display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid #edf0f4;flex-shrink:0}
+.sidebar-heading small{font-size:10px;color:#738196;font-weight:700;letter-spacing:.1em}.sidebar-heading h2{font-family:var(--font-body);font-size:16px;margin-top:5px}
+#map-panel-close{height:36px;width:36px;border:1px solid #e5e9ef;border-radius:10px;background:#f8fafc;color:#27374d;font-size:24px}
+#prospect-controls{position:static;max-width:none;max-height:none;overflow:visible;padding:18px 20px;color:#263750;font-size:12px;box-shadow:none;background:#fff;border:0;border-radius:0}
+#prospect-controls summary{font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px}
+#prospect-controls label{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:12px;font-weight:600}
+#prospect-controls select{display:block;width:100%;padding:10px;border:1px solid #dce3ed;border-radius:9px;background:#f8fafc;color:#263750;font-size:13px}
+#prospect-controls button{border:1px solid #dce3ed;border-radius:9px;background:#f8fafc;padding:9px 12px;color:#263750;font-weight:600;font-size:12px;margin:8px 5px 5px 0}
+#prospect-controls hr{border:0;border-top:1px solid #edf0f4;margin:15px 0}
+#prospect-controls p{font-size:11px;line-height:1.5;color:#738196;margin:8px 0}
+#prospect-controls input[type="checkbox"]{width:16px;height:16px;accent-color:#16305a}
+.request-filters{padding:16px 20px;border-top:1px solid #edf0f4}.request-filters>p{font-size:12px;font-weight:700;margin-bottom:10px}
+#view-map .map-toolbar{position:static;padding:0;gap:6px}.map-toolbar .chip{box-shadow:none;background:#f8fafc;border:1px solid #e3e8ef;font-size:11px;padding:8px 10px;backdrop-filter:none}
+.map-toolbar .chip.is-selected{background:#14243b;border-color:#14243b;color:#fff}
+#view-map .bottom-sheet{position:relative;left:auto;right:auto;bottom:auto;border-radius:0;box-shadow:none;border-top:1px solid #edf0f4;height:auto;max-height:none;min-height:220px;flex:1;overflow:visible;padding-bottom:12px}
+#view-map .bottom-sheet.is-collapsed{height:auto;max-height:none;min-height:76px;flex:0}
+#view-map .bottom-sheet__header h2{font-family:var(--font-body);font-size:14px}
+#view-map .chantier-list{overflow:visible;min-height:100px;padding:0 18px 10px}.bottom-sheet__header{padding-left:20px;padding-right:20px}.sheet-toolbar{flex-wrap:wrap}
+#view-map .map-action-stack{right:16px;bottom:56px;gap:8px}
+#view-map .map-legend{left:14px;right:auto;bottom:14px;max-width:calc(100% - 28px);padding:8px 12px;border-radius:10px;gap:12px;font-size:10px;box-shadow:0 2px 10px #14243b12}
+#view-map .locate-btn,#view-map .map-zoom-control{border-radius:10px;box-shadow:0 2px 10px #14243b18;background:#fff}
+#view-map .leaflet-top.leaflet-right{top:0;right:0}
+.nav-bar{border-color:#e3e8ef}.nav-item.is-active{color:#16305a}
+#prospect-directory,#tender-dialog{background:rgba(10,23,41,.48)!important;backdrop-filter:blur(3px)}
+#prospect-directory>div,#tender-dialog>div{border-radius:18px!important;box-shadow:0 20px 80px #0003;padding:24px!important}
+#prospect-directory h2,#tender-dialog h2{font-family:var(--font-body);font-size:21px;margin-bottom:8px}
+#prospect-directory input,#prospect-directory select,#tender-dialog input{border:1px solid #dce3ed!important;border-radius:9px!important;padding:11px!important;background:#f8fafc;color:#263750;max-width:100%}
+#prospect-directory button,#tender-dialog button{border:1px solid #dce3ed;border-radius:9px;background:#f2f5f9;padding:10px 14px;color:#263750;font-weight:600}
+#prospect-directory article,#tender-dialog article{border-color:#e3e8ef!important;border-radius:12px!important;padding:18px!important;box-shadow:none}
+#prospect-directory article p,#tender-dialog article p{margin:8px 0;font-size:13px}#prospect-directory article small{font-size:11px;color:#738196}#prospect-directory a,#tender-dialog a{color:#185d94;text-decoration:none}
+@media(max-width:760px){
+ #view-map .top-bar{padding-left:14px;padding-right:14px;min-height:58px}.artisan-actions{padding:8px;gap:5px}.artisan-actions button{font-size:11px;padding:10px 9px;gap:5px;flex:1}
+ .map-workspace,.map-workspace.is-panel-open{display:block}.map-stage{height:100%;width:100%}
+ .map-sidebar{position:absolute;inset:0 auto 0 0;width:min(360px,100%);box-shadow:12px 0 36px #14243b24;z-index:500}
+ #view-map .map-legend{font-size:9px;gap:8px;left:8px;bottom:8px;padding:8px;max-width:calc(100% - 16px)}#view-map .map-action-stack{right:10px;bottom:58px}
+ #prospect-directory>div,#tender-dialog>div{padding:16px!important;border-radius:14px!important;max-height:94dvh!important}
+}
+@media(max-width:370px){.artisan-actions button{font-size:10px;padding:10px 6px}.action-dot{display:none}}
+
+.vitrine-public{background:#fff;border:1px solid #e3e8ef;border-radius:20px;padding:clamp(22px,5vw,48px);max-width:920px;margin:auto;color:#263750}.vitrine-label{font-size:11px;letter-spacing:.13em;font-weight:800;color:#997240}.vitrine-public h1{font-family:var(--font-body,system-ui);font-size:clamp(25px,4vw,40px);margin:14px 0 8px;line-height:1.15}.vitrine-trade{font-size:17px;color:#65748b;margin-bottom:14px}.vitrine-availability{display:inline-block;background:#eef4f1;color:#34614c;font-size:12px;font-weight:700;padding:7px 11px;border-radius:99px}.vitrine-description{white-space:pre-wrap;line-height:1.7;margin:22px 0}.vitrine-public section{border-top:1px solid #edf0f4;margin-top:24px;padding-top:22px}.vitrine-public h2{font-family:var(--font-body,system-ui);font-size:18px;margin:0 0 12px}.vitrine-public ul{padding-left:20px;line-height:1.8}.vitrine-public small,.vitrine-public footer{color:#728096;font-size:12px;line-height:1.6}.vitrine-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.vitrine-gallery figure{margin:0;min-width:0}.vitrine-gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;background:#f2f5f9}.vitrine-gallery figcaption{font-size:12px;color:#65748b;padding:8px 0}.vitrine-contact-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.vitrine-contact-actions a{text-decoration:none}.vitrine-contact-text{font-size:13px;overflow-wrap:anywhere;margin-top:14px}.vitrine-public footer{border-top:1px solid #edf0f4;margin-top:28px;padding-top:16px}.vitrine-shell{position:fixed;inset:0;z-index:4000;background:rgba(10,23,41,.5);padding:20px;overflow:auto;overscroll-behavior:contain}.vitrine-shell[hidden]{display:none}.vitrine-dialog-card{max-width:1100px;margin:auto;border-radius:20px;background:#f7f9fc;box-shadow:0 20px 80px #0003;padding:24px}.vitrine-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px}.vitrine-dialog-head h2{font-family:var(--font-body);font-size:22px;margin:0 0 7px}.vitrine-dialog-head p{color:#65748b;font-size:13px}.vitrine-editor-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.vitrine-editor-grid>*{min-width:0}.vitrine-editor-grid .field label{text-transform:none;letter-spacing:0;font-size:12px}.vitrine-note{background:#fff7e8;border:1px solid #eddfc5;padding:12px 15px;border-radius:10px;color:#775820;font-size:13px;margin-bottom:16px}.vitrine-note[hidden]{display:none}.vitrine-save-actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.vitrine-photo-row{display:flex;gap:10px;align-items:center;margin:10px 0;background:#fff;border:1px solid #e3e8ef;border-radius:10px;padding:10px}.vitrine-photo-row img{width:64px;height:54px;object-fit:cover;border-radius:7px}.vitrine-photo-row input{flex:1;min-width:0;padding:8px;border:1px solid #dce3ed;border-radius:7px}.vitrine-photo-row button{border:0;border-radius:7px;background:#f7e5e3;padding:8px;color:#a3372f}.vitrine-preview-title{font-size:12px;color:#65748b;margin-bottom:12px}.vitrine-editor-grid .vitrine-public{padding:24px}.vitrine-publish-consent{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.6;margin:16px 0}.vitrine-publish-consent input{margin-top:4px}.vitrine-profile-callout{padding:22px;background:#13253e;color:white;border-radius:15px;margin-bottom:18px}.vitrine-profile-callout h3{color:#fff;font-family:var(--font-body);font-size:19px;margin-bottom:8px}.vitrine-profile-callout p{font-size:13px;color:#c6d2e2;margin-bottom:16px}.vitrine-profile-callout button{background:#d7b983;color:#14243b}.vitrine-link{display:block;overflow-wrap:anywhere;font-size:12px;color:#185d94;margin-top:10px}.prospection-textarea{width:100%;min-height:300px;resize:vertical;padding:14px;border:1px solid #dce3ed;border-radius:10px;line-height:1.65;background:#fff;font-family:inherit;font-size:13px}.prospection-subject{width:100%;padding:12px;border:1px solid #dce3ed;border-radius:9px;margin:8px 0 16px}.prospection-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.prospection-status{font-size:12px;color:#65748b;margin:12px 0}.prospection-action{display:block;width:100%;border:1px solid #cbd7e5;border-radius:9px;background:#eef3fa;color:#234263;padding:10px;margin-top:12px;font-size:12px;font-weight:700}.prospection-dialog{max-width:740px}.prospection-pending{padding:16px;background:#fff;border-radius:10px;border:1px solid #e3e8ef;margin-top:16px}.prospection-pending:empty{display:none}@media(max-width:800px){.vitrine-editor-grid{grid-template-columns:1fr}.vitrine-shell{padding:10px}.vitrine-dialog-card{padding:18px}.vitrine-gallery{grid-template-columns:1fr}.vitrine-dialog-head h2{font-size:19px}}
+
 </style>
 </head>
 <body>
@@ -391,7 +450,7 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
   <div class="auth-card">
     <div class="brand-row"><span class="brand-mark">E3</span><span class="brand-name">Entreprise 3</span></div>
     <h1>Espace artisan</h1>
-    <p class="lead">Connectez-vous pour accéder aux chantiers disponibles en Île-de-France.</p>
+    <p class="lead">Vos demandes, vos contacts professionnels et les appels d’offres, au même endroit.</p>
     <p class="form-error" id="login-error" hidden></p>
     <form id="login-form">
       <div class="field">
@@ -466,34 +525,24 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
       </div>
       <p class="verify-banner" id="verify-banner" hidden></p>
 
-      <div id="map"></div>
-      <details id="prospect-controls" style="position:absolute;top:130px;right:12px;z-index:450;background:#fff;padding:10px;border-radius:12px;box-shadow:0 3px 14px #0002;max-width:225px;max-height:calc(100dvh - 200px);overflow:auto;font-size:12px;color:#1a2332">
-        <summary style="cursor:pointer;font-weight:700">Carte · contacts et appels d’offres</summary>
-        <label for="contact-city" style="display:block;margin-top:8px">Voir une ville</label><select id="contact-city" style="max-width:100%;padding:6px"><option value="">Choisir une ville</option></select><button id="contact-france" type="button" style="margin-top:5px">Vue France</button><button id="prospect-directory-open" type="button" style="display:block;margin-top:8px;padding:6px">Annuaire prospects France</button><p id="verified-count" role="status" style="margin:6px 0"></p><label style="display:block;margin-top:8px"><input id="syndic-visible" type="checkbox" checked> 🟣 Syndics</label>
-        <label style="display:block;margin-top:6px"><input id="agency-visible" type="checkbox" checked> 🔵 Agences et autres prospects</label>
-        <button id="syndic-refresh" type="button" style="display:block;margin-top:8px;padding:6px">Rechercher dans cette zone</button>
-        <hr style="margin:10px 0"><label style="display:block"><input id="tender-visible" type="checkbox" checked> ▲ Appels d’offres BTP / entretien</label><button id="tender-open" type="button" style="display:block;margin-top:8px;padding:6px">Voir les appels d’offres France</button><p id="tender-status" role="status" style="margin:6px 0">Source officielle : BOAMP.</p><p id="syndic-status" role="status" style="margin:6px 0 0">Recherche autour du centre de la carte.</p>
-        <p style="margin:6px 0 0">Collecte France non exhaustive. Coordonnées publiques sourcées ; certains établissements restent sans contact.</p>
+      <div class="artisan-actions" aria-label="Explorer les opportunités">
+        <button id="map-panel-toggle" type="button" aria-expanded="false" aria-controls="map-sidebar"><span aria-hidden="true">☰</span> Filtres et demandes</button>
+        <button id="prospect-directory-open" type="button"><span class="action-dot contact-dot" aria-hidden="true"></span> Contacts professionnels</button>
+        <button id="tender-open" type="button"><span class="action-dot tender-dot" aria-hidden="true"></span> Appels d’offres</button>
+      </div>
+      <div class="map-workspace" id="map-workspace">
+        <aside id="map-sidebar" class="map-sidebar" aria-label="Filtres et demandes" hidden>
+          <div class="sidebar-heading"><div><small>VOTRE SECTEUR</small><h2>Filtres et demandes</h2></div><button id="map-panel-close" type="button" aria-label="Fermer les filtres">×</button></div>
+          <details id="prospect-controls" open>
+        <summary>Afficher sur la carte</summary>
+        <label for="contact-city">Choisir une ville</label><select id="contact-city"><option value="">Choisir une ville</option></select><button id="contact-france" type="button">Toute la France</button><p id="verified-count" role="status"></p><label><input id="syndic-visible" type="checkbox" checked> Syndics et gestionnaires</label>
+        <label><input id="agency-visible" type="checkbox" checked> Agences, hôtels et autres contacts</label>
+        <button id="syndic-refresh" type="button">Rechercher dans cette zone</button>
+        <hr><label><input id="tender-visible" type="checkbox" checked> Appels d’offres BTP et entretien</label><p id="tender-status" role="status">Source officielle : BOAMP.</p><p id="syndic-status" role="status">Recherche autour du centre de la carte.</p>
+        <p>Collecte France non exhaustive. Coordonnées publiques sourcées ; certains établissements restent sans contact.</p>
       </details>
-      <div class="map-toolbar" style="top:calc(76px + env(safe-area-inset-top,0px));" id="category-toolbar"></div>
-      <div class="map-action-stack" aria-label="Commandes de la carte">
-        <button class="locate-btn" id="locate-btn" title="Me localiser" aria-label="Centrer la carte sur ma position">📍</button>
-        <button class="locate-btn" id="fit-btn" title="Voir tous les chantiers" aria-label="Recentrer la carte sur tous les chantiers">🗺️</button>
-        <div class="map-zoom-control" aria-label="Zoom de la carte">
-          <button type="button" id="zoom-in-btn" aria-label="Zoomer" title="Zoomer">+</button>
-          <button type="button" id="zoom-out-btn" aria-label="Dézoomer" title="Dézoomer">−</button>
-        </div>
-      </div>
-      <div class="map-legend" id="map-legend" style="flex-wrap:wrap">
-        <span style="color:#c2410c">▲ Appel d’offres</span>
-        <span><i class="dot" style="background:#6d28d9"></i>Syndic</span>
-        <span><i class="dot" style="background:#0369a1"></i>Agence immo</span>
-        <span><i class="dot dot--urgent"></i>Urgent</span>
-        <span><i class="dot dot--modere"></i>Modéré</span>
-        <span><i class="dot dot--faible"></i>Faible</span>
-      </div>
-
-      <section class="bottom-sheet" id="bottom-sheet" aria-label="Liste des chantiers disponibles">
+          <div class="request-filters"><p>Métier des demandes E3</p><div class="map-toolbar" id="category-toolbar"></div></div>
+                <section class="bottom-sheet" id="bottom-sheet" aria-label="Liste des chantiers disponibles">
         <button type="button" class="bottom-sheet__handle" id="bottom-sheet-toggle" aria-label="Réduire la liste des chantiers" aria-expanded="true" aria-controls="chantier-list" title="Réduire ou afficher la liste"></button>
         <div class="bottom-sheet__header">
           <h2>Chantiers disponibles</h2>
@@ -509,6 +558,22 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
         </div>
         <div class="chantier-list" id="chantier-list"></div>
       </section>
+        </aside>
+        <div class="map-stage">
+          <div id="map" aria-label="Carte des demandes et des professionnels"></div>
+                <div class="map-action-stack" aria-label="Commandes de la carte">
+        <button class="locate-btn" id="locate-btn" title="Me localiser" aria-label="Centrer la carte sur ma position">📍</button>
+        <button class="locate-btn" id="fit-btn" title="Voir tous les chantiers" aria-label="Recentrer la carte sur tous les chantiers">🗺️</button>
+        <div class="map-zoom-control" aria-label="Zoom de la carte">
+          <button type="button" id="zoom-in-btn" aria-label="Zoomer" title="Zoomer">+</button>
+          <button type="button" id="zoom-out-btn" aria-label="Dézoomer" title="Dézoomer">−</button>
+        </div>
+      </div>
+
+          <div class="map-legend" id="map-legend"><span><i class="dot" style="background:#6d28d9"></i>Syndics</span><span><i class="dot" style="background:#0369a1"></i>Contacts</span><span><i class="dot" style="background:#c2410c"></i>Appels d’offres</span><span><i class="dot dot--faible"></i>Demandes E3</span></div>
+        </div>
+      </div>
+
     </section>
 
     <!-- VUE NOTIFICATIONS ------------------------------------------------ -->
@@ -586,8 +651,8 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 <div id="prospect-directory" hidden role="dialog" aria-modal="true" aria-labelledby="prospect-directory-title" style="position:fixed;inset:0;z-index:3000;background:#f6f6f6;overflow:auto;padding:20px;color:#171717">
   <div style="max-width:1100px;margin:auto">
     <button id="prospect-directory-close" type="button" style="float:right;padding:10px">Fermer ✕</button>
-    <h2 id="prospect-directory-title">Contacts France · syndics et agences</h2>
-    <p>82 établissements collectés sur leurs sites officiels. Couverture non exhaustive. Aucun besoin de travaux attesté.</p>
+    <h2 id="prospect-directory-title">Contacts professionnels · France</h2>
+    <p>Retrouvez les professionnels par catégorie et par région. Ces fiches sont des clients potentiels ; elles ne constituent pas des demandes de travaux.</p>
     <label for="prospect-directory-query">Nom, ville ou code postal</label>
     <input id="prospect-directory-query" type="search" placeholder="Lyon, 59000, cabinet…" style="padding:12px;margin:8px 0;max-width:100%">
     <label for="prospect-directory-region">Région</label>
@@ -597,6 +662,10 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
   </div>
 </div>
 <div id="tender-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="tender-title" style="position:fixed;inset:0;z-index:3000;background:#f6f6f6;overflow:auto;padding:20px;color:#171717"><div style="max-width:1100px;margin:auto"><button id="tender-close" type="button" style="float:right;padding:10px">Fermer ✕</button><h2 id="tender-title">Appels d’offres publics · BTP et entretien</h2><p>France · avis BOAMP dont la date limite est à venir. Travaux, entretien du bâtiment, nettoyage et espaces verts. Sélection non exhaustive.</p><label for="tender-query">Métier, lieu ou acheteur</label><input id="tender-query" type="search" placeholder="Plomberie, nettoyage, Lyon…" style="padding:12px;margin:8px 0;max-width:100%"><button id="tender-refresh" type="button" style="padding:10px">Actualiser</button><p id="tender-list-count" role="status"></p><div id="tender-results" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px"></div><button id="tender-more" type="button" hidden style="padding:12px;margin-top:14px">Charger les annonces suivantes</button></div></div>
+
+<div class="vitrine-shell" id="vitrine-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="vitrine-title"><div class="vitrine-dialog-card"><div class="vitrine-dialog-head"><div><h2 id="vitrine-title">Ma fiche professionnelle</h2><p>Présentez votre métier et vos réalisations. Vous choisissez ce qui devient public.</p></div><button id="vitrine-close" type="button" class="btn btn-ghost" aria-label="Fermer ma fiche">Fermer ×</button></div><div id="vitrine-editor-body"></div></div></div>
+<div class="vitrine-shell" id="prospection-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="prospection-title" style="z-index:4100"><div class="vitrine-dialog-card prospection-dialog"><div class="vitrine-dialog-head"><div><h2 id="prospection-title">Présenter mon entreprise</h2><p>Votre présentation, vos services et le lien vers votre fiche E3.</p></div><button id="prospection-close" type="button" class="btn btn-ghost" aria-label="Fermer la présentation">Fermer ×</button></div><div id="prospection-content"></div></div></div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* =========================================================================
@@ -846,24 +915,11 @@ function initMap() {
 }
 
 function syncMapChrome() {
-  const sheet = document.getElementById('bottom-sheet');
-  const mapView = document.getElementById('view-map');
-  if (sheet && mapView) mapView.style.setProperty('--sheet-height', `${sheet.getBoundingClientRect().height}px`);
+  if (map) map.invalidateSize({ pan: false });
 }
 
 function mapFitOptions(maxZoom = 15) {
-  const container = map.getContainer().getBoundingClientRect();
-  const toolbar = document.getElementById('category-toolbar').getBoundingClientRect();
-  const sheetHeight = document.getElementById('bottom-sheet').getBoundingClientRect().height;
-  const top = Math.max(92, toolbar.bottom - container.top + 16);
-  const bottom = Math.min(sheetHeight + 18, Math.max(24, container.height - top - 90));
-  return {
-    paddingTopLeft: [22, top],
-    paddingBottomRight: [78, bottom],
-    maxZoom,
-    animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    duration: 0.55,
-  };
+  return {paddingTopLeft:[20,24],paddingBottomRight:[72,56],maxZoom,animate:!window.matchMedia('(prefers-reduced-motion: reduce)').matches,duration:0.55};
 }
 
 function centerMapOnPoint(point, zoom = 14) {
@@ -1623,6 +1679,7 @@ async function cloturerMission(id) {
 function renderProfile() {
   const a = currentArtisan;
   document.getElementById('profile-page').innerHTML = `
+    <div class="vitrine-profile-callout"><h3>Votre entreprise sur E3</h3><p>Une fiche avec vos services, vos photos et un lien à partager aux professionnels.</p><button id="open-vitrine-profile" type="button" class="btn">Créer ou modifier ma fiche</button></div>
     <div class="profile-card">
       <h3>${esc(a.nom_entreprise)}</h3>
       <dl>
@@ -1641,6 +1698,7 @@ function renderProfile() {
       <span class="status-pill status-pill--${a.statut_verification}">${a.statut_verification === 'valide' ? '✓ Validé' : a.statut_verification === 'refuse' ? 'Refusé' : 'En vérification'}</span>
     </div>
   `;
+  document.getElementById('open-vitrine-profile').addEventListener('click',openVitrineEditor);
 }
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
@@ -1789,11 +1847,13 @@ function prospectContactHtml(company, establishment, suppliedContact = null) {
   const emailLink=/^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)?'<a href="mailto:'+esc(email)+'">✉ Envoyer un email · '+esc(email)+'</a>':'Email : Non renseigné';
   const link=(url,label)=>/^https:\/\//.test(String(url||''))?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+' ↗</a>':'';
   const source=link(contact.source,'Source : '+(contact.source_kind||'site de l’établissement'));
+  const prospectIndex=VERIFIED_PROSPECT_CONTACTS.indexOf(contact);
+  const presentButton=prospectIndex>=0&&emailLink.startsWith('<a ')?'<button class="prospection-action" type="button" data-prospect-vitrine="'+prospectIndex+'">Présenter mon entreprise</button>':'';
   const contactSource=contact.contact_source&&contact.contact_source!==contact.source?'<br>'+link(contact.contact_source,'Source des coordonnées : '+(contact.contact_source_kind||'source publiée')):'';
   let status=contact.contact_status||(contact.imported?'Coordonnées fournies dans votre fichier · non vérifiées en ligne.':'Coordonnées publiées sur la source.');
   if(!contact.phone&&!contact.email)status='Fiche à enrichir · téléphone et email non renseignés.';
   const date=contact.collected_at||contact.checked||'';
-  return '<div style="border-top:1px solid #ddd;padding-top:8px"><strong>'+esc(contact.name)+'</strong><p>'+phoneLink+'</p><p style="overflow-wrap:anywhere">'+emailLink+'</p><small>'+source+contactSource+'<br>'+esc(status)+(date?'<br>Collecté le '+esc(date.split('-').reverse().join('/')):'')+(contact.source_updated?'<br>Mise à jour de la source : '+esc(contact.source_updated):'')+'</small></div>';
+  return '<div style="border-top:1px solid #ddd;padding-top:8px"><strong>'+esc(contact.name)+'</strong><p>'+phoneLink+'</p><p style="overflow-wrap:anywhere">'+emailLink+'</p><small>'+source+contactSource+'<br>'+esc(status)+(date?'<br>Collecté le '+esc(date.split('-').reverse().join('/')):'')+(contact.source_updated?'<br>Mise à jour de la source : '+esc(contact.source_updated):'')+'</small>'+presentButton+'</div>';
 }
 
 // Public prospect layer, independent from E3 requests.
@@ -1976,6 +2036,111 @@ function initTenderLayer(){
   setInterval(()=>{renderTenderLayer();renderTenderList()},60000);
   loadTenders(true);
 }
+
+
+// Display controls only; no changes to quotes, requests or Supabase.
+function setMapPanel(open, restoreFocus=false){
+ const panel=document.getElementById('map-sidebar'),button=document.getElementById('map-panel-toggle');panel.hidden=!open;document.getElementById('map-workspace').classList.toggle('is-panel-open',open);button.setAttribute('aria-expanded',String(open));
+ if(!open&&restoreFocus)button.focus();if(open&&window.matchMedia('(max-width:760px)').matches)document.getElementById('map-panel-close').focus();if(map)map.invalidateSize({pan:false});
+}
+document.getElementById('map-panel-toggle').addEventListener('click',()=>setMapPanel(document.getElementById('map-sidebar').hidden));
+document.getElementById('map-panel-close').addEventListener('click',()=>setMapPanel(false,true));
+document.getElementById('map-sidebar').addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();setMapPanel(false,true)}else if(event.key==='Tab'&&window.matchMedia('(max-width:760px)').matches){const items=[...event.currentTarget.querySelectorAll('button,input,select,summary,a[href]')].filter(e=>!e.disabled&&e.getClientRects().length),first=items[0],last=items[items.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}});
+for(const id of ['prospect-directory-open','tender-open'])document.getElementById(id).addEventListener('click',()=>setMapPanel(false));
+
+
+const VITRINE_AVAILABILITY = {disponible:'Disponible',semaine_prochaine:'Disponible la semaine prochaine',sur_demande:'Disponibilité sur demande',indisponible:'Actuellement indisponible'};
+function vitrineSafeWebsite(value){try{const u=new URL(String(value||''));return u.protocol==='https:'?u.href:''}catch{return ''}}
+function vitrineSafeEmail(value){return /^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(String(value||''))?String(value):''}
+function vitrinePublicMarkup(profile, photos=[]){
+  const p=profile||{},phone=String(p.telephone||'').replace(/[^+0-9]/g,''),email=vitrineSafeEmail(p.email),website=vitrineSafeWebsite(p.website);
+  const services=String(p.services||'').split(/\n/).map(x=>x.trim()).filter(Boolean).slice(0,12);
+  const photosHtml=photos.filter(x=>{try{const u=new URL(x.url);return u.protocol==='https:'&&u.hostname==='yqjeqcomrubelahrvizd.supabase.co'&&u.pathname.startsWith('/storage/v1/object/sign/artisan-vitrines/')}catch{return false}}).slice(0,6).map(x=>'<figure><img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.caption||'Réalisation de '+p.display_name)+'"><figcaption>'+esc(x.caption||'Réalisation professionnelle')+'</figcaption></figure>').join('');
+  return '<article class="vitrine-public"><div class="vitrine-label">ARTISAN SUR E3</div><h1>'+esc(p.display_name||'Votre entreprise')+'</h1><p class="vitrine-trade">'+esc(p.metier||'Votre métier')+(p.ville?' · '+esc(p.ville):'')+'</p><span class="vitrine-availability">'+esc(VITRINE_AVAILABILITY[p.disponibilite]||VITRINE_AVAILABILITY.sur_demande)+'</span><p class="vitrine-description">'+esc(p.presentation||'Présentez votre entreprise et votre savoir-faire.')+'</p>'+(services.length?'<section><h2>Mes services</h2><ul>'+services.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul></section>':'')+(p.zone?'<section><h2>Zone d’intervention</h2><p>'+esc(p.zone)+'</p></section>':'')+(p.tarifs?'<section><h2>Tarifs indicatifs</h2><p class="vitrine-description">'+esc(p.tarifs)+'</p><small>Le prix définitif dépend des travaux et du devis de l’artisan.</small></section>':'')+(photosHtml?'<section><h2>Mes réalisations</h2><div class="vitrine-gallery">'+photosHtml+'</div></section>':'')+'<div class="vitrine-contact-actions">'+(/^\+?\d{8,15}$/.test(phone)?'<a class="btn btn-primary" href="tel:'+esc(phone)+'">Appeler</a>':'')+(email?'<a class="btn btn-gold" href="mailto:'+esc(email)+'?subject='+encodeURIComponent('Demande de devis — '+(p.display_name||''))+'">Demander un devis</a>':'')+(website?'<a class="btn btn-ghost" href="'+esc(website)+'" target="_blank" rel="noopener noreferrer">Site de l’entreprise</a>':'')+'</div><p class="vitrine-contact-text">'+esc([p.telephone,p.email].filter(Boolean).join(' · '))+'</p><footer>Informations et réalisations fournies par l’artisan.'+(p.updated_at&&Number.isFinite(Date.parse(p.updated_at))?' Mise à jour le '+esc(new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris'}).format(new Date(p.updated_at)))+'.':'')+'</footer></article>';
+}
+
+// Fiches et emails : aucune écriture dans les interventions ou les devis.
+const E3_VITRINE_PUBLIC_BASE = 'https://simoncadochdelmar-max.github.io/E3/';
+const VITRINE_COLUMNS='artisan_id,display_name,metier,presentation,services,ville,zone,tarifs,disponibilite,telephone,email,website,photos,published,updated_at';
+let vitrineState=null, vitrineReturnFocus=null, vitrineDraftTimer=null, prospectionReturnFocus=null, prospectionCurrent=null;
+function vitrineDraftKey(){return currentArtisan?'e3-vitrine-draft:'+currentArtisan.id:''}
+function vitrineDefault(){const a=currentArtisan||{};return {display_name:a.nom_entreprise||'',metier:(a.specialites||[]).map(s=>categorieMeta(s).label).join(', '),presentation:'',services:'',ville:'',zone:(a.zones_intervention||[]).join(', '),tarifs:'',disponibilite:'sur_demande',telephone:a.telephone||'',email:a.email||'',website:'',photos:[],published:false}}
+function vitrineReadDraft(){try{return JSON.parse(localStorage.getItem(vitrineDraftKey())||'null')}catch{return null}}
+function vitrineStoreDraft(){try{localStorage.setItem(vitrineDraftKey(),JSON.stringify({data:vitrineState.draft,at:Date.now()}));return true}catch{vitrineStatus('Le brouillon ne peut pas être conservé sur cet appareil. Enregistrez-le en ligne.');return false}}
+function vitrineStatus(message){document.getElementById('vitrine-status').textContent=message}
+function vitrineField(label,name,value,options={}){const id='vitrine-'+name;return '<div class="field"><label for="'+id+'">'+esc(label)+'</label>'+(options.multiline?'<textarea id="'+id+'" name="'+name+'" rows="'+(options.rows||3)+'" maxlength="'+(options.max||1600)+'">'+esc(value||'')+'</textarea>':'<input id="'+id+'" name="'+name+'" type="'+(options.type||'text')+'" maxlength="'+(options.max||100)+'" value="'+esc(value||'')+'" '+(options.required?'required minlength="2"':'')+'>')+(options.hint?'<p class="hint">'+esc(options.hint)+'</p>':'')+'</div>'}
+async function vitrineLoad(){
+  if(!currentArtisan)throw Error('Connectez-vous pour créer votre fiche.');
+  if(vitrineState?.id===currentArtisan.id)return vitrineState;
+  vitrineState={id:currentArtisan.id,draft:vitrineDefault(),saved:null,ready:false,busy:false,photoUrls:new Map()};
+  const local=vitrineReadDraft();let server=null;
+  try{const result=await sb.from('artisan_vitrines').select(VITRINE_COLUMNS).eq('artisan_id',currentArtisan.id).maybeSingle();if(result.error)throw result.error;server=result.data;vitrineState.ready=true;vitrineState.saved=server;}
+  catch(err){console.warn('Sauvegarde fiche indisponible',err.code||'');}
+  if(server)vitrineState.draft={...vitrineDefault(),...server};
+  if(local?.data&&(!server||Number(local.at)>Date.parse(server.updated_at)))vitrineState.draft={...vitrineState.draft,...local.data,published:Boolean(server?.published)};
+  vitrineState.draft.photos=Array.isArray(vitrineState.draft.photos)?vitrineState.draft.photos.slice(0,6).filter(p=>vitrineOwnPhotoPath(p.path)):[];
+  return vitrineState;
+}
+function vitrineOwnPhotoPath(path){return currentArtisan&&new RegExp('^'+currentArtisan.id+'/[a-f0-9-]{36}\\.webp$').test(String(path||''))}
+function vitrineReadForm(){const form=document.getElementById('vitrine-form');for(const name of ['display_name','metier','presentation','services','ville','zone','tarifs','telephone','email','website','disponibilite'])vitrineState.draft[name]=form.elements.namedItem(name).value.trim();return vitrineState.draft}
+async function vitrinePhotoUrls(profile){return (await Promise.all((profile.photos||[]).map(async p=>{if(!vitrineOwnPhotoPath(p.path))return null;let url=vitrineState.photoUrls.get(p.path);if(!url){const result=await sb.storage.from('artisan-vitrines').createSignedUrl(p.path,900);if(result.error)return null;url=result.data.signedUrl;vitrineState.photoUrls.set(p.path,url)}return {...p,url}}))).filter(Boolean)}
+function vitrineUpdatePreview(){if(!vitrineState)return;const p=vitrineReadForm();const photos=p.photos.map(x=>({...x,url:vitrineState.photoUrls.get(x.path)||''}));document.getElementById('vitrine-preview').innerHTML=vitrinePublicMarkup(p,photos)}
+async function vitrineRenderPhotos(){await vitrinePhotoUrls(vitrineState.draft);document.getElementById('vitrine-photo-list').innerHTML=vitrineState.draft.photos.map((p,i)=>'<div class="vitrine-photo-row">'+(vitrineState.photoUrls.get(p.path)?'<img src="'+esc(vitrineState.photoUrls.get(p.path))+'" alt="Aperçu de réalisation">':'')+'<label class="sr-only" for="vitrine-caption-'+i+'">Légende de la photo '+(i+1)+'</label><input id="vitrine-caption-'+i+'" data-photo-caption="'+i+'" value="'+esc(p.caption||'')+'" maxlength="160" placeholder="Ex. Rénovation d’une salle de bains"><button type="button" data-photo-remove="'+i+'" aria-label="Retirer cette photo">×</button></div>').join('');vitrineUpdatePreview()}
+function vitrinePublicUrl(id){if(!/^[a-f0-9-]{36}$/i.test(String(id||'')))return '';const base=location.protocol==='https:'?location.href:E3_VITRINE_PUBLIC_BASE;const u=new URL('fiche-artisan.html',base);u.searchParams.set('artisan',id);return u.href}
+function vitrineUpdatePublication(){const saved=vitrineState.saved,published=Boolean(saved?.published);document.getElementById('vitrine-unpublish').hidden=!published;document.getElementById('vitrine-share').hidden=!published;document.getElementById('vitrine-link').hidden=!published;document.getElementById('vitrine-link').href=published?vitrinePublicUrl(saved.artisan_id):'#';document.getElementById('vitrine-link').textContent=published?'Voir ma fiche publique':'';document.getElementById('vitrine-publish').textContent=published?'Mettre à jour ma fiche publique':'Publier ma fiche';}
+async function openVitrineEditor(){
+  vitrineReturnFocus=document.activeElement;
+  const dialog=document.getElementById('vitrine-dialog');dialog.hidden=false;document.getElementById('vitrine-editor-body').innerHTML='<p>Chargement de votre fiche…</p>';document.getElementById('vitrine-close').focus();
+  try{await vitrineLoad();vitrineState.photoUrls.clear();const p=vitrineState.draft;
+  document.getElementById('vitrine-editor-body').innerHTML='<div id="vitrine-unavailable" class="vitrine-note" '+(vitrineState.ready?'hidden':'')+'>La sauvegarde en ligne n’est pas encore disponible. Vous pouvez préparer un brouillon sur cet appareil ; la publication et les photos restent indisponibles.</div><div class="vitrine-editor-grid"><form id="vitrine-form">'+vitrineField('Nom affiché sur E3','display_name',p.display_name,{required:true})+vitrineField('Métier / spécialité','metier',p.metier,{required:true})+vitrineField('Présentation','presentation',p.presentation,{multiline:true,hint:'Votre expérience, votre savoir-faire et ce qui vous distingue. Au moins 20 caractères pour publier.'})+vitrineField('Services proposés','services',p.services,{multiline:true,max:1000,hint:'Un service par ligne.'})+'<div class="field-row">'+vitrineField('Ville','ville',p.ville)+vitrineField('Zone d’intervention','zone',p.zone,{max:250})+'</div><div class="field"><label for="vitrine-disponibilite">Disponibilité</label><select id="vitrine-disponibilite" name="disponibilite">'+Object.entries(VITRINE_AVAILABILITY).map(([k,v])=>'<option value="'+k+'" '+(p.disponibilite===k?'selected':'')+'>'+esc(v)+'</option>').join('')+'</select></div>'+vitrineField('Tarifs indicatifs · facultatif','tarifs',p.tarifs,{multiline:true,rows:2,max:500,hint:'Vous pouvez écrire « Sur devis ». Pour un prix, précisez HT ou TTC et les éventuels frais de déplacement.'})+'<div class="field-row">'+vitrineField('Téléphone à publier','telephone',p.telephone,{type:'tel',max:30})+vitrineField('Email à publier','email',p.email,{type:'email',max:254})+'</div>'+vitrineField('Site de l’entreprise · facultatif','website',p.website,{type:'url',max:400,hint:'Une adresse commençant par https://.'})+'<div class="field"><label for="vitrine-photo-upload">Photos de vos réalisations · jusqu’à 6</label><input id="vitrine-photo-upload" type="file" accept="image/jpeg,image/png,image/webp" multiple '+(vitrineState.ready?'':'disabled')+'><p class="hint">Choisissez vos réalisations destinées à être montrées publiquement.</p><div id="vitrine-photo-list"></div></div><label class="vitrine-publish-consent"><input type="checkbox" id="vitrine-consent" '+(vitrineState.saved?.published?'checked':'')+'> Je souhaite rendre ces informations, ces coordonnées et ces photos accessibles au public sur ma fiche E3.</label><div class="vitrine-save-actions"><button class="btn btn-ghost" id="vitrine-save" type="button">Enregistrer le brouillon</button><button class="btn btn-gold" id="vitrine-publish" type="button" '+(vitrineState.ready?'':'disabled')+'>Publier ma fiche</button><button class="btn btn-ghost" id="vitrine-unpublish" type="button" hidden>Retirer du public</button><button class="btn btn-ghost" id="vitrine-share" type="button" hidden>Copier le lien</button></div><a id="vitrine-link" class="vitrine-link" target="_blank" rel="noopener noreferrer" hidden></a><p class="prospection-status" id="vitrine-status" role="status"></p></form><div><p class="vitrine-preview-title">APERÇU DE VOTRE FICHE</p><div id="vitrine-preview"></div></div></div>';
+  document.getElementById('vitrine-form').addEventListener('submit',e=>e.preventDefault());
+  document.getElementById('vitrine-form').addEventListener('input',e=>{if(e.target.dataset.photoCaption!==undefined){const photo=vitrineState.draft.photos[Number(e.target.dataset.photoCaption)];if(photo)photo.caption=e.target.value.trim()}vitrineUpdatePreview();clearTimeout(vitrineDraftTimer);vitrineDraftTimer=setTimeout(()=>{vitrineStoreDraft()},400)});
+  document.getElementById('vitrine-save').addEventListener('click',()=>saveVitrine(false));document.getElementById('vitrine-publish').addEventListener('click',()=>saveVitrine(true));document.getElementById('vitrine-unpublish').addEventListener('click',unpublishVitrine);
+  document.getElementById('vitrine-share').addEventListener('click',()=>copyE3Text(vitrinePublicUrl(currentArtisan.id),'Lien de votre fiche copié.'));
+  document.getElementById('vitrine-photo-upload').addEventListener('change',uploadVitrinePhotos);
+  document.getElementById('vitrine-photo-list').addEventListener('click',async e=>{const b=e.target.closest('[data-photo-remove]');if(!b||vitrineState.busy)return;vitrineState.draft.photos.splice(Number(b.dataset.photoRemove),1);vitrineStoreDraft();await vitrineRenderPhotos();vitrineStatus('Photo retirée du brouillon. Enregistrez pour appliquer ce retrait en ligne.');});
+  vitrineUpdatePublication();await vitrineRenderPhotos();vitrineStatus(vitrineState.saved?.published?'Votre fiche est publiée. Les changements restent en brouillon jusqu’à leur publication.':vitrineState.ready?'Votre fiche est privée tant que vous ne la publiez pas.':'Brouillon conservé uniquement sur cet appareil.');
+  }catch(err){document.getElementById('vitrine-editor-body').textContent=err.message||'Impossible de charger la fiche.'}
+}
+function vitrineSetBusy(busy){vitrineState.busy=busy;for(const id of ['vitrine-save','vitrine-publish','vitrine-unpublish','vitrine-photo-upload']){const el=document.getElementById(id);if(el)el.disabled=busy||(!vitrineState.ready&&id!=='vitrine-save')}}
+function vitrineValidate(p,publish){if(!p.display_name||p.display_name.length<2||!p.metier||p.metier.length<2)return 'Renseignez le nom affiché et votre métier.';if(p.website&&!vitrineSafeWebsite(p.website))return 'Le site doit commencer par https://.';if(p.email&&!vitrineSafeEmail(p.email))return 'Vérifiez votre email.';if(p.telephone&&!/^\+?\d{8,15}$/.test(p.telephone.replace(/[^+0-9]/g,'')))return 'Vérifiez votre téléphone.';if(publish){if(p.presentation.length<20)return 'Ajoutez une présentation de 20 caractères au minimum.';if(!p.telephone&&!p.email)return 'Ajoutez au moins une coordonnée publique.';if(!document.getElementById('vitrine-consent').checked)return 'Cochez votre accord pour rendre la fiche publique.';if(currentArtisan.statut_verification!=='valide')return 'La publication sera disponible après validation de votre compte E3.'}return ''}
+async function saveVitrine(publish){
+  if(vitrineState.busy)return;const p=vitrineReadForm();const message=vitrineValidate(p,publish);if(message){vitrineStatus(message);return}clearTimeout(vitrineDraftTimer);const draftStored=vitrineStoreDraft();if(!vitrineState.ready){vitrineStatus(draftStored?'Brouillon enregistré sur cet appareil. La sauvegarde en ligne n’est pas encore activée.':'Brouillon non sauvegardé : le stockage de cet appareil est indisponible. Gardez cette page ouverte.');return}
+  vitrineSetBusy(true);vitrineStatus(publish?'Publication en cours…':'Enregistrement du brouillon…');
+  try{const payload={artisan_id:currentArtisan.id,...Object.fromEntries(['display_name','metier','presentation','services','ville','zone','tarifs','disponibilite','telephone','email','website'].map(k=>[k,p[k]])),photos:p.photos.map(x=>({path:x.path,caption:String(x.caption||'').slice(0,160)})),published:publish};
+    // A saved draft must not replace a live page: keep it locally until explicit publication.
+    if(!publish&&vitrineState.saved?.published){vitrineStatus(draftStored?'Brouillon conservé sur cet appareil. Votre fiche publique garde sa dernière version publiée.':'Brouillon non sauvegardé sur cet appareil. Votre fiche publique garde sa dernière version publiée. Gardez cette page ouverte.');return}
+    const result=await sb.from('artisan_vitrines').upsert(payload,{onConflict:'artisan_id'}).select(VITRINE_COLUMNS).single();if(result.error)throw result.error;
+    vitrineState.saved=result.data;vitrineState.draft={...p,published:publish,updated_at:result.data.updated_at};try{localStorage.removeItem(vitrineDraftKey())}catch{}vitrineUpdatePublication();vitrineUpdatePreview();vitrineStatus(publish?'Votre fiche est publiée. Vous pouvez copier son lien ou préparer une présentation pour un contact.':'Brouillon enregistré en ligne. Il n’est pas accessible au public.');
+  }catch(err){console.warn('Enregistrement fiche',err.code||'');vitrineStatus(draftStored?'Enregistrement en ligne impossible. Votre brouillon est conservé sur cet appareil. Réessayez après avoir vérifié votre connexion.':'Enregistrement en ligne impossible et stockage local indisponible. Gardez cette page ouverte pour conserver vos changements.');}
+  finally{vitrineSetBusy(false)}
+}
+async function unpublishVitrine(){if(vitrineState.busy)return;vitrineSetBusy(true);try{const result=await sb.from('artisan_vitrines').update({published:false}).eq('artisan_id',currentArtisan.id).select(VITRINE_COLUMNS).single();if(result.error)throw result.error;vitrineState.saved=result.data;vitrineState.draft.published=false;document.getElementById('vitrine-consent').checked=false;vitrineUpdatePublication();vitrineStatus('La fiche n’est plus consultable publiquement. Les liens photo déjà ouverts peuvent rester valables jusqu’à 15 minutes.');}catch{vitrineStatus('Retrait non confirmé. Réessayez ; la fiche peut encore être publique.')}finally{vitrineSetBusy(false)}}
+async function vitrineImageBlob(file){if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Choisissez une photo JPG, PNG ou WebP.');if(file.size>20*1024*1024)throw Error('Cette photo dépasse 20 Mo. Choisissez une image plus légère.');let picture;
+  if(typeof createImageBitmap==='function')picture=await createImageBitmap(file);else{const url=URL.createObjectURL(file);try{picture=new Image();picture.src=url;await picture.decode()}finally{URL.revokeObjectURL(url)}}
+  try{const factor=Math.min(1,1600/Math.max(picture.width,picture.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(picture.width*factor));canvas.height=Math.max(1,Math.round(picture.height*factor));canvas.getContext('2d').drawImage(picture,0,0,canvas.width,canvas.height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.86));if(!blob||blob.type!=='image/webp'||blob.size>5*1024*1024)throw Error('Impossible de préparer cette photo. Essayez une autre image.');return blob}finally{picture.close?.()}}
+async function uploadVitrinePhotos(event){if(!vitrineState.ready||vitrineState.busy)return;const files=[...event.target.files];if(files.length+vitrineState.draft.photos.length>6){vitrineStatus('Vous pouvez ajouter 6 photos au maximum.');event.target.value='';return}vitrineSetBusy(true);let uploaded=0;try{for(const file of files){vitrineStatus('Préparation de la photo '+(uploaded+1)+'…');const blob=await vitrineImageBlob(file),path=currentArtisan.id+'/'+crypto.randomUUID()+'.webp';const result=await sb.storage.from('artisan-vitrines').upload(path,blob,{contentType:'image/webp',upsert:false});if(result.error)throw result.error;vitrineState.draft.photos.push({path,caption:''});uploaded++;vitrineStoreDraft()}await vitrineRenderPhotos();vitrineStatus(uploaded+' photo(s) ajoutée(s) au brouillon. Enregistrez ou publiez pour appliquer les changements.')}catch(err){await vitrineRenderPhotos();vitrineStatus((uploaded?uploaded+' photo(s) conservée(s). ':'')+(err.message||'Photo non ajoutée. Réessayez.'))}finally{event.target.value='';vitrineSetBusy(false)}}
+function closeVitrineEditor(){if(vitrineState?.busy){vitrineStatus('Attendez la fin de l’opération avant de fermer.');return}if(document.getElementById('vitrine-form')){vitrineReadForm();clearTimeout(vitrineDraftTimer);vitrineStoreDraft()}document.getElementById('vitrine-dialog').hidden=true;vitrineReturnFocus?.focus()}
+async function copyE3Text(text,message='Texte copié.'){try{await navigator.clipboard.writeText(text);toast(message,'success');return true}catch{const input=document.createElement('textarea');input.value=text;input.style.position='fixed';input.style.opacity='0';document.body.appendChild(input);input.select();let copied=false;try{copied=document.execCommand('copy')}catch{}input.remove();toast(copied?message:'Copiez le texte sélectionné dans la fenêtre.','info');return copied}}
+function prospectionLedger(){try{return JSON.parse(localStorage.getItem('e3-prospection:'+currentArtisan.id)||'{}')}catch{return {}}}
+function prospectionSetState(email,state){const history=prospectionLedger();history[email.toLowerCase()]={state,at:new Date().toISOString()};try{localStorage.setItem('e3-prospection:'+currentArtisan.id,JSON.stringify(history));return true}catch{return false}}
+function buildProspectionMessage(p,contact,url){const services=String(p.services||'').split(/\n/).map(s=>s.trim()).filter(Boolean).slice(0,5);const subject=(p.display_name+' — '+p.metier+(p.ville?' à '+p.ville:'')).replace(/[\r\n]/g,' ').slice(0,160);const body=['Bonjour à l’équipe de '+contact.name+',','', 'Je vous présente '+p.display_name+', '+p.metier+(p.ville?' à '+p.ville:'')+'.',p.presentation,'',services.length?'Mes services :\n'+services.map(s=>'• '+s).join('\n'):'',p.zone?'Zone d’intervention : '+p.zone:'','Disponibilité : '+(VITRINE_AVAILABILITY[p.disponibilite]||VITRINE_AVAILABILITY.sur_demande),p.tarifs?'Tarifs indicatifs : '+p.tarifs+' (prix définitif sur devis).':'','',p.display_name+' est sur E3. Retrouvez ma présentation et mes réalisations :',url,'','Vous pouvez me joindre '+[p.telephone,p.email].filter(Boolean).join(' ou ')+'.','', 'Cordialement,',p.display_name,'','Présentation préparée sur E3 à l’initiative de '+p.display_name+'.','Si vous ne souhaitez plus recevoir mes présentations, répondez STOP à ce message.'].filter(x=>x!==undefined).join('\n').replace(/\n{3,}/g,'\n\n');return {subject,body}}
+async function openProspection(index){
+  const contact=VERIFIED_PROSPECT_CONTACTS[index];if(!contact||!vitrineSafeEmail(contact.email)){toast('Cette fiche n’a pas d’email utilisable.','info');return}prospectionReturnFocus=document.activeElement;prospectionCurrent={contact,index,ready:false};document.getElementById('prospection-dialog').hidden=false;document.getElementById('prospection-close').focus();document.getElementById('prospection-content').innerHTML='<p>Préparation de votre présentation…</p>';
+  try{await vitrineLoad();if(!vitrineState.saved?.published){document.getElementById('prospection-content').innerHTML='<div class="prospection-pending"><h3>Créez d’abord votre fiche publique</h3><p>Votre email présentera votre métier, vos services et le lien vers vos réalisations.</p><button id="prospection-create-profile" class="btn btn-gold" type="button">Préparer ma fiche artisan</button></div>';document.getElementById('prospection-create-profile').addEventListener('click',()=>{closeProspection();openVitrineEditor()});return}
+    const result=await sb.rpc('lire_fiche_artisan',{p_id:currentArtisan.id});if(result.error||!result.data)throw Error('Votre fiche publique n’est pas disponible. Vérifiez sa publication avant de préparer un email.');const p=result.data,url=vitrinePublicUrl(currentArtisan.id),message=buildProspectionMessage(p,contact,url),entry=prospectionLedger()[contact.email.toLowerCase()];prospectionCurrent={contact,index,profile:p,url,ready:true};
+    document.getElementById('prospection-content').innerHTML='<p><strong>Destinataire :</strong> '+esc(contact.name)+'<br>'+esc(contact.email)+'</p><p class="prospection-status">Vérifiez l’adresse et adaptez le message au destinataire. Aucun email n’est envoyé automatiquement.</p><label for="prospection-subject">Objet</label><input id="prospection-subject" class="prospection-subject" maxlength="160" value="'+esc(message.subject)+'"><label for="prospection-body">Votre message</label><textarea id="prospection-body" class="prospection-textarea" maxlength="7000">'+esc(message.body)+'</textarea><p class="prospection-status" id="prospection-status" role="status">'+esc(entry?.state==='blocked'?'Ce contact est marqué « Ne plus contacter » sur cet appareil.':entry?.state==='sent'?'Vous avez marqué ce contact comme contacté le '+new Intl.DateTimeFormat('fr-FR').format(new Date(entry.at))+'.':'Message prêt à vérifier.')+'</p><div class="prospection-actions"><button class="btn btn-gold" id="prospection-mail" type="button" '+(entry?.state==='blocked'?'disabled':'')+'>Ouvrir ma messagerie</button><button class="btn btn-ghost" id="prospection-copy" type="button">Copier le message</button><button class="btn btn-ghost" id="prospection-mark-sent" type="button" '+(entry?.state==='blocked'?'disabled':'')+'>J’ai envoyé le message</button><button class="btn btn-danger-outline" id="prospection-block" type="button">Ne plus contacter</button></div><p class="prospection-status">L’envoi se fait dans votre messagerie. Après une réponse STOP, marquez ce contact « Ne plus contacter ». Ce suivi est conservé sur cet appareil.</p>';
+    document.getElementById('prospection-copy').addEventListener('click',()=>copyE3Text('Objet : '+document.getElementById('prospection-subject').value+'\n\n'+document.getElementById('prospection-body').value));
+    document.getElementById('prospection-mail').addEventListener('click',openProspectionMailbox);document.getElementById('prospection-mark-sent').addEventListener('click',()=>{if(prospectionLedger()[contact.email.toLowerCase()]?.state==='blocked')return;const saved=prospectionSetState(contact.email,'sent');document.getElementById('prospection-status').textContent=saved?'Vous avez marqué ce message comme envoyé. E3 ne vérifie pas son envoi.':'Le suivi ne peut pas être conservé sur cet appareil.'});
+    document.getElementById('prospection-block').addEventListener('click',()=>{const saved=prospectionSetState(contact.email,'blocked');document.getElementById('prospection-mail').disabled=true;document.getElementById('prospection-mark-sent').disabled=true;document.getElementById('prospection-status').textContent=saved?'Ce contact est marqué « Ne plus contacter » sur cet appareil.':'Envoi désactivé pour cette fenêtre. Le blocage ne peut pas être conservé sur cet appareil.';});
+  }catch(err){document.getElementById('prospection-content').textContent=err.message||'Impossible de préparer la présentation.'}
+}
+async function openProspectionMailbox(){if(!prospectionCurrent?.ready)return;const c=prospectionCurrent.contact;if(prospectionLedger()[c.email.toLowerCase()]?.state==='blocked')return;const button=document.getElementById('prospection-mail');button.disabled=true;try{const r=await sb.rpc('lire_fiche_artisan',{p_id:currentArtisan.id});if(r.error||!r.data)throw Error('Votre fiche n’est plus publique. Publiez-la avant d’envoyer cette présentation.');const subject=document.getElementById('prospection-subject').value.replace(/[\r\n]/g,' ').trim(),body=document.getElementById('prospection-body').value.trim();if(!subject||!body)throw Error('Renseignez l’objet et le message.');const link='mailto:'+encodeURIComponent(c.email)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);if(link.length>12000)throw Error('Le message est trop long pour certaines messageries. Copiez-le et utilisez votre messagerie.');window.location.href=link;document.getElementById('prospection-status').textContent='Ouverture de votre messagerie demandée. Vérifiez puis envoyez le message dans celle-ci ; rien n’a été envoyé par E3.';}catch(err){document.getElementById('prospection-status').textContent=err.message||'Impossible d’ouvrir la messagerie.'}finally{button.disabled=false}}
+function closeProspection(){document.getElementById('prospection-dialog').hidden=true;prospectionCurrent=null;prospectionReturnFocus?.focus()}
+function vitrineTrapFocus(dialog,close,event){if(event.key==='Escape'){event.preventDefault();close();return}if(event.key!=='Tab')return;const items=[...dialog.querySelectorAll('button,input,textarea,select,a[href]')].filter(e=>!e.disabled&&e.getClientRects().length),first=items[0],last=items[items.length-1];if(!first)return;if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}
+document.getElementById('vitrine-close').addEventListener('click',closeVitrineEditor);document.getElementById('prospection-close').addEventListener('click',closeProspection);
+document.getElementById('vitrine-dialog').addEventListener('keydown',e=>vitrineTrapFocus(e.currentTarget,closeVitrineEditor,e));document.getElementById('prospection-dialog').addEventListener('keydown',e=>vitrineTrapFocus(e.currentTarget,closeProspection,e));
+document.addEventListener('click',e=>{const b=e.target.closest('[data-prospect-vitrine]');if(!b)return;const i=Number(b.dataset.prospectVitrine);if(Number.isInteger(i)&&i>=0&&i<VERIFIED_PROSPECT_CONTACTS.length)openProspection(i)});
 
 </script>
 </body>
