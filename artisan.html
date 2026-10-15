@@ -442,6 +442,8 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 
 .trip-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.trip-controls label{font-size:12px}.trip-controls select{padding:8px;border:1px solid #dce3ed;border-radius:8px;background:white}#trip-badge{font-size:12px;font-weight:700;color:#526b86}.trip-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin:16px 0}.trip-contact{background:white;border:1px solid #e3e8ef;border-radius:12px;padding:16px}.trip-contact label{display:flex;gap:10px;align-items:flex-start}.trip-contact label input{width:18px;height:18px;flex-shrink:0;margin-top:3px;accent-color:#14243b}.trip-contact strong{font-size:14px}.trip-contact small{display:block;font-size:11px;color:#65748b;margin-top:4px}.trip-contact p{font-size:12px;line-height:1.6;margin:8px 0;overflow-wrap:anywhere}.trip-contact .trip-approx{color:#8a662c}.trip-sent{color:#2f6b4f;font-weight:700}.trip-empty{background:white;padding:24px;border-radius:12px;color:#65748b;grid-column:1/-1}.trip-empty p{font-size:13px;margin-top:8px}.trip-footer{margin:16px 0}.trip-mail-preview{background:#fff;border:1px solid #e3e8ef;border-radius:10px;padding:14px;margin:10px 0}.trip-mail-preview summary{cursor:pointer;font-size:13px;font-weight:700}.trip-mail-preview pre{white-space:pre-wrap;font:13px/1.7 var(--font-body);overflow-wrap:anywhere}#trip-alert{padding:9px 16px;background:#edf4fa;border-bottom:1px solid #dbe7f1;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}#trip-alert[hidden]{display:none}#trip-alert button{padding:7px 10px;border:1px solid #bed1e4;border-radius:8px;color:#234263;background:#fff;font-size:11px;font-weight:700}@media(max-width:760px){.artisan-actions button{flex:0 0 auto}#trip-alert{padding:8px;font-size:11px}#trip-alert button{flex-shrink:0}.trip-controls{gap:8px}.trip-footer button{width:100%}}
 
+
+.chantier-card{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:start}.request-badges{grid-column:2;display:flex;flex-wrap:wrap;align-items:flex-start;gap:5px;white-space:normal}.request-badges>span{white-space:normal}.request-replied{font-size:11px;color:#216044;line-height:1.4}.chantier-card__title{white-space:normal;line-height:1.4}
 </style>
 </head>
 <body>
@@ -531,7 +533,7 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
       <p class="verify-banner" id="verify-banner" hidden></p>
 
       <div class="artisan-actions" aria-label="Explorer les opportunités">
-        <button id="map-panel-toggle" type="button" aria-expanded="false" aria-controls="map-sidebar"><span aria-hidden="true">☰</span> Filtres et demandes</button>
+        <button id="map-panel-toggle" type="button" aria-expanded="false" aria-controls="map-sidebar"><span aria-hidden="true">☰</span> Demandes de travaux</button>
         <button id="trip-open" type="button"><span aria-hidden="true">◎</span> Prospection</button>
         <button id="prospect-directory-open" type="button"><span class="action-dot contact-dot" aria-hidden="true"></span> Contacts professionnels</button>
         <button id="tender-open" type="button"><span class="action-dot tender-dot" aria-hidden="true"></span> Appels d’offres</button>
@@ -539,8 +541,8 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
       <div id="trip-alert" hidden><span id="trip-alert-text"></span><button id="trip-alert-open" type="button">Choisir les destinataires</button></div>
       <div class="map-workspace" id="map-workspace">
         <aside id="map-sidebar" class="map-sidebar" aria-label="Filtres et demandes" hidden>
-          <div class="sidebar-heading"><div><small>VOTRE SECTEUR</small><h2>Filtres et demandes</h2></div><button id="map-panel-close" type="button" aria-label="Fermer les filtres">×</button></div>
-          <details id="prospect-controls" open>
+          <div class="sidebar-heading"><div><small>VOTRE SECTEUR</small><h2>Demandes de travaux</h2></div><button id="map-panel-close" type="button" aria-label="Fermer les filtres">×</button></div>
+          <details id="prospect-controls">
         <summary>Afficher sur la carte</summary>
         <label for="contact-city">Choisir une ville</label><select id="contact-city"><option value="">Choisir une ville</option></select><button id="contact-france" type="button">Toute la France</button><p id="verified-count" role="status"></p><label><input id="syndic-visible" type="checkbox" checked> Syndics et gestionnaires</label>
         <label><input id="agency-visible" type="checkbox" checked> Agences, hôtels et autres contacts</label>
@@ -552,7 +554,7 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
                 <section class="bottom-sheet" id="bottom-sheet" aria-label="Liste des chantiers disponibles">
         <button type="button" class="bottom-sheet__handle" id="bottom-sheet-toggle" aria-label="Réduire la liste des chantiers" aria-expanded="true" aria-controls="chantier-list" title="Réduire ou afficher la liste"></button>
         <div class="bottom-sheet__header">
-          <h2>Chantiers disponibles</h2>
+          <h2>Demandes ouvertes</h2>
           <span class="bottom-sheet__collapse-label" id="sheet-toggle-hint">Réduire</span>
           <span class="badge-count" id="chantiers-count">0</span>
         </div>
@@ -720,7 +722,7 @@ const CATEGORIES = [
   { value:'autre', label:'Autre', icone:'✨' },
 ];
 const URGENCES = {
-  faible:{ label:'Faible' }, modere:{ label:'Modéré' }, urgent:{ label:'Urgent' }
+  faible:{ label:'À planifier' }, modere:{ label:'Dans les prochains jours' }, urgent:{ label:'Urgent' }
 };
 const STATUTS = {
   nouveau:'Disponible', assigne:'Assignée', en_cours:'En cours', termine:'Terminée', annule:'Annulée'
@@ -1159,24 +1161,27 @@ function renderChantierList() {
   document.getElementById('chantiers-count').textContent = filtered.length;
 
   if (filtered.length === 0) {
-    list.innerHTML = `<p class="empty-state">Aucun chantier disponible pour ce filtre actuellement.</p>`;
+    list.innerHTML = `<p class="empty-state">Aucune demande de travaux ne correspond à ces filtres. Les fiches de professionnels sur la carte sont des contacts à prospecter.</p>`;
     return;
   }
 
   list.innerHTML = filtered.map(i => {
     const cat = categorieMeta(i.categorie);
     const dist = i._distance != null ? ` · ${i._distance.toFixed(1)} km` : '';
-    const nbExtra = (i.prestations?.length || 1) - 1;
-    const titre = cat.label + (nbExtra > 0 ? ` +${nbExtra}` : '');
+    const titre = (i.prestations?.length ? i.prestations : [i.categorie]).map(value => categorieMeta(value).label).join(' · ');
     return `
     <button class="chantier-card" data-id="${i.id}">
       <span class="chantier-card__icon">${cat.icone}</span>
       <span class="chantier-card__info">
         ${i.nom_site ? `<span class="chantier-card__site">${esc(i.nom_site)}</span>` : ''}
-        <span class="chantier-card__title">${titre}</span>
+        <span class="chantier-card__title">${esc(titre)}</span>
         <span class="chantier-card__meta">${esc(i.adresse ?? '')}${i.ville ? ', ' + esc(i.ville) : ''}${dist}</span>
       </span>
-      ${i.mode_demande === 'devis' ? '<span class="contrat-tag">📄 Devis multiples</span>' : i.type_demande === 'recurrent' ? '<span class="contrat-tag">🔁 Contrat</span>' : `<span class="urgence-tag urgence-tag--${i.urgence}">${URGENCES[i.urgence]?.label ?? i.urgence}</span>`}
+      <span class="request-badges">
+        <span class="contrat-tag">${i.mode_demande === 'devis' ? 'Devis demandé' : 'Artisan recherché'}</span>
+        ${i.type_demande === 'recurrent' ? '<span class="contrat-tag">Entretien régulier</span>' : '<span class="urgence-tag urgence-tag--'+esc(i.urgence)+'">'+esc(URGENCES[i.urgence]?.label || 'À planifier')+'</span>'}
+        ${(i.mode_demande === 'devis' ? i._hasQuote : i._interested) ? '<span class="request-replied">Réponse envoyée · en attente du client</span>' : ''}
+      </span>
     </button>`;
   }).join('');
 
@@ -1201,16 +1206,16 @@ async function ouvrirModaleChantier(intervention) {
   const photos = await Promise.all((intervention.photos || []).map(photoUrl));
 
   const prestaLabels = (intervention.prestations?.length ? intervention.prestations : [intervention.categorie]).map(v => categorieMeta(v).label);
-  const profilLabel = PROFIL_STRUCTURE_LABELS[intervention.profil_structure];
+  const profilLabel = intervention.type_bien_gestion === 'copro' ? 'Copropriété' : intervention.type_bien_gestion === 'bien_gere' ? 'Agence / gestionnaire locatif' : PROFIL_STRUCTURE_LABELS[intervention.profil_structure];
 
   modalBody.innerHTML = `
     <h2 class="modal__title" id="modal-title">${cat.icone} ${esc(intervention.nom_site) || cat.label}</h2>
     <div class="modal__meta">
       ${intervention.type_demande === 'recurrent'
-        ? `<span class="contrat-tag">🔁 Contrat ${intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || '' : ''}</span>`
+        ? `<span class="contrat-tag">🔁 ${String(intervention.description || '').includes(' — Fréquence : ') ? 'Entretien · fréquences par prestation' : 'Entretien ' + (intervention.frequence ? FREQUENCE_LABELS[intervention.frequence] || '' : '')}</span>`
         : `<span class="urgence-tag urgence-tag--${intervention.urgence}">${URGENCES[intervention.urgence]?.label}</span>`}
       ${intervention.mode_demande === 'devis' ? '<span class="contrat-tag">📄 Plusieurs devis attendus</span>' : ''}
-      ${profilLabel ? `<span>${profilLabel}${intervention.type_bien_gestion ? ` · ${intervention.type_bien_gestion === 'copro' ? 'Copropriété / résidence' : 'Bien en gestion'}` : ''}</span>` : ''}
+      ${profilLabel ? `<span>${profilLabel}</span>` : ''}
       <span>Réf. ${esc(intervention.reference ?? '—')}</span>
     </div>
     <div class="modal__section">
@@ -1227,18 +1232,19 @@ async function ouvrirModaleChantier(intervention) {
       <span class="btn-action">Coordonnées après sélection</span>
     </div>
     <div class="modal__section">
-      <h4>Description</h4>
+      <h4>Besoin et précisions du demandeur</h4>
       <p>${escNl(intervention.description)}</p>
     </div>
     ${photos.length ? `<div class="modal__section"><h4>Photos</h4><div class="modal__photos">${photos.map(u => `<img src="${u}" alt="Photo du chantier" />`).join('')}</div></div>` : ''}
     <div class="modal__section">
       <h4>Réponse attendue</h4>
-      <p>${intervention.mode_demande === 'devis' ? 'Envoyez votre prix et les détails de votre proposition. Le demandeur comparera les devis.' : 'Manifestez votre intérêt : le client verra vos coordonnées et pourra vous choisir. Ce clic ne bloque pas le chantier.'}</p>
+      <p>${intervention.mode_demande === 'devis' ? 'Envoyez votre prix et les détails de votre proposition. Le client pourra comparer les propositions avant de choisir.' : 'Présentez votre intérêt au client. Il pourra vous choisir dans son suivi ; répondre ne vous attribue pas la demande.'}</p>
       <p class="hint">Le prix et les modalités sont convenus entre le client et l’artisan.</p>
     </div>
     <button class="btn btn-gold btn-block" id="accept-btn" ${currentArtisan.statut_verification !== 'valide' ? 'disabled' : ''}>
       ${currentArtisan.statut_verification !== 'valide' ? 'Compte non validé' : intervention.mode_demande === 'devis' ? intervention._hasQuote ? 'Devis déjà envoyé' : 'Répondre avec un devis' : intervention._interested ? 'Intérêt déjà envoyé' : 'Je suis intéressé'}
     </button>
+    ${((intervention.mode_demande === 'devis' && intervention._hasQuote) || (intervention.mode_demande !== 'devis' && intervention._interested)) ? '<p class="hint">Votre réponse est envoyée. Retrouvez les réponses en attente dans Notifications ; une demande apparaît dans Missions lorsque le client vous choisit.</p>' : ''}
   `;
   const acceptButton = document.getElementById('accept-btn');
   if (intervention._interested || intervention._hasQuote) acceptButton.disabled = true;
