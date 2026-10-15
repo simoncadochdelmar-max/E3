@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root{
   --cream:#faf7f2;
@@ -42,7 +42,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{scroll-padding-top:1rem;}
 body{
-  font-family:'DM Sans',sans-serif;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   background:var(--cream);
   color:var(--text);
   min-height:100dvh;
@@ -307,6 +307,73 @@ details.service-group[open] > summary{margin-bottom:9px;}
 @media (min-width:520px){
   body{max-width:520px;margin:0 auto;box-shadow:0 0 60px rgba(14,33,64,.08);}
 }
+
+/* Parcours mobile simple, cohérent avec l'espace artisan */
+:root{
+  --cream:#f6f6f6;--cream-dark:#eeeeee;--navy:#111111;--navy-mid:#292929;--navy-soft:#3b3b3b;
+  --gold:#06a85a;--gold-light:#13bd6b;--gold-pale:#e8f7ef;--text:#171717;--text-mid:#555555;
+  --muted:#707070;--border:#e5e5e5;--border-mid:#cfcfcf;--success:#087443;--success-bg:#e8f7ef;
+  --shadow:0 4px 16px rgba(0,0,0,.06);
+}
+body{max-width:520px;margin:0 auto;background:#fff;box-shadow:0 0 36px rgba(0,0,0,.06)}
+.header{background:#fff;padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 12px;overflow:visible}
+.header::after{display:none}
+.brand{margin-bottom:18px}
+.brand-mark{background:#111;border-radius:10px;color:#fff}
+.brand-name{color:#171717}
+.header-title,.header-title em{font-family:inherit;color:#111;font-style:normal;font-weight:750}
+.header-title{font-size:28px;line-height:1.12}
+.profile-chip{background:#e8f7ef;border:0;color:#087443;border-radius:8px;padding:7px 10px;margin-top:12px}
+.chip-dot{background:#06a85a;animation:none}
+.progress-wrap{padding:12px 20px 0}
+.sn-label{font-size:10px;text-transform:none;letter-spacing:0}
+.sn-circle{background:#fff}
+.step-node.active .sn-circle,.step-node.done .sn-circle{background:#111;border-color:#111}
+.step-node.done::after{background:#111}
+.section-title,.confirm-wrap h2{font-family:inherit;font-weight:700;color:#111}
+.section-title{font-size:22px}
+.section-sub{color:#666;font-size:14px}
+#profile-grid{grid-template-columns:1fr;gap:8px}
+#profile-grid .picker-card{min-height:68px;padding:12px 14px;display:grid;grid-template-columns:36px 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px}
+#profile-grid .picker-icon{grid-row:1/3;font-size:23px}
+#profile-grid .picker-label{font-size:14px}
+#profile-grid .picker-desc{font-size:12px}
+.picker-card.sel,.subtoggle button.sel{background:#111;border-color:#111;color:#fff}
+.picker-card.sel .picker-desc{color:#d5d5d5}
+.subtoggle button{min-height:46px}
+.demand-type{grid-template-columns:1fr;gap:8px}
+.demand-card{display:flex;align-items:center;gap:12px;min-height:62px;padding:12px;border-radius:12px}
+.demand-icon{font-size:22px;margin:0}
+.demand-title{font-size:14px;color:#171717}
+.demand-sub{font-size:12px}
+.demand-card.sel{border-color:#111;background:#f3f3f3;box-shadow:inset 3px 0 #06a85a}
+.cat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cat-card{min-height:62px;padding:10px;border-radius:12px}
+.cat-icon{font-size:20px;margin-bottom:4px}
+.cat-label{font-size:12px}
+.service-group-title{color:#333;font-size:12px}
+.field label{font-size:12px;text-transform:none;letter-spacing:0;color:#444}
+.field input,.field textarea{min-height:48px;border:1px solid #d8d8d8;border-radius:10px}
+.field input:focus,.field textarea:focus{border-color:#111;box-shadow:0 0 0 2px #11111114}
+.nav-wrap{position:sticky;bottom:0;z-index:40;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid #eee;box-shadow:0 -6px 18px #0000000a}
+.btn{min-height:50px;border-radius:10px}
+.btn-primary{background:#111;box-shadow:none}
+.btn-primary:disabled{background:#999}
+.btn-back{flex-basis:52px;color:#111}
+.summary-block-title{color:#333}
+.confirm-badge{background:#06a85a;box-shadow:none}
+.confirm-note{background:#e8f7ef;color:#24553d}
+.map-frame{border-radius:12px;box-shadow:none;border-color:#e5e5e5}
+.map-center-btn,.map-label-chip{border-radius:10px}
+.leaflet-control-zoom{box-shadow:0 2px 8px #00000015!important}
+.optional-details{border-radius:10px}
+.optional-details>summary{color:#222}
+.optional-details>summary::before{color:#06a85a}
+.geo-btn{color:#087443}
+@media(max-width:360px){.section{padding-left:16px;padding-right:16px}.nav-wrap{padding-left:16px;padding-right:16px}}
+
+[hidden]{display:none!important}.choice-grid{display:grid;gap:12px}.choice-card{display:flex;align-items:center;gap:16px;text-align:left;width:100%;min-height:80px;padding:18px;background:white;border:1px solid #dce1e5;border-radius:14px;color:#17202d;font-size:16px}.choice-card>span{font-size:28px}.choice-card.sel{border-color:#168457;background:#f0faf5}.role-chips,.selected-services{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 16px}.role-chips button,.selected-service{border:1px solid #d8e1df;border-radius:999px;background:#fff;color:#263a33;padding:9px 12px;font-size:12px;min-height:40px}.role-chips button.sel,.selected-service{background:#e8f7ef;border-color:#6fa88c;color:#165638}.wizard-position{font-size:12px;color:#697381;margin-bottom:12px}.detail-service{border:1px solid #dfe6e1;border-radius:14px;background:#fff;padding:16px;margin:16px 0}.detail-service h3{font-size:16px;margin:0 0 8px}.detail-service>.hint-small{margin-bottom:12px}.detail-service .field select{width:100%;min-height:46px;padding:10px;border:1px solid #d8d8d8;border-radius:10px;background:white;font-size:14px}.text-action{background:none;border:0;color:#126e49;text-decoration:underline;font-size:14px;padding:10px 0}.skip-details{width:100%;margin:16px 0}.summary-service{padding:10px 0;border-bottom:1px solid #edf0ee}.summary p{font-size:13px;line-height:1.65;overflow-wrap:anywhere;margin:5px 0}.response-explanation{padding:15px;border-radius:12px;background:#edf8f1;font-size:14px;line-height:1.6;margin:20px 0}.nav-wrap .btn-primary{white-space:normal;line-height:1.4}.sn-label{font-size:9px}.section.active{overflow:visible}.scope-checks input{width:18px;height:18px;min-height:0}.field input[type=search]{width:100%}#selected-services:empty{display:none}@media(max-width:360px){.sn-label{font-size:8px}.choice-card{font-size:14px;padding:14px}.role-chips button{font-size:11px}}
+
 </style>
 </head>
 <body>
@@ -320,50 +387,107 @@ details.service-group[open] > summary{margin-bottom:9px;}
     <h1 class="header-title" id="header-title">Faire une<br><em>demande</em></h1>
     <div class="profile-chip">
       <span class="chip-dot" aria-hidden="true"></span>
-      <span id="header-profile-label">Sélectionnez votre profil</span>
+      <span id="header-profile-label">Nouvelle demande</span>
     </div>
   </div>
 </div>
 
-<div class="progress-wrap" aria-hidden="true">
-  <div class="step-track">
-    <div class="step-node active"><div class="sn-circle">1</div><div class="sn-label">Profil</div></div>
-    <div class="step-node"><div class="sn-circle">2</div><div class="sn-label">Lieu</div></div>
-    <div class="step-node"><div class="sn-circle">3</div><div class="sn-label">Besoin</div></div>
-    <div class="step-node"><div class="sn-circle">4</div><div class="sn-label">Contact</div></div>
-  </div>
-</div>
-
-<p id="global-error" role="alert"></p>
-
+<div class="progress-wrap" aria-label="Progression"><p id="wizard-position" class="wizard-position" aria-live="polite">Étape 1 sur 7</p><div class="step-track"><div class="step-node"><div class="sn-circle">1</div><div class="sn-label">Besoin</div></div><div class="step-node"><div class="sn-circle">2</div><div class="sn-label">Pour qui</div></div><div class="step-node"><div class="sn-circle">3</div><div class="sn-label">Prestation</div></div><div class="step-node"><div class="sn-circle">4</div><div class="sn-label">Précisions</div></div><div class="step-node"><div class="sn-circle">5</div><div class="sn-label">Lieu</div></div><div class="step-node"><div class="sn-circle">6</div><div class="sn-label">Contact</div></div><div class="step-node"><div class="sn-circle">7</div><div class="sn-label">Vérifier</div></div></div></div>
 <form id="wizard-form" novalidate>
 
-<!-- ÉTAPE 1 — PROFIL -->
 <section class="section active" id="s1" aria-labelledby="s1-title">
-  <h2 class="section-title" id="s1-title">Vous êtes…</h2>
-  <p class="section-sub">Choisissez votre profil : les questions s’adapteront à votre besoin.</p>
-
-  <div class="picker-grid" id="profile-grid" role="radiogroup" aria-label="Profil"></div>
-
-  <div class="field" id="gestionnaire-bien-wrap" hidden style="margin-top:16px;">
-    <label>Quel type de bien concerne la demande ?</label>
-    <div class="demand-type" id="gestionnaire-bien-choices" role="radiogroup" aria-label="Type de bien concerné">
-      <button type="button" class="demand-card" data-v="copro" role="radio" aria-checked="false" onclick="pickGestionnaireBien(this)">
-        <span class="demand-icon">🏢</span><span class="demand-title">Copropriété / résidence</span>
-      </button>
-      <button type="button" class="demand-card" data-v="bien_gere" role="radio" aria-checked="false" onclick="pickGestionnaireBien(this)">
-        <span class="demand-icon">🏠</span><span class="demand-title">Logement ou bien en gestion</span>
-      </button>
-    </div>
-    <p class="grid-err" id="err-gestionnaire-bien">Choisissez le type de bien concerné.</p>
-  </div>
-
-  <p class="grid-err" id="err-profile">Veuillez sélectionner un profil pour continuer.</p>
+ <h2 class="section-title" id="s1-title">De quoi avez-vous besoin ?</h2>
+ <div id="need-grid" class="choice-grid"></div><p class="grid-err" id="err-need">Choisissez votre besoin.</p>
 </section>
-
-<!-- ÉTAPE 2 — LIEU -->
 <section class="section" id="s2" aria-labelledby="s2-title">
-  <h2 class="section-title" id="s2-title">Localisation</h2>
+ <h2 class="section-title" id="s2-title">C’est pour…</h2>
+ <div id="target-grid" class="choice-grid"></div><p class="grid-err" id="err-target">Choisissez le lieu concerné.</p>
+</section>
+<section class="section" id="s3" aria-labelledby="s3-title">
+ <h2 class="section-title" id="s3-title">Quelle prestation ?</h2>
+ <div id="copro-role-wrap" hidden><p class="hint-small">Vous êtes… <span class="optional-tag">(facultatif)</span></p><div class="role-chips"><button type="button" data-role="Syndic professionnel" aria-pressed="false">Syndic professionnel</button><button type="button" data-role="Syndic bénévole" aria-pressed="false">Syndic bénévole</button><button type="button" data-role="Conseil syndical" aria-pressed="false">Conseil syndical</button></div></div>
+ <div class="field"><label for="service-search">Rechercher une prestation</label><input type="search" id="service-search" placeholder="Fuite, ménage, électricité…" autocomplete="off"></div>
+ <div id="selected-services" class="selected-services" aria-label="Prestations choisies" aria-live="polite"></div>
+ <h3 class="service-group-title" id="shortcut-title">Les prestations les plus courantes</h3><div class="cat-grid" id="service-shortcuts"></div>
+ <details class="optional-details" id="all-services"><summary>Toutes les catégories</summary><div id="all-services-groups"></div></details>
+ <p class="grid-err" id="err-cat">Choisissez au moins une prestation.</p>
+ <div class="field"><label for="desc" id="label-desc">Que souhaitez-vous ?</label><textarea id="desc" rows="4" maxlength="600"></textarea><p class="hint-small">Ne mettez pas de digicode ni de coordonnées personnelles dans cette description.</p><p class="char-count"><span id="desc-count">0</span>/600</p><p class="field-err" id="err-desc">Décrivez votre besoin en quelques mots.</p></div>
+ <details class="optional-details" id="photo-options"><summary>Ajouter des photos <span class="optional-tag">(facultatif)</span></summary><div class="field"><label class="file-btn" for="photos">Ajouter des photos</label><input type="file" id="photos" accept="image/*" multiple hidden><p class="hint-small">Jusqu’à 3 photos.</p><div id="preview-wrap"></div></div></details>
+</section>
+<section class="section" id="s4" aria-labelledby="s4-title">
+ <h2 class="section-title" id="s4-title">Précisions <span class="optional-tag">(facultatif)</span></h2>
+ <p class="section-sub">Répondez uniquement à ce que vous savez. Rien ne vous empêche de continuer.</p>
+ <button class="text-action" type="button" onclick="leaveDetailsUnspecified()">Tout laisser à préciser</button><p id="detail-feedback" class="hint-small" role="status"></p>
+ <div id="syndic-service-details"></div>
+ <details id="copro-details" class="optional-details" hidden>
+    <summary>Préciser la copropriété et le contrat <span class="optional-tag">(facultatif)</span></summary>
+    <h3 class="section-title" style="font-size:17px;margin-bottom:6px;">Informations sur la copropriété</h3>
+    <p class="section-sub">Partagez uniquement ce que vous connaissez. Ces précisions aideront l’entreprise à préparer son devis.</p>
+    <div class="field-row">
+      <div class="field">
+        <label for="copro-batiments">Nombre de bâtiments</label>
+        <input type="number" id="copro-batiments" min="1" inputmode="numeric" placeholder="Ex. 2" />
+      </div>
+      <div class="field">
+        <label for="copro-etages">Nombre d’étages</label>
+        <input type="number" id="copro-etages" min="0" inputmode="numeric" placeholder="Ex. 5" />
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="copro-cages">Cages d’escalier</label>
+        <input type="number" id="copro-cages" min="0" inputmode="numeric" placeholder="Ex. 3" />
+      </div>
+      <div class="field">
+        <label for="copro-lots">Lots / logements</label>
+        <input type="number" id="copro-lots" min="1" inputmode="numeric" placeholder="Ex. 40" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="copro-ascenseurs">Nombre d’ascenseurs</label>
+      <input type="number" id="copro-ascenseurs" min="0" inputmode="numeric" placeholder="Ex. 2" />
+    </div>
+    <div class="field">
+      <label>Zones communes concernées <span class="optional-tag">(plusieurs choix possibles)</span></label>
+      <div class="copro-area-list" id="copro-areas">
+        <label><input type="checkbox" value="Hall d'entrée"> Hall d'entrée</label>
+        <label><input type="checkbox" value="Escaliers et couloirs"> Escaliers et couloirs</label>
+        <label><input type="checkbox" value="Ascenseur"> Ascenseur</label>
+        <label><input type="checkbox" value="Local poubelles"> Local poubelles</label>
+        <label><input type="checkbox" value="Parking"> Parking</label>
+        <label><input type="checkbox" value="Espaces verts"> Espaces verts</label>
+        <label><input type="checkbox" value="Autre partie commune"> Autre partie commune</label>
+      </div>
+    </div>
+    <div class="field" id="copro-contract-base" hidden>
+      <label for="copro-contrat-actuel">Avez-vous déjà un contrat en cours ?</label>
+      <select id="copro-contrat-actuel" onchange="document.getElementById('copro-contract-end-wrap').hidden = this.value !== 'oui'">
+        <option value="">Je ne sais pas / je préfère préciser plus tard</option>
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+      </select>
+      <div id="copro-contract-end-wrap" hidden style="margin-top:10px;">
+        <label for="copro-fin-contrat">Date de fin du contrat actuel <span class="optional-tag">(facultatif)</span></label>
+        <input type="date" id="copro-fin-contrat" />
+      </div>
+      <label for="copro-visite" style="margin-top:12px;">Une visite sur place est-elle possible ?</label>
+      <select id="copro-visite">
+        <option value="">À préciser avec l’entreprise</option>
+        <option value="oui">Oui</option>
+        <option value="non">Non</option>
+      </select>
+    </div>
+    <div id="copro-multiservice-wrap" class="field" hidden>
+      <label class="consent"><input type="checkbox" id="copro-multiservice" />
+        <span>Je souhaite, si possible, recevoir une proposition regroupant plusieurs prestations.</span>
+      </label>
+    </div>
+  </details>
+ <details class="optional-details"><summary>Surface et démarrage <span class="optional-tag">(facultatif)</span></summary><div class="field"><label for="surface_m2">Surface approximative en m²</label><input type="number" id="surface_m2" min="0" inputmode="decimal"></div><div class="field" id="start-date-wrap"><label for="date_debut">Démarrage souhaité</label><input type="date" id="date_debut"></div></details>
+ <button type="button" class="btn btn-secondary skip-details" onclick="nextStep()">Passer, l’entreprise me posera la question</button>
+</section>
+<section class="section" id="s5" aria-labelledby="s5-title">
+  <h2 class="section-title" id="s5-title">Localisation</h2>
   <p class="section-sub" id="sub-lieu">Précisez l'adresse concernée par la demande.</p>
 
   <div class="field" id="field-agence" hidden>
@@ -372,7 +496,7 @@ details.service-group[open] > summary{margin-bottom:9px;}
   </div>
 
   <div class="field" id="field-nomsite">
-    <label for="nom_site" id="label-nomsite">Nom du site <span class="optional-tag">(facultatif)</span></label>
+    <label for="nom_site" id="label-nomsite">Nom du lieu <span class="optional-tag">(facultatif)</span></label>
     <input type="text" id="nom_site" placeholder="Ex : Résidence Les Tilleuls" autocomplete="organization" />
   </div>
 
@@ -427,154 +551,9 @@ details.service-group[open] > summary{margin-bottom:9px;}
     <p class="hint-small">Ces informations restent privées et ne seront transmises qu’à l’artisan retenu.</p>
   </details>
 </section>
-
-<!-- ÉTAPE 3 — BESOIN -->
-<section class="section" id="s3" aria-labelledby="s3-title">
-  <h2 class="section-title" id="s3-title">De quoi avez-vous besoin ?</h2>
-  <p class="section-sub">Choisissez une intervention directe ou demandez plusieurs devis, puis précisez les prestations.</p>
-
-  <div class="demand-type" id="demand-mode" role="radiogroup" aria-label="Mode de mise en relation">
-    <div class="demand-card sel" data-v="intervention" onclick="pickModeDemande(this)" role="radio" aria-checked="true" tabindex="0">
-      <div class="demand-icon">🤝</div><div class="demand-title">Être mis en relation avec un artisan</div>
-      <div class="demand-sub">Des artisans peuvent se signaler. Vous choisissez avant l’échange de coordonnées.</div>
-    </div>
-    <div class="demand-card" data-v="devis" onclick="pickModeDemande(this)" role="radio" aria-checked="false" tabindex="0">
-      <div class="demand-icon">📄</div><div class="demand-title">Recevoir plusieurs devis</div>
-      <div class="demand-sub">Plusieurs entreprises peuvent répondre. Vous choisissez.</div>
-    </div>
-  </div>
-  <p class="section-sub">Le prix des travaux est proposé par les artisans et convenu directement avec l’entreprise choisie.</p>
-
-  <div class="demand-type" id="demand-type" role="radiogroup" aria-label="Type de demande">
-    <div class="demand-card sel" data-v="ponctuel" onclick="pickDemandType(this)" role="radio" aria-checked="true" tabindex="0">
-      <div class="demand-icon">⚡</div>
-      <div class="demand-title">Intervention ponctuelle</div>
-      <div class="demand-sub">Dépannage, réparation, besoin immédiat</div>
-    </div>
-    <div class="demand-card" data-v="recurrent" onclick="pickDemandType(this)" role="radio" aria-checked="false" tabindex="0">
-      <div class="demand-icon">🔁</div>
-      <div class="demand-title" id="recurring-title">Entretien régulier / contrat</div>
-      <div class="demand-sub" id="recurring-subtitle">Choix disponible pour les professionnels.</div>
-    </div>
-  </div>
-
-  <div id="prestations-container"></div>
-  <p class="grid-err" id="err-cat">Choisissez au moins une prestation.</p>
-
-  <div id="urgence-wrap" class="field" style="margin-top:6px;">
-    <label>Niveau d'urgence</label>
-    <div class="urg-row" id="urg-choices">
-      <div class="urg-card sel" data-u="faible" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-l)"></span><div class="cat-label">Faible</div></div>
-      <div class="urg-card" data-u="modere" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-m)"></span><div class="cat-label">Modéré</div></div>
-      <div class="urg-card" data-u="urgent" onclick="pickUrg(this)"><span class="urg-dot" style="background:var(--urg-h)"></span><div class="cat-label">Urgent</div></div>
-    </div>
-  </div>
-
-  <div id="frequence-wrap" class="field" hidden>
-    <label>Fréquence souhaitée</label>
-    <div class="freq-row" id="freq-choices">
-      <div class="cat-card" data-f="hebdomadaire" onclick="pickFreq(this)"><span class="cat-label">1× / semaine</span></div>
-      <div class="cat-card" data-f="bihebdomadaire" onclick="pickFreq(this)"><span class="cat-label">2× / semaine</span></div>
-      <div class="cat-card" data-f="quotidienne" onclick="pickFreq(this)"><span class="cat-label">Quotidien</span></div>
-      <div class="cat-card" data-f="mensuelle" onclick="pickFreq(this)"><span class="cat-label">Mensuelle</span></div>
-      <div class="cat-card" data-f="trimestrielle" onclick="pickFreq(this)"><span class="cat-label">Tous les 3 mois</span></div>
-      <div class="cat-card" data-f="a_definir" onclick="pickFreq(this)"><span class="cat-label">À définir</span></div>
-    </div>
-    <label for="date_debut" style="margin-top:12px;">Démarrage souhaité <span class="optional-tag">(facultatif)</span></label>
-    <input type="date" id="date_debut" />
-  </div>
-
-  <div id="copro-details" class="field" hidden>
-    <h3 class="section-title" style="font-size:17px;margin-bottom:6px;">Informations sur la copropriété</h3>
-    <p class="section-sub">Partagez uniquement ce que vous connaissez. Ces précisions aideront l’entreprise à préparer son devis.</p>
-    <div class="field-row">
-      <div class="field">
-        <label for="copro-batiments">Nombre de bâtiments</label>
-        <input type="number" id="copro-batiments" min="1" inputmode="numeric" placeholder="Ex. 2" />
-      </div>
-      <div class="field">
-        <label for="copro-etages">Nombre d’étages</label>
-        <input type="number" id="copro-etages" min="0" inputmode="numeric" placeholder="Ex. 5" />
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label for="copro-cages">Cages d’escalier</label>
-        <input type="number" id="copro-cages" min="0" inputmode="numeric" placeholder="Ex. 3" />
-      </div>
-      <div class="field">
-        <label for="copro-lots">Lots / logements</label>
-        <input type="number" id="copro-lots" min="1" inputmode="numeric" placeholder="Ex. 40" />
-      </div>
-    </div>
-    <div class="field">
-      <label for="copro-ascenseurs">Nombre d’ascenseurs</label>
-      <input type="number" id="copro-ascenseurs" min="0" inputmode="numeric" placeholder="Ex. 2" />
-    </div>
-    <div class="field">
-      <label>Zones communes concernées <span class="optional-tag">(plusieurs choix possibles)</span></label>
-      <div class="copro-area-list" id="copro-areas">
-        <label><input type="checkbox" value="Hall d'entrée"> Hall d'entrée</label>
-        <label><input type="checkbox" value="Escaliers et couloirs"> Escaliers et couloirs</label>
-        <label><input type="checkbox" value="Ascenseur"> Ascenseur</label>
-        <label><input type="checkbox" value="Local poubelles"> Local poubelles</label>
-        <label><input type="checkbox" value="Parking"> Parking</label>
-        <label><input type="checkbox" value="Espaces verts"> Espaces verts</label>
-        <label><input type="checkbox" value="Autre partie commune"> Autre partie commune</label>
-      </div>
-    </div>
-    <div class="field" id="copro-contract-base" hidden>
-      <label for="copro-contrat-actuel">Avez-vous déjà un contrat en cours ?</label>
-      <select id="copro-contrat-actuel" onchange="document.getElementById('copro-contract-end-wrap').hidden = this.value !== 'oui'">
-        <option value="">Je ne sais pas / je préfère préciser plus tard</option>
-        <option value="oui">Oui</option>
-        <option value="non">Non</option>
-      </select>
-      <div id="copro-contract-end-wrap" hidden style="margin-top:10px;">
-        <label for="copro-fin-contrat">Date de fin du contrat actuel <span class="optional-tag">(facultatif)</span></label>
-        <input type="date" id="copro-fin-contrat" />
-      </div>
-      <label for="copro-visite" style="margin-top:12px;">Une visite sur place est-elle possible ?</label>
-      <select id="copro-visite">
-        <option value="a_convenir">À convenir avec l’entreprise</option>
-        <option value="oui">Oui</option>
-        <option value="non">Non</option>
-      </select>
-    </div>
-    <div id="copro-multiservice-wrap" class="field" hidden>
-      <label class="consent"><input type="checkbox" id="copro-multiservice" />
-        <span>Je souhaite, si possible, recevoir une proposition regroupant plusieurs prestations.</span>
-      </label>
-    </div>
-    <div id="syndic-service-details"></div>
-    <p class="grid-err" id="err-syndic-scope">Pour chaque service sélectionné, cochez au moins une opération à chiffrer.</p>
-  </div>
-
-  <div class="field" id="field-surface">
-    <label for="surface_m2">Surface approximative en m² <span class="optional-tag">(facultatif)</span></label>
-    <input type="number" id="surface_m2" min="0" inputmode="numeric" placeholder="Ex : 350" />
-  </div>
-
-  <div class="field">
-    <label for="desc">Description</label>
-    <textarea id="desc" rows="4" maxlength="600" placeholder="Détaillez votre besoin : nature du problème, fréquence souhaitée, contraintes d'accès..."></textarea>
-    <p class="hint-small">Pour votre sécurité, ne mettez pas de digicode ni de numéro de téléphone dans cette description.</p>
-    <p class="char-count"><span id="desc-count">0</span>/600</p>
-    <p class="field-err" id="err-desc">Merci de décrire votre besoin.</p>
-  </div>
-
-  <div class="field">
-    <label for="photos">Photos <span class="optional-tag">(jusqu'à 3, facultatif)</span></label>
-    <label class="file-btn" for="photos">📷 Ajouter des photos</label>
-    <input type="file" id="photos" accept="image/*" capture="environment" multiple hidden />
-    <div id="preview-wrap"></div>
-  </div>
-</section>
-
-<!-- ÉTAPE 4 — CONTACT -->
-<section class="section" id="s4" aria-labelledby="s4-title">
-  <h2 class="section-title" id="s4-title">Vos coordonnées</h2>
-  <p class="section-sub">Pour permettre à un artisan intéressé de vous contacter au sujet de votre demande.</p>
+<section class="section" id="s6" aria-labelledby="s6-title">
+  <h2 class="section-title" id="s6-title">Vos coordonnées</h2>
+  <p class="section-sub">Ces coordonnées servent à traiter votre demande. Leur partage dépend du mode de réponse choisi.</p>
 
   <div class="field-row">
     <div class="field">
@@ -599,25 +578,16 @@ details.service-group[open] > summary{margin-bottom:9px;}
 
   <label class="consent">
     <input type="checkbox" id="consent" />
-    <span>J'accepte que mes coordonnées soient utilisées pour traiter cette demande et, si je demande plusieurs devis, transmises aux artisans qui répondent. Elles ne seront communiquées qu'à l'artisan retenu pour une demande d'intervention directe.</span>
+    <span>J'accepte que mes coordonnées soient utilisées pour traiter cette demande et, si je demande des devis, transmises aux artisans qui répondent. Elles ne seront communiquées qu'à l'artisan retenu si vous choisissez un artisan.</span>
   </label>
 
   <p class="grid-err" id="err-contact">Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.</p>
 </section>
-
-<!-- ÉTAPE 5 — RÉCAPITULATIF -->
-<section class="section" id="s5" aria-labelledby="s5-title">
-  <h2 class="section-title" id="s5-title">Vérifiez votre demande</h2>
-  <p class="section-sub">Relisez les informations avant l'envoi.</p>
-  <div id="summary"></div>
-  <p class="section-sub">Le prix des travaux et les modalités d’intervention seront convenus directement entre vous et l’artisan.</p>
-</section>
-
-<!-- ÉTAPE 6 — CONFIRMATION -->
-<section class="section" id="s6">
+<section class="section" id="s7" aria-labelledby="s7-title"><h2 class="section-title" id="s7-title">Vérifiez votre demande</h2><div id="summary"></div><p id="response-explanation" class="response-explanation"></p><p id="global-error" class="grid-err" role="alert" style="display:none"></p></section>
+<section class="section" id="s8" aria-labelledby="s8-title">
   <div class="confirm-wrap">
     <div class="confirm-badge" aria-hidden="true">✓</div>
-    <h2>Demande transmise</h2>
+    <h2 id="s8-title">Demande transmise</h2>
     <p>Votre dossier a bien été envoyé à notre réseau d'artisans et prestataires en Île-de-France.</p>
     <div class="ref-box">
       <div class="lbl">Référence du dossier</div>
@@ -630,16 +600,11 @@ details.service-group[open] > summary{margin-bottom:9px;}
     <button type="button" class="btn btn-primary" style="margin:14px auto 0; max-width:280px;" onclick="resetForm()">Effectuer une autre demande</button>
   </div>
 </section>
+<div class="nav-wrap" id="nav-wrap"><button type="button" class="btn btn-back" id="btn-back" onclick="prevStep()" aria-label="Étape précédente">←</button><button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer</button></div>
 
-<div class="nav-wrap" id="nav-wrap">
-  <button type="button" class="btn btn-back" id="btn-back" onclick="prevStep()" style="display:none" aria-label="Étape précédente">←</button>
-  <button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer</button>
-</div>
-
-<p style="text-align:center;font-size:11px;color:#8896a8;padding:6px 0 18px;">Version du formulaire : v5 — parcours adapté à votre profil</p>
 </form>
-
 <script>
+
 /* =========================================================================
    CONFIGURATION SUPABASE (même projet que l'espace artisan)
    ========================================================================= */
@@ -752,213 +717,245 @@ const COMPLEMENT_LABELS = {
   particulier:"Étage / n° d'appartement / interphone",
 };
 
-/* =========================================================================
-   ÉTAT
-   ========================================================================= */
-let step = 1;
-const TOTAL_NODES = 4;
-let photoFiles = [];
-let selectedPrestations = new Set();
-let data = {
-  profile:null, gestionnaireBien:null,
-  demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null,
-};
 
-/* =========================================================================
-   ÉTAPE 1 — PROFIL
-   ========================================================================= */
-(function initProfiles() {
-  const grid = document.getElementById('profile-grid');
-  grid.innerHTML = PROFILES.map(p => `
-    <button type="button" class="picker-card" data-v="${p.v}" role="radio" aria-checked="false" onclick="selectProfile('${p.v}', this)">
-      <span class="picker-icon" aria-hidden="true">${p.icon}</span>
-      <span class="picker-label">${p.label}</span>
-      <span class="picker-desc">${p.desc}</span>
-    </button>`).join('');
-})();
-
-function selectProfile(value, el) {
-  document.querySelectorAll('#profile-grid .picker-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.profile = value;
-  if (value !== 'gestionnaire_immo') data.gestionnaireBien = null;
-  const gestionnaireWrap = document.getElementById('gestionnaire-bien-wrap');
-  gestionnaireWrap.hidden = value !== 'gestionnaire_immo';
-  if (value !== 'gestionnaire_immo') {
-    document.querySelectorAll('#gestionnaire-bien-choices .demand-card').forEach(card => { card.classList.remove('sel'); card.setAttribute('aria-checked','false'); });
-  }
-  selectedPrestations.clear();
-  document.getElementById('err-profile').classList.remove('show');
-
-  const meta = PROFILES.find(p => p.v === value);
-  document.getElementById('header-profile-label').textContent = meta.label;
-  document.getElementById('header-title').innerHTML = HEADER_TITLES[value];
-
-  const recurrentCard = document.querySelector('#demand-type [data-v="recurrent"]');
-  recurrentCard.hidden = value === 'particulier';
-  if (value === 'particulier' && data.demandType === 'recurrent') {
-    pickDemandType(document.querySelector('#demand-type [data-v="ponctuel"]'));
-    data.frequence = null;
-  }
-  updateRecurringCopy();
-
-  if (value !== 'gestionnaire_immo') {
-    document.getElementById('label-nomsite').innerHTML = `${NOMSITE_LABELS[value] || 'Nom'} <span class="optional-tag">(facultatif)</span>`;
-  }
-  document.getElementById('field-nomsite').style.display = value === 'particulier' ? 'none' : 'block';
-  document.getElementById('field-agence').hidden = value !== 'gestionnaire_immo';
-  document.getElementById('field-contact-sur-place').hidden = value !== 'gestionnaire_immo';
-  document.getElementById('field-disponibilites').hidden = value !== 'gestionnaire_immo';
-  document.getElementById('summary-acces-title').textContent = value === 'gestionnaire_immo'
-    ? 'Ajouter un contact ou des informations d’accès'
-    : 'Ajouter des informations d’accès';
-  document.getElementById('label-adresse-lieu').textContent = value === 'gestionnaire_immo'
-    ? 'Adresse de la copropriété / du bien concerné'
-    : 'Adresse';
-  updateLocationLabels();
-  document.getElementById('label-complement').innerHTML = `${COMPLEMENT_LABELS[value] || 'Complément'} <span class="optional-tag">(facultatif)</span>`;
-
-  document.getElementById('sub-lieu').textContent = value === 'particulier'
-    ? 'Indiquez l\'adresse où se situe le problème.'
-    : "Indiquez l'adresse exacte de l'intervention.";
-  document.getElementById('desc').placeholder = value === 'gestionnaire_immo'
-    ? 'Décrivez les travaux ou l’entretien souhaité, et ce que l’artisan doit prévoir…'
-    : value === 'particulier'
-      ? 'Décrivez le problème : ce qui ne fonctionne pas, depuis quand, et ce que vous avez constaté…'
-      : 'Décrivez le besoin, les horaires d’accès et les éventuelles contraintes du lieu…';
-
-  renderPrestations();
-  renderSyndicServiceDetails();
+// Parcours : besoin, lieu concerné, prestations, précisions, adresse, contact, vérification.
+let step = 1, photoFiles = [], selectedPrestations = new Set();
+let data = {requestKind:null,target:null,coproRole:'',profile:null,gestionnaireBien:null,demandType:'ponctuel',modeDemande:'intervention',urgence:'faible',frequence:null};
+let serviceDetails = {};
+let requestSending = false, disabledBeforeSending = new Map();
+const NEEDS = [
+ {value:'depannage',icon:'🚨',label:'Un dépannage urgent'},
+ {value:'travaux',icon:'🔧',label:'Des travaux ou une intervention'},
+ {value:'entretien',icon:'🔁',label:'Un entretien régulier'}
+];
+const TARGETS = [
+ {value:'copro',icon:'🏢',label:'Une copropriété',profile:'gestionnaire_immo',bien:'copro'},
+ {value:'locaux',icon:'🏬',label:'Un commerce, bureau ou établissement',profile:'etablissement'},
+ {value:'logement',icon:'🏠',label:'Mon logement',profile:'particulier'},
+ {value:'gestion',icon:'🔑',label:'Une agence / un gestionnaire locatif',profile:'gestionnaire_immo',bien:'bien_gere'}
+];
+const SERVICE_FREQUENCIES = {'':'À préciser avec l’entreprise',quotidienne:'Tous les jours',bihebdomadaire:'2 fois par semaine',hebdomadaire:'1 fois par semaine',mensuelle:'1 fois par mois',trimestrielle:'Tous les 3 mois',semestrielle:'Tous les 6 mois',annuelle:'1 fois par an'};
+const SERVICES = Object.values(SERVICE_GROUPS).flatMap(group=>group.items.map(item=>({...item,group:group.label})));
+const SERVICE_ALIASES = {plomberie:'fuite eau robinet canalisation débouchage',electricite:'panne courant tableau prises',serrurerie:'serrure clé porte bloquée',ascenseur:'panne ascenseur',chauffage:'chaudière radiateur climatisation',menage:'nettoyage ménage propreté',espaces_verts:'jardin pelouse haies tonte'};
+const normalizeSearch = s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const serviceLabel = id=>SERVICES.find(s=>s.v===id)?.l||id;
+const field = id=>document.getElementById(id);
+function wizardPath(){return data.requestKind==='depannage'?[1,2,3,5,6,7,8]:[1,2,3,4,5,6,7,8];}
+function deriveRequestMode(){
+ data.modeDemande=data.requestKind==='depannage'?'intervention':'devis';
+ data.demandType=data.requestKind==='entretien'?'recurrent':'ponctuel';
+ data.urgence=data.requestKind==='depannage'?'urgent':'faible';
+ const frequencies=Array.from(selectedPrestations).map(id=>serviceDetails[id]?.frequency||'');
+ const common=frequencies.length&&frequencies.every(v=>v===frequencies[0])?frequencies[0]:'';
+ // The existing backend keeps its compatible global field; the exact schedule of each service is saved in description.
+ data.frequence=data.requestKind==='entretien'?(['quotidienne','bihebdomadaire','hebdomadaire','mensuelle','trimestrielle'].includes(common)?common:'a_definir'):null;
 }
-
-function updateRecurringCopy() {
-  const copro = data.profile === 'gestionnaire_immo' && data.gestionnaireBien === 'copro';
-  const bienGere = data.profile === 'gestionnaire_immo' && data.gestionnaireBien === 'bien_gere';
-  document.getElementById('recurring-title').textContent = copro ? 'Contrat d’entretien de la copropriété' : bienGere ? 'Entretien régulier du bien en gestion' : 'Entretien régulier de vos locaux';
-  document.getElementById('recurring-subtitle').textContent = copro ? 'Parties communes, espaces verts et équipements de la résidence.' : bienGere ? 'Entretien régulier d’un logement ou local confié à votre agence.' : 'Nettoyage ou maintenance à fréquence régulière.';
+function chooseNeed(value){
+ if(requestSending)return;
+ if(!NEEDS.some(n=>n.value===value))return;
+ stashServiceDetails();data.requestKind=value;deriveRequestMode();step=2;showStep();
 }
-
-function pickGestionnaireBien(el) {
-  document.querySelectorAll('#gestionnaire-bien-choices .demand-card').forEach(card => { card.classList.remove('sel'); card.setAttribute('aria-checked','false'); });
-  el.classList.add('sel');
-  el.setAttribute('aria-checked','true');
-  data.gestionnaireBien = el.dataset.v;
-  document.getElementById('err-gestionnaire-bien').classList.remove('show');
-  updateLocationLabels();
-  updateRecurringCopy();
-  renderSyndicServiceDetails();
+function chooseTarget(value){
+ if(requestSending)return;
+ const target=TARGETS.find(t=>t.value===value);if(!target)return;
+ stashServiceDetails();data.target=value;data.profile=target.profile;data.gestionnaireBien=target.bien||null;
+ // Previous selections and explicit answers are intentionally preserved.
+ step=3;renderServices();showStep();
 }
-
-function updateLocationLabels() {
-  if (data.profile !== 'gestionnaire_immo') return;
-  const isCopro = data.gestionnaireBien === 'copro';
-  document.getElementById('label-nomsite').innerHTML = isCopro
-    ? 'Nom de la copropriété / résidence <span class="optional-tag">(facultatif)</span>'
-    : 'Nom ou référence du bien <span class="optional-tag">(facultatif)</span>';
-  document.getElementById('nom_site').placeholder = isCopro ? 'Ex. : Résidence Les Tilleuls' : 'Ex. : Appartement rue Victor-Hugo';
+function chooseCoproRole(value){
+ data.coproRole=data.coproRole===value?'':value;
+ field('copro-role-wrap').querySelectorAll('button').forEach(b=>{b.classList.toggle('sel',b.dataset.role===data.coproRole);b.setAttribute('aria-pressed',String(b.dataset.role===data.coproRole));});
 }
-
-/* =========================================================================
-   ÉTAPE 3 — PRESTATIONS, TYPE DE DEMANDE, URGENCE/FRÉQUENCE
-   ========================================================================= */
-function pickModeDemande(el) {
-  document.querySelectorAll('#demand-mode .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.modeDemande = el.dataset.v;
+function quickServiceIds(){
+ if(data.requestKind==='depannage')return data.target==='copro'?['plomberie','electricite','serrurerie','ascenseur','chauffage','portes_portails','interphone','autre']:['plomberie','electricite','serrurerie','chauffage','vitrerie','portes_portails','vmc','autre'];
+ if(data.requestKind==='travaux')return ['renovation','peinture','plomberie','electricite','toiture_terrasse','petits_travaux','vitrerie','autre'];
+ return data.target==='copro'?['menage','espaces_verts','ascenseur','chauffage','vmc','incendie','portes_portails','parking']:['menage','nettoyage_vitrine','chauffage','espaces_verts','vmc','deratisation','piscine','autre'];
 }
-document.querySelectorAll('#demand-mode .demand-card').forEach(card => {
-  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
-});
-
-function pickDemandType(el) {
-  document.querySelectorAll('#demand-type .demand-card').forEach(c => { c.classList.remove('sel'); c.setAttribute('aria-checked','false'); });
-  el.classList.add('sel'); el.setAttribute('aria-checked','true');
-  data.demandType = el.dataset.v;
-  document.getElementById('urgence-wrap').hidden = data.demandType !== 'ponctuel';
-  document.getElementById('frequence-wrap').hidden = data.demandType !== 'recurrent';
-  renderSyndicServiceDetails();
+function serviceButton(service){return `<button type="button" class="cat-card ${selectedPrestations.has(service.v)?'sel':''}" data-service="${esc(service.v)}" aria-pressed="${selectedPrestations.has(service.v)}"><span class="cat-icon" aria-hidden="true">${service.i}</span><span class="cat-label">${esc(service.l)}</span></button>`;}
+function renderServices(){
+ const query=normalizeSearch(field('service-search').value.trim());
+ const matches=SERVICES.filter(s=>normalizeSearch([s.l,s.group,SERVICE_ALIASES[s.v]].join(' ')).includes(query));
+ field('service-shortcuts').innerHTML=(query?matches:quickServiceIds().map(id=>SERVICES.find(s=>s.v===id)).filter(Boolean)).map(serviceButton).join('')||'<p>Aucune catégorie trouvée. Essayez un autre mot ou choisissez « Autre ».</p>';
+ field('shortcut-title').textContent=query?'Résultats':'Les prestations les plus courantes';
+ field('all-services-groups').innerHTML=Object.values(SERVICE_GROUPS).map(group=>`<div class="service-group"><h3 class="service-group-title">${esc(group.label)}</h3><div class="cat-grid">${group.items.map(serviceButton).join('')}</div></div>`).join('');
+ field('selected-services').innerHTML=Array.from(selectedPrestations).map(id=>`<button type="button" class="selected-service" data-service="${esc(id)}" aria-label="Retirer ${esc(serviceLabel(id))}">${esc(serviceLabel(id))} <span aria-hidden="true">×</span></button>`).join('');
+ updateNavigation();
 }
-document.querySelectorAll('#demand-type .demand-card').forEach(card => {
-  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
-});
-
-function pickUrg(el) {
-  document.querySelectorAll('#urg-choices .urg-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  data.urgence = el.dataset.u;
+function togglePrestation(id){
+ if(requestSending)return;
+ if(!SERVICES.some(s=>s.v===id))return;
+ stashServiceDetails();if(selectedPrestations.has(id))selectedPrestations.delete(id);else selectedPrestations.add(id);
+ renderServices();clearErrors();
 }
-function pickFreq(el) {
-  document.querySelectorAll('#freq-choices .cat-card').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  data.frequence = el.dataset.f;
+function applicableServiceConfig(id){
+ const source=SYNDIC_SCOPE_CONFIG[id];if(!source)return null;
+ let config={...source,checks:[...(source.checks||[])].map(label=>label.replace(/Intervention ponctuelle/gi,'Une intervention')),fields:[...(source.fields||[])].filter(([key])=>key!=='passages_semaine')};
+ if(data.target!=='copro'){
+  config.title=serviceLabel(id);
+  config.fields=config.fields.filter(([,label])=>!/logements|cages|bâtiments|étages/i.test(label));
+  config.checks=config.checks.map(label=>label.replace(/des parties communes/gi,'du lieu'));
+  if(id==='menage'&&data.target==='logement'){config.checks=['Pièces de vie','Chambres','Cuisine','Salle de bains','Vitres','Sols'];config.fields=[];}
+ }
+ if(data.requestKind==='travaux'){
+  if(id==='chauffage')config.checks=['Diagnostic','Réparation','Remplacement','Installation'];
+  if(id==='ascenseur')config.checks=['Diagnostic','Réparation','Mise en conformité'];
+ }
+ return config;
 }
-
-function renderPrestations() {
-  const order = PROFILE_GROUP_ORDER[data.profile] || Object.keys(SERVICE_GROUPS);
-  const container = document.getElementById('prestations-container');
-  container.innerHTML = order.map((groupId, index) => {
-    const group = SERVICE_GROUPS[groupId];
-    return `
-    <details class="service-group" ${index === 0 ? 'open' : ''}>
-      <summary class="service-group-title">${group.label}</summary>
-      <div class="cat-grid">
-        ${group.items.map(it => `
-          <button type="button" class="cat-card ${selectedPrestations.has(it.v) ? 'sel' : ''}" data-v="${it.v}" aria-pressed="${selectedPrestations.has(it.v)}" onclick="togglePrestation('${it.v}', this)">
-            <span class="cat-icon" aria-hidden="true">${it.i}</span>
-            <span class="cat-label">${it.l}</span>
-          </button>`).join('')}
-      </div>
-    </details>`;
+function stashServiceDetails(){
+ const root=field('syndic-service-details');if(!root)return;
+ root.querySelectorAll('[data-detail-service]').forEach(block=>{
+  const id=block.dataset.detailService,previous=serviceDetails[id]||{};
+  const values={...(previous.fields||{})};
+  block.querySelectorAll('[data-detail-field]').forEach(input=>{values[input.dataset.detailField]=input.value.trim();});
+  serviceDetails[id]={operations:Array.from(block.querySelectorAll('[data-operation]:checked')).map(input=>input.value),fields:values,frequency:block.querySelector('[data-frequency]')?.value??previous.frequency??''};
+ });
+}
+function renderServiceDetails(){
+ const blocks=Array.from(selectedPrestations).filter(id=>applicableServiceConfig(id)||data.requestKind==='entretien');
+ field('syndic-service-details').innerHTML=blocks.map(id=>{
+  const config=applicableServiceConfig(id)||{title:serviceLabel(id),checks:[],fields:[]},state=serviceDetails[id]||{operations:[],fields:{},frequency:''};
+  const checks=config.checks.map(label=>`<label><input type="checkbox" data-operation value="${esc(label)}" ${state.operations?.includes(label)?'checked':''}> ${esc(label)}</label>`).join('');
+  const inputs=config.fields.map(([key,label,type,placeholder])=>{
+   const value=state.fields?.[key]||'',domId='detail-'+id+'-'+key;
+   return `<div class="field"><label for="${esc(domId)}">${esc(label)}</label>${type==='select'?`<select id="${esc(domId)}" data-detail-field="${esc(key)}"><option value="">À préciser avec l’entreprise</option>${placeholder.split('|').map(option=>`<option value="${esc(option)}" ${value===option?'selected':''}>${esc(option)}</option>`).join('')}</select>`:`<input id="${esc(domId)}" data-detail-field="${esc(key)}" type="${esc(type)}" value="${esc(value)}" placeholder="${esc(placeholder)}" ${type==='number'?'min="0" inputmode="numeric"':''}>`}</div>`;
   }).join('');
+  return `<article class="detail-service" data-detail-service="${esc(id)}"><h3>${esc(serviceLabel(id))}</h3><p class="hint-small">À préciser avec l’entreprise. Cochez uniquement ce que vous souhaitez.</p>${data.requestKind==='entretien'?`<div class="field"><label for="frequency-${esc(id)}">Fréquence pour cette prestation</label><select id="frequency-${esc(id)}" data-frequency>${Object.entries(SERVICE_FREQUENCIES).map(([value,label])=>`<option value="${value}" ${value===state.frequency?'selected':''}>${esc(label)}</option>`).join('')}</select></div>`:''}${checks?`<div class="scope-checks">${checks}</div>`:''}${inputs?`<details class="optional-details"><summary>Autres précisions <span class="optional-tag">(facultatif)</span></summary>${inputs}</details>`:''}</article>`;
+ }).join('')||'<p class="section-sub">Aucune précision technique nécessaire pour ces prestations.</p>';
+ field('copro-details').hidden=data.target!=='copro';
+ field('copro-contract-base').hidden=data.requestKind!=='entretien';
+ field('copro-multiservice-wrap').hidden=data.requestKind!=='entretien'||selectedPrestations.size<2;
 }
-
-function togglePrestation(value, el) {
-  if (selectedPrestations.has(value)) { selectedPrestations.delete(value); el.classList.remove('sel'); el.setAttribute('aria-pressed','false'); }
-  else { selectedPrestations.add(value); el.classList.add('sel'); el.setAttribute('aria-pressed','true'); }
-  document.getElementById('err-cat').classList.remove('show');
-  renderSyndicServiceDetails();
+function leaveDetailsUnspecified(){
+ serviceDetails={};field('copro-details').querySelectorAll('input,select').forEach(input=>{if(input.type==='checkbox')input.checked=false;else input.value='';});
+ field('surface_m2').value='';field('date_debut').value='';field('copro-contract-end-wrap').hidden=true;renderServiceDetails();
+ field('detail-feedback').textContent='Les précisions et fréquences sont laissées à définir avec l’entreprise.';
 }
-
-function renderSyndicServiceDetails() {
-  const container = document.getElementById('syndic-service-details');
-  if (!container.dataset.ready) {
-    container.innerHTML = '<p class="section-sub">Pour chaque service sélectionné, cochez les opérations à inclure. Les quantités et autres précisions peuvent rester vides si vous ne les connaissez pas.</p>' + Object.entries(SYNDIC_SCOPE_CONFIG)
-      .filter(([serviceId]) => serviceId !== 'multi_service')
-      .map(([serviceId, config]) => {
-        const checks = (config.checks || []).map((item, i) => `
-          <label><input type="checkbox" data-contract-check="${esc(serviceId)}" value="${esc(item)}"> ${esc(item)}</label>`).join('');
-        const fields = (config.fields || []).map(([key, label, type, placeholder]) => {
-          if (type === 'select') {
-            const options = placeholder.split('|').map(option => `<option value="${esc(option)}">${esc(option)}</option>`).join('');
-            return `<div class="field"><label for="syndic-${esc(serviceId)}-${esc(key)}">${esc(label)}</label><select id="syndic-${esc(serviceId)}-${esc(key)}" data-contract-field="${esc(key)}"><option value="">À préciser</option>${options}</select></div>`;
-          }
-          return `<div class="field"><label for="syndic-${esc(serviceId)}-${esc(key)}">${esc(label)}</label><input id="syndic-${esc(serviceId)}-${esc(key)}" type="${esc(type)}" data-contract-field="${esc(key)}" placeholder="${esc(placeholder)}" ${type === 'number' ? 'min="0" inputmode="numeric"' : ''}></div>`;
-        }).join('');
-        return `<section class="syndic-scope-card" data-service-id="${esc(serviceId)}" hidden>
-          <h4>${esc(config.title)}</h4>
-          ${checks ? `<div class="scope-checks">${checks}</div>` : ''}
-          ${fields ? `<div class="scope-fields">${fields}</div>` : ''}
-        </section>`;
-      }).join('');
-    container.dataset.ready = 'true';
+function collectServiceLines(id){
+ const state=serviceDetails[id]||{},config=applicableServiceConfig(id),lines=[];
+ if(data.requestKind==='entretien')lines.push('Fréquence : '+(SERVICE_FREQUENCIES[state.frequency]||SERVICE_FREQUENCIES['']));
+ if(data.requestKind!=='depannage'&&config){
+  const operations=(state.operations||[]).filter(value=>config.checks.includes(value));
+  if(operations.length)lines.push('Opérations : '+operations.join(', '));
+  config.fields.forEach(([key,label,type])=>{const value=state.fields?.[key];if(value&&(type!=='number'||(Number.isFinite(Number(value))&&Number(value)>=0)))lines.push(label+' : '+value);});
+  if(!operations.length&&!config.fields.some(([key,,type])=>state.fields?.[key]&&(type!=='number'||Number(state.fields[key])>=0)))lines.push('Détails : à préciser avec l’entreprise');
+ }
+ if(data.requestKind!=='depannage'&&!config)lines.push('Détails : à préciser avec l’entreprise');
+ return lines;
+}
+function collectSyndicDetailLines(){
+ stashServiceDetails();deriveRequestMode();
+ const lines=['Besoin : '+(NEEDS.find(n=>n.value===data.requestKind)?.label||''),'Lieu concerné : '+(TARGETS.find(t=>t.value===data.target)?.label||'')];
+ if(data.target==='copro'&&data.coproRole)lines.push('Demandeur : '+data.coproRole);
+ if(data.requestKind!=='depannage'){
+  Array.from(selectedPrestations).forEach(id=>collectServiceLines(id).forEach(line=>lines.push(serviceLabel(id)+' — '+line)));
+  if(data.target==='copro'){
+   const names={'copro-batiments':'Bâtiments','copro-etages':'Étages','copro-cages':'Cages d’escalier','copro-ascenseurs':'Ascenseurs','copro-lots':'Lots / logements'};
+   Object.entries(names).forEach(([id,label])=>{const value=field(id).value.trim();if(value&&Number(value)>=0)lines.push(label+' : '+value);});
+   const areas=Array.from(field('copro-areas').querySelectorAll('input:checked')).map(input=>input.value);if(areas.length)lines.push('Zones concernées : '+areas.join(', '));
+   if(data.requestKind==='entretien'){
+    const contract=field('copro-contrat-actuel').value;if(contract){lines.push('Contrat actuel : '+(contract==='oui'?'oui':'non'));if(contract==='oui'&&field('copro-fin-contrat').value)lines.push('Fin du contrat : '+field('copro-fin-contrat').value);}
+    const visit=field('copro-visite').value;if(['oui','non'].includes(visit))lines.push('Visite possible : '+visit);
+    if(field('copro-multiservice').checked)lines.push('Proposition regroupant les prestations souhaitée si possible');
+   }
   }
-  const isSyndicContract = data.profile === 'gestionnaire_immo' && data.gestionnaireBien === 'copro' && data.demandType === 'recurrent';
-  document.getElementById('copro-details').hidden = !isSyndicContract;
-  document.getElementById('copro-contract-base').hidden = !isSyndicContract;
-  document.getElementById('copro-multiservice-wrap').hidden = !isSyndicContract || selectedPrestations.size < 2;
-  document.getElementById('err-syndic-scope').classList.remove('show');
-  container.querySelectorAll('[data-service-id]').forEach(section => {
-    section.hidden = !isSyndicContract || !selectedPrestations.has(section.dataset.serviceId);
-  });
+ }
+ return lines;
+}
+function clearErrors(){document.querySelectorAll('.grid-err,.field-err').forEach(e=>e.classList.remove('show'));}
+function validateStep(){
+ clearErrors();let errorId=null;
+ if(step===1&&!data.requestKind)errorId='err-need';
+ if(step===2&&!data.target)errorId='err-target';
+ if(step===3){if(!selectedPrestations.size)errorId='err-cat';else if(!field('desc').value.trim())errorId='err-desc';}
+ if(step===5){if(!field('adresse_lieu').value.trim())errorId='err-adresse';else if(!/^\d{5}$/.test(field('code_postal').value.trim()))errorId='err-cp';else if(!field('ville').value.trim())errorId='err-ville';}
+ if(step===6){
+  const email=field('email').value.trim(),tel=field('tel').value.replace(/[\s().-]/g,'');
+  if(!field('prenom').value.trim()||!field('nom').value.trim()||!/^(0|\+33)[1-9]\d{8}$/.test(tel)||((data.profile!=='particulier'||email)&&!/^\S+@\S+\.\S+$/.test(email))){field('err-contact').textContent='Indiquez votre nom, prénom et téléphone valides'+(data.profile!=='particulier'?', ainsi qu’un email valide.':'. Si vous renseignez un email, vérifiez son format.');errorId='err-contact';}
+  else if(!field('consent').checked){field('err-contact').textContent='Confirmez que nous pouvons traiter vos coordonnées pour cette demande.';errorId='err-contact';}
+ }
+ if(errorId){field(errorId).classList.add('show');field(errorId).scrollIntoView({block:'center',behavior:'smooth'});return false;}return true;
+}
+function nextStep(){
+ if(requestSending||step>=8||field('btn-next').disabled)return;
+ if(!validateStep())return;
+ stashServiceDetails();deriveRequestMode();
+ if(step===7){submitDemand();return;}
+ const path=wizardPath();step=path[path.indexOf(step)+1];showStep();
+}
+function prevStep(){if(requestSending||step>=8||field('btn-next').disabled&&step!==3)return;stashServiceDetails();const path=wizardPath(),index=path.indexOf(step);if(index>0){step=path[index-1];showStep();}}
+function goToStep(value){if(requestSending||!wizardPath().includes(value)||value===8)return;stashServiceDetails();step=value;showStep();}
+function setRequestSending(active){
+ requestSending=active;field('wizard-form').setAttribute('aria-busy',String(active));
+ if(active){disabledBeforeSending=new Map();field('wizard-form').querySelectorAll('button,input,select,textarea').forEach(element=>{disabledBeforeSending.set(element,element.disabled);element.disabled=true;});}
+ else {disabledBeforeSending.forEach((disabled,element)=>element.disabled=disabled);disabledBeforeSending.clear();updateNavigation();}
+}
+function updateNavigation(){
+ const nav=field('nav-wrap'),button=field('btn-next');nav.hidden=step===8;
+ field('btn-back').hidden=step===1||step===8;
+ if(requestSending){button.disabled=true;return;}
+ button.hidden=step===1||step===2;
+ button.disabled=step===3&&!selectedPrestations.size;
+ button.textContent=step===7?(data.requestKind==='depannage'?'Chercher un artisan disponible':'Demander des devis'):step===3?`${selectedPrestations.size} ${selectedPrestations.size>1?'choisies':'choisie'} · Continuer`:'Continuer';
+}
+function showStep(){
+ document.querySelectorAll('#wizard-form > .section').forEach(section=>section.classList.toggle('active',section.id==='s'+step));
+ const path=wizardPath().filter(n=>n!==8);
+ document.querySelectorAll('.step-node').forEach((node,index)=>{const value=index+1;node.hidden=!path.includes(value);node.classList.toggle('active',step===value);node.classList.toggle('done',wizardPath().indexOf(value)<wizardPath().indexOf(step));node.querySelector('.sn-circle').textContent=path.indexOf(value)+1;});
+ field('wizard-position').textContent=step===8?'Demande envoyée':`Étape ${path.indexOf(step)+1} sur ${path.length}`;
+ field('header-profile-label').textContent=[NEEDS.find(n=>n.value===data.requestKind)?.label,TARGETS.find(t=>t.value===data.target)?.label].filter(Boolean).join(' · ')||'Nouvelle demande';
+ field('copro-role-wrap').hidden=data.target!=='copro';
+ field('label-desc').textContent=data.requestKind==='depannage'?'Que se passe-t-il ?':'Que souhaitez-vous ?';
+ field('desc').placeholder=data.requestKind==='depannage'?'Ex. : une fuite sous l’évier depuis ce matin…':'Décrivez simplement le travail ou l’entretien souhaité…';
+ field('field-nomsite').style.display=data.target==='logement'?'none':'block';
+ field('field-agence').hidden=!(data.target==='gestion'||(data.target==='copro'&&data.coproRole==='Syndic professionnel'));
+ field('start-date-wrap').hidden=data.requestKind!=='entretien';
+ document.querySelectorAll('[data-need]').forEach(button=>{button.classList.toggle('sel',button.dataset.need===data.requestKind);button.setAttribute('aria-pressed',String(button.dataset.need===data.requestKind));});
+ document.querySelectorAll('[data-target]').forEach(button=>{button.classList.toggle('sel',button.dataset.target===data.target);button.setAttribute('aria-pressed',String(button.dataset.target===data.target));});
+ field('field-contact-sur-place').hidden=data.target==='logement';field('field-disponibilites').hidden=data.target==='logement';
+ field('email-optional-tag').style.display=data.profile==='particulier'?'inline':'none';
+ if(step===4)renderServiceDetails();
+ if(step===5&&place)showMiniMap(place.lat,place.lng);
+ if(step===7)buildSummary();
+ updateNavigation();window.scrollTo({top:0,behavior:'smooth'});const title=field('s'+step).querySelector('h2');if(title){title.setAttribute('tabindex','-1');title.focus({preventScroll:true});}
+}
+function buildSummary(){
+ stashServiceDetails();deriveRequestMode();
+ const services=Array.from(selectedPrestations).map(id=>`<article class="summary-service"><strong>${esc(serviceLabel(id))}</strong>${collectServiceLines(id).map(line=>`<p>${esc(line)}</p>`).join('')}</article>`).join('');
+ const privateAccess=[field('acces_info').value,...(data.target!=='logement'?[field('contact_sur_place').value,field('disponibilites').value]:[])].filter(Boolean).join(' · ');
+ const extras=collectSyndicDetailLines().filter(line=>!line.startsWith('Besoin :')&&!line.startsWith('Lieu concerné :')&&!line.startsWith('Demandeur :')&&!line.includes(' — '));
+ if(field('surface_m2').value&&Number(field('surface_m2').value)>=0)extras.push('Surface : '+field('surface_m2').value+' m²');
+ if(data.requestKind==='entretien'&&field('date_debut').value)extras.push('Démarrage souhaité : '+field('date_debut').value);
+ const blocks=[{title:'Votre besoin',step:1,content:`<p>${esc(NEEDS.find(n=>n.value===data.requestKind)?.label)}</p><p>${esc(TARGETS.find(t=>t.value===data.target)?.label)}${data.target==='copro'&&data.coproRole?' · '+esc(data.coproRole):''}</p>`},
+  {title:'Prestations et description',step:3,content:services+`<p>${esc(field('desc').value)}</p><p>${photoFiles.length} photo(s)</p>`},
+  ...(data.requestKind!=='depannage'?[{title:'Précisions complémentaires',step:4,content:`<p>${esc(extras.join(' · ')||'À préciser avec l’entreprise')}</p>`}]:[]),
+  {title:'Lieu',step:5,content:`<p>${esc(data.target==='logement'?'':field('nom_site').value)}</p><p>${esc(field('adresse_lieu').value)}<br>${esc(field('code_postal').value)} ${esc(field('ville').value)}</p>${field('complement_lieu').value?`<p>${esc(field('complement_lieu').value)}</p>`:''}${privateAccess?`<p>Informations privées : ${esc(privateAccess)}</p>`:''}`},
+  {title:'Contact',step:6,content:`<p>${esc(field('prenom').value)} ${esc(field('nom').value)}</p><p>${esc(field('tel').value)}</p><p>${esc(field('email').value)}</p>`}];
+ field('summary').innerHTML=blocks.map(block=>`<div class="summary"><div class="summary-block-title"><span>${block.title}</span><button type="button" onclick="goToStep(${block.step})">Modifier</button></div>${block.content}</div>`).join('');
+ field('response-explanation').textContent=data.requestKind==='depannage'?'Des artisans peuvent se signaler. L’intervention dépend de leur réponse.':'Les entreprises pourront vous envoyer leurs propositions, sans engagement de votre part.';
+}
+function resetForm(){
+ if(requestSending)return;
+ photoFiles.forEach(p=>URL.revokeObjectURL(p.url));photoFiles=[];selectedPrestations=new Set();serviceDetails={};
+ data={requestKind:null,target:null,coproRole:'',profile:null,gestionnaireBien:null,demandType:'ponctuel',modeDemande:'intervention',urgence:'faible',frequence:null};
+ field('wizard-form').reset();step=1;field('global-error').style.display='none';field('tracking-link').hidden=true;field('tracking-hint').hidden=true;field('preview-wrap').innerHTML='';field('desc-count').textContent='0';field('syndic-service-details').innerHTML='';field('detail-feedback').textContent='';
+ field('copro-details').open=false;field('all-services').open=false;field('photo-options').open=false;field('details-acces').open=false;field('copro-contract-end-wrap').hidden=true;
+ field('copro-role-wrap').querySelectorAll('button').forEach(b=>{b.classList.remove('sel');b.setAttribute('aria-pressed','false');});
+ resetAddressState();renderServices();showStep();
+}
+function initRequestWizard(){
+ field('need-grid').innerHTML=NEEDS.map(n=>`<button type="button" class="choice-card" data-need="${n.value}"><span aria-hidden="true">${n.icon}</span><strong>${n.label}</strong></button>`).join('');
+ field('target-grid').innerHTML=TARGETS.map(t=>`<button type="button" class="choice-card" data-target="${t.value}"><span aria-hidden="true">${t.icon}</span><strong>${t.label}</strong></button>`).join('');
+ field('need-grid').addEventListener('click',event=>{const button=event.target.closest('[data-need]');if(button)chooseNeed(button.dataset.need);});
+ field('target-grid').addEventListener('click',event=>{const button=event.target.closest('[data-target]');if(button)chooseTarget(button.dataset.target);});
+ field('s3').addEventListener('click',event=>{const button=event.target.closest('[data-service]');if(button)togglePrestation(button.dataset.service);});
+ field('copro-role-wrap').addEventListener('click',event=>{const button=event.target.closest('[data-role]');if(button)chooseCoproRole(button.dataset.role);});
+ field('service-search').addEventListener('input',renderServices);
+ field('wizard-form').addEventListener('submit',event=>{event.preventDefault();if(step!==1&&step!==2)nextStep();});
+ field('desc').addEventListener('input',()=>{field('desc-count').textContent=field('desc').value.length;});
+ renderServices();showStep();
 }
 
-/* Compteur de caractères de la description */
-const descField = document.getElementById('desc');
-descField.addEventListener('input', () => { document.getElementById('desc-count').textContent = descField.value.length; });
-
-/* =========================================================================
-   PHOTOS
-   ========================================================================= */
 document.getElementById('photos').addEventListener('change', async (e) => {
   const remaining = 3 - photoFiles.length;
   const files = Array.from(e.target.files).slice(0, remaining);
@@ -979,196 +976,10 @@ function renderPreviews() {
 }
 function removePhoto(i) { photoFiles.splice(i, 1); renderPreviews(); }
 
-/* =========================================================================
-   VALIDATION PAR ÉTAPE
-   ========================================================================= */
-function clearErrors() { document.querySelectorAll('.grid-err,.field-err').forEach(e => e.classList.remove('show')); }
 
-function validateStep() {
-  clearErrors();
-  if (step === 1) {
-    if (!data.profile) { document.getElementById('err-profile').classList.add('show'); return false; }
-    if (data.profile === 'gestionnaire_immo' && !data.gestionnaireBien) { document.getElementById('err-gestionnaire-bien').classList.add('show'); return false; }
-    return true;
-  }
-  if (step === 2) {
-    let ok = true;
-    if (!document.getElementById('adresse_lieu').value.trim()) { document.getElementById('err-adresse').classList.add('show'); ok = false; }
-    if (!/^[0-9]{5}$/.test(document.getElementById('code_postal').value.trim())) { document.getElementById('err-cp').classList.add('show'); ok = false; }
-    if (!document.getElementById('ville').value.trim()) { document.getElementById('err-ville').classList.add('show'); ok = false; }
-    return ok;
-  }
-  if (step === 3) {
-    let ok = true;
-    if (selectedPrestations.size === 0) { document.getElementById('err-cat').classList.add('show'); ok = false; }
-    if (!descField.value.trim()) { document.getElementById('err-desc').classList.add('show'); ok = false; }
-    if (data.profile === 'gestionnaire_immo' && data.gestionnaireBien === 'copro' && data.demandType === 'recurrent') {
-      const missingScope = Array.from(selectedPrestations).some(serviceId => {
-        const config = SYNDIC_SCOPE_CONFIG[serviceId];
-        if (!config) return false;
-        const section = document.querySelector(`#syndic-service-details [data-service-id="${serviceId}"]`);
-        if (!section) return true;
-        if (config.checks?.length) return !section.querySelector('[data-contract-check]:checked');
-        return !Array.from(section.querySelectorAll('[data-contract-field]')).some(input => input.value.trim());
-      });
-      if (missingScope) {
-        const scopeError = document.getElementById('err-syndic-scope');
-        scopeError.classList.add('show');
-        ok = false;
-      }
-    }
-    return ok;
-  }
-  if (step === 4) {
-    const prenom = document.getElementById('prenom').value.trim();
-    const nom = document.getElementById('nom').value.trim();
-    const tel = document.getElementById('tel').value.trim().replace(/\s/g, '');
-    const email = document.getElementById('email').value.trim();
-    const telRegex = /^(0|\+33)[1-9][0-9]{8}$/;
-    const emailRequired = data.profile !== 'particulier';
-    const emailOk = emailRequired ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) : (email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
-    const errBox = document.getElementById('err-contact');
-    if (!prenom || !nom || !telRegex.test(tel) || !emailOk) {
-      errBox.textContent = 'Merci de compléter votre prénom, nom, un téléphone et un e-mail valides.';
-      errBox.classList.add('show'); return false;
-    }
-    if (!document.getElementById('consent').checked) {
-      errBox.textContent = "Merci de cocher la case pour accepter d'être contacté.";
-      errBox.classList.add('show'); return false;
-    }
-    return true;
-  }
-  return true;
-}
-
-/* =========================================================================
-   NAVIGATION
-   ========================================================================= */
-function nextStep() {
-  if (step <= 4 && !validateStep()) return;
-  if (step === 4) buildSummary();
-  if (step === 5) { submitDemand(); return; }
-  step++;
-  showStep();
-}
-function prevStep() { step--; showStep(); }
-function goToStep(n) { step = n; showStep(); }
-
-function showStep() {
-  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i + 1 === step));
-  document.querySelectorAll('.step-node').forEach((n, i) => {
-    const idx = i + 1;
-    n.classList.toggle('active', idx === Math.min(step, TOTAL_NODES));
-    n.classList.toggle('done', idx < step && step <= TOTAL_NODES + 1);
-  });
-  document.getElementById('btn-back').style.display = (step > 1 && step < 6) ? 'flex' : 'none';
-  document.getElementById('btn-next').textContent = step === 5 ? 'Confirmer la demande' : 'Continuer';
-  document.getElementById('nav-wrap').style.display = step === 6 ? 'none' : 'flex';
-  document.getElementById('email-optional-tag').style.display = data.profile === 'particulier' ? 'inline' : 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  const title = document.querySelector(`.section.active .section-title`);
-  if (title) title.setAttribute('tabindex', '-1'), title.focus({ preventScroll: true });
-}
-
-/* =========================================================================
-   RÉCAPITULATIF
-   ========================================================================= */
-function collectSyndicDetailLines() {
-  if (data.profile !== 'gestionnaire_immo' || data.gestionnaireBien !== 'copro') return [];
-  const lines = ['Type de bien : Copropriété / résidence'];
-  const addField = (id, label) => {
-    const value = document.getElementById(id)?.value?.trim();
-    if (value) lines.push(`${label} : ${value}`);
-  };
-  addField('copro-batiments', 'Nombre de bâtiments');
-  addField('copro-etages', 'Nombre d’étages');
-  addField('copro-cages', 'Nombre de cages d’escalier');
-  addField('copro-ascenseurs', 'Nombre d’ascenseurs');
-  addField('copro-lots', 'Nombre de lots / logements');
-  const zones = Array.from(document.querySelectorAll('#copro-areas input:checked')).map(input => input.value);
-  if (zones.length) lines.push(`Parties communes concernées : ${zones.join(', ')}`);
-
-  if (data.demandType === 'recurrent') {
-    const currentContract = document.getElementById('copro-contrat-actuel').value;
-    if (currentContract) lines.push(`Contrat actuel : ${currentContract === 'oui' ? 'oui' : 'non'}`);
-    addField('copro-fin-contrat', 'Fin du contrat actuel');
-    const visit = document.getElementById('copro-visite').value;
-    if (visit) {
-      const visitLabel = {a_convenir:'à convenir',oui:'oui',non:'non'}[visit] || visit;
-      lines.push(`Visite sur place : ${visitLabel}`);
-    }
-    if (document.getElementById('copro-multiservice').checked) lines.push('Souhaite une proposition regroupant plusieurs prestations si possible');
-
-    document.querySelectorAll('#syndic-service-details [data-service-id]').forEach(section => {
-      const serviceId = section.dataset.serviceId;
-      if (!selectedPrestations.has(serviceId)) return;
-      const title = SYNDIC_SCOPE_CONFIG[serviceId]?.title || serviceId;
-      const checked = Array.from(section.querySelectorAll('[data-contract-check]:checked')).map(input => input.value);
-      if (checked.length) lines.push(`${title} — prestations : ${checked.join(', ')}`);
-      section.querySelectorAll('[data-contract-field]').forEach(input => {
-        const value = input.value?.trim();
-        if (!value) return;
-        const label = input.closest('.field')?.querySelector('label')?.textContent?.trim() || 'Précision';
-        lines.push(`${title} — ${label} : ${value}`);
-      });
-    });
-  }
-  return lines;
-}
-
-function buildSummary() {
-  const profileMeta = PROFILES.find(p => p.v === data.profile);
-  const prestaLabels = Array.from(selectedPrestations).map(v => {
-    for (const g of Object.values(SERVICE_GROUPS)) { const found = g.items.find(i => i.v === v); if (found) return found.l; }
-    return v;
-  });
-  const coproDetailLines = collectSyndicDetailLines();
-  const coproRows = coproDetailLines.length ? [['Informations complémentaires', coproDetailLines.join(' · ')]] : [];
-
-  const blocks = [
-    { title:'Profil', step:1, rows:[
-      ['Type', profileMeta.label + (data.gestionnaireBien ? ` — ${data.gestionnaireBien === 'copro' ? 'Copropriété / résidence' : 'Logement ou bien en gestion'}` : '')],
-    ]},
-    { title:'Lieu', step:2, rows:[
-      ...(data.profile === 'gestionnaire_immo' ? [['Nom du syndic / de l’agence', document.getElementById('nom_agence').value || '—']] : []),
-      ['Nom du site', document.getElementById('nom_site').value || '—'],
-      ['Adresse', document.getElementById('adresse_lieu').value],
-      ['Ville', `${document.getElementById('code_postal').value} ${document.getElementById('ville').value}`],
-      ['Complément', document.getElementById('complement_lieu').value || '—'],
-      ['Informations privées sur place', data.profile === 'gestionnaire_immo' ? ([document.getElementById('acces_info').value, document.getElementById('contact_sur_place').value, document.getElementById('disponibilites').value].filter(Boolean).join(' · ') || '—') : (document.getElementById('acces_info').value || '—')],
-    ]},
-    { title:'Besoin', step:3, rows:[
-      ['Prestations', prestaLabels.join(', ')],
-      ['Mode de mise en relation', data.modeDemande === 'devis' ? 'Recevoir plusieurs devis' : 'Choisir un artisan parmi ceux intéressés'],
-      ['Type de prestation', data.demandType === 'ponctuel' ? 'Intervention ponctuelle' : "Contrat d'entretien"],
-      ...(data.demandType === 'ponctuel' ? [['Urgence', { faible:'Faible', modere:'Modéré', urgent:'Urgent' }[data.urgence]]]
-        : [['Fréquence', data.frequence ? { hebdomadaire:'1× par semaine', bihebdomadaire:'2× par semaine', quotidienne:'Quotidienne', mensuelle:'Mensuelle', trimestrielle:'Tous les 3 mois', a_definir:'À définir' }[data.frequence] : 'Non précisée']]),
-      ...coproRows,
-      ['Surface', document.getElementById('surface_m2').value ? document.getElementById('surface_m2').value + ' m²' : '—'],
-      ['Description', document.getElementById('desc').value],
-      ['Photos', photoFiles.length ? `${photoFiles.length} photo(s)` : 'Aucune'],
-    ]},
-    { title:'Contact', step:4, rows:[
-      ['Nom', `${document.getElementById('prenom').value} ${document.getElementById('nom').value}`],
-      ['Téléphone', document.getElementById('tel').value],
-      ['E-mail', document.getElementById('email').value || '—'],
-    ]},
-  ];
-
-  document.getElementById('summary').innerHTML = blocks.map(b => `
-    <div class="summary">
-      <div class="summary-block-title">
-        <span>${b.title}</span>
-        <button type="button" onclick="goToStep(${b.step})">Modifier</button>
-      </div>
-      ${b.rows.map(r => `<div class="sum-row"><div class="sum-k">${r[0]}</div><div class="sum-v">${esc(r[1])}</div></div>`).join('')}
-    </div>`).join('');
-}
-
-/* =========================================================================
-   ENVOI DE LA DEMANDE
-   ========================================================================= */
 async function submitDemand() {
+  if (requestSending) return;
+  setRequestSending(true);
   const btn = document.getElementById('btn-next');
   const errorBox = document.getElementById('global-error');
   errorBox.style.display = 'none';
@@ -1180,10 +991,10 @@ async function submitDemand() {
     const profileMeta = PROFILES.find(p => p.v === data.profile);
     const profilDemandeur = data.profile === 'particulier' ? 'particulier' : profileMeta.profil_demandeur;
     const descriptionParts = [document.getElementById('desc').value];
-    const nomAgence = document.getElementById('nom_agence').value.trim();
+    const nomAgence = data.target === 'gestion' || data.coproRole === 'Syndic professionnel' ? document.getElementById('nom_agence').value.trim() : '';
     if (data.profile === 'gestionnaire_immo' && nomAgence) descriptionParts.push(`Syndic / agence : ${nomAgence}`);
     const syndicLines = collectSyndicDetailLines();
-    if (syndicLines.length) descriptionParts.push(`Informations complémentaires pour le devis :\n${syndicLines.join('\n')}`);
+    if (syndicLines.length) descriptionParts.push(`Précisions de la demande :\n${syndicLines.join('\n')}`);
 
     // 1. Upload des photos
     const photoPaths = [];
@@ -1213,17 +1024,17 @@ async function submitDemand() {
       // Colonnes complémentaires (voir ALTER TABLE fourni séparément)
       profil_structure: data.profile,
       type_bien_gestion: data.profile === 'gestionnaire_immo' ? data.gestionnaireBien : null,
-      nom_site: document.getElementById('nom_site').value || null,
+      nom_site: data.profile === 'particulier' ? null : document.getElementById('nom_site').value || null,
       prestations: prestations,
       type_demande: data.demandType,
       mode_demande: data.modeDemande,
       frequence: data.demandType === 'recurrent' ? data.frequence : null,
-      date_debut_souhaitee: document.getElementById('date_debut').value || null,
-      surface_m2: document.getElementById('surface_m2').value ? Number(document.getElementById('surface_m2').value) : null,
+      date_debut_souhaitee: data.demandType === 'recurrent' ? document.getElementById('date_debut').value || null : null,
+      surface_m2: data.requestKind !== 'depannage' && document.getElementById('surface_m2').value && Number(document.getElementById('surface_m2').value) >= 0 ? Number(document.getElementById('surface_m2').value) : null,
       acces_prive: [
         document.getElementById('acces_info').value.trim(),
-        data.profile === 'gestionnaire_immo' && document.getElementById('contact_sur_place').value.trim() ? `Contact sur place : ${document.getElementById('contact_sur_place').value.trim()}` : '',
-        data.profile === 'gestionnaire_immo' && document.getElementById('disponibilites').value.trim() ? `Disponibilités / horaires d’accès : ${document.getElementById('disponibilites').value.trim()}` : '',
+        data.target !== 'logement' && document.getElementById('contact_sur_place').value.trim() ? `Contact sur place : ${document.getElementById('contact_sur_place').value.trim()}` : '',
+        data.target !== 'logement' && document.getElementById('disponibilites').value.trim() ? `Disponibilités / horaires d’accès : ${document.getElementById('disponibilites').value.trim()}` : '',
       ].filter(Boolean).join('\n') || null,
     };
 
@@ -1248,11 +1059,11 @@ async function submitDemand() {
     document.getElementById('ticket-number').textContent = payload.reference;
     document.getElementById('confirm-note').textContent = data.modeDemande === 'devis'
       ? 'Votre demande est transmise aux entreprises partenaires. Vous pourrez comparer leurs devis et choisir celui qui vous convient. Le prix est proposé par les artisans.'
-      : "Votre demande est transmise au réseau d’artisans. Un artisan intéressé pourra vous contacter ; le prix et les modalités seront convenus directement avec lui.";
+      : "Votre demande est transmise au réseau d’artisans. Ouvrez votre suivi pour voir les artisans intéressés et choisir celui à qui communiquer vos coordonnées. Le prix sera convenu directement avec lui.";
     const trackingLink = document.getElementById('tracking-link');
     if (suiviToken) {
       const pageSuivi = data.modeDemande === 'devis' ? 'suivi-devis.html' : 'suivi-intervention.html';
-      const suiviUrl = new URL(pageSuivi, 'https://e3-ecru.vercel.app/');
+      const suiviUrl = new URL(pageSuivi, window.location.href);
       suiviUrl.searchParams.set('reference', payload.reference);
       suiviUrl.searchParams.set('token', suiviToken);
       trackingLink.href = suiviUrl.href;
@@ -1261,61 +1072,19 @@ async function submitDemand() {
       document.getElementById('tracking-hint').hidden = false;
     } else { trackingLink.hidden = true; document.getElementById('tracking-hint').hidden = true; }
 
-    step = 6;
+    step = 8;
     showStep();
   } catch (err) {
     console.error(err);
-    errorBox.textContent = "Envoi impossible : " + (err.message || err.error_description || JSON.stringify(err)) + (err.hint ? " — " + err.hint : "");
+    errorBox.textContent = "La demande n’a pas pu être envoyée. Vos réponses sont conservées : réessayez dans un instant.";
     errorBox.style.display = 'block';
     btn.disabled = false;
-    btn.textContent = 'Confirmer la demande';
+    updateNavigation();
   }
+  finally { setRequestSending(false); }
 }
 
-/* =========================================================================
-   RÉINITIALISATION
-   ========================================================================= */
-function resetForm() {
-  step = 1;
-  photoFiles = [];
-  selectedPrestations = new Set();
-  data = { profile:null, gestionnaireBien:null, demandType:'ponctuel', modeDemande:'intervention', urgence:'faible', frequence:null };
-  document.getElementById('wizard-form').reset();
-  document.querySelectorAll('.picker-card,.cat-card,.demand-card,.urg-card').forEach(c => { c.classList.remove('sel'); c.setAttribute?.('aria-checked','false'); });
-  document.querySelector('.demand-card[data-v="ponctuel"]').classList.add('sel');
-  document.querySelector('#demand-type [data-v="recurrent"]').hidden = false;
-  document.querySelectorAll('#demand-mode .demand-card').forEach((card, i) => { card.classList.toggle('sel', i === 0); card.setAttribute('aria-checked', i === 0 ? 'true' : 'false'); });
-  document.querySelector('.urg-card[data-u="faible"]').classList.add('sel');
-  document.getElementById('urgence-wrap').hidden = false;
-  document.getElementById('frequence-wrap').hidden = true;
-  document.getElementById('copro-details').hidden = true;
-  document.getElementById('copro-contract-end-wrap').hidden = true;
-  document.getElementById('details-acces').open = false;
-  document.getElementById('header-profile-label').textContent = 'Sélectionnez votre profil';
-  document.getElementById('header-title').innerHTML = 'Faire une<br><em>demande</em>';
-  document.getElementById('recurring-title').textContent = 'Entretien régulier / contrat';
-  document.getElementById('recurring-subtitle').textContent = 'Choix disponible pour les professionnels.';
-  document.getElementById('gestionnaire-bien-wrap').hidden = true;
-  document.getElementById('field-agence').hidden = true;
-  document.getElementById('field-contact-sur-place').hidden = true;
-  document.getElementById('field-disponibilites').hidden = true;
-  document.querySelectorAll('#gestionnaire-bien-choices .demand-card').forEach(card => { card.classList.remove('sel'); card.setAttribute('aria-checked','false'); });
-  document.getElementById('prestations-container').innerHTML = '';
-  document.getElementById('preview-wrap').innerHTML = '';
-  document.getElementById('desc-count').textContent = '0';
-  document.getElementById('global-error').style.display = 'none';
-  document.getElementById('tracking-link').hidden = true;
-  document.getElementById('tracking-hint').hidden = true;
-  renderSyndicServiceDetails();
-  const btn = document.getElementById('btn-next');
-  btn.disabled = false; btn.textContent = 'Continuer';
-  resetAddressState();
-  showStep();
-}
 
-/* =========================================================================
-   OUTILS : échappement HTML, noms de fichiers sûrs, compression photo
-   ========================================================================= */
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeName = n => String(n || 'photo.jpg').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9._-]/g, '_').slice(-60);
 function randomAccessToken() {
@@ -1477,7 +1246,8 @@ function resetAddressState() {
   const c = document.getElementById('copy-ref'); if (c) c.textContent = '📋 Copier la référence';
 }
 
-showStep();
+for (const id of ['code_postal', 'ville']) field(id).addEventListener('input', () => { place = null; field('geo-ok').hidden = true; field('map-frame').hidden = true; });
+initRequestWizard();
 </script>
 </body>
 </html>
