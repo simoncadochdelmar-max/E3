@@ -444,6 +444,16 @@ legend{width:100%;font-family:var(--font-display);font-weight:600;font-size:1rem
 
 
 .chantier-card{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:start}.request-badges{grid-column:2;display:flex;flex-wrap:wrap;align-items:flex-start;gap:5px;white-space:normal}.request-badges>span{white-space:normal}.request-replied{font-size:11px;color:#216044;line-height:1.4}.chantier-card__title{white-space:normal;line-height:1.4}
+
+/* Mission : fiche mobile et actions hiérarchisées */
+.mission-view{font-size:15px;line-height:1.5;padding-bottom:12px;}
+.mission-heading{margin-bottom:22px}.mission-eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--muted)}.mission-heading h2{font-family:var(--font-body);font-size:24px;margin:8px 0 12px}.mission-status{display:inline-flex;background:var(--success-bg);color:var(--success);padding:5px 10px;border-radius:30px;font-size:12px;font-weight:700}
+.mission-timeline{display:flex;list-style:none;padding:0;margin:0 0 24px;gap:8px}.mission-timeline li{flex:1;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;border-top:3px solid #e9edf1;padding-top:9px}.mission-timeline li span{display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#edf0f4}.mission-timeline .is-done{border-color:var(--success);color:var(--success)}.mission-timeline .is-done span{background:var(--success-bg)}
+.mission-panel{padding:18px;border:1px solid #e4e8ed;border-radius:16px;margin:0 0 14px;background:#fff}.mission-panel h3{font:700 16px var(--font-body);margin:0 0 12px}.mission-address{font-weight:600;margin-bottom:14px}.mission-contact{display:flex;flex-direction:column;gap:3px;color:var(--muted);font-size:13px}.mission-contact strong{color:var(--ink)}.mission-quick-actions{display:flex;gap:8px;margin-top:16px}.mission-quick-actions a{flex:1;text-align:center;padding:12px 5px;border:1px solid #dce2e8;border-radius:10px;font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;min-height:44px}.mission-quick-actions .mission-call{background:var(--success);color:#fff;border-color:var(--success)}
+.mission-description{font-size:16px;overflow-wrap:anywhere}.mission-details{border-top:1px solid #edf0f3;margin-top:15px;padding-top:12px}.mission-details summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}.mission-details p{font-size:13px;margin-top:12px}.mission-section-title{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between}.mission-section-title>span{font-size:11px;color:var(--muted)}.mission-help{font-size:13px;color:var(--muted);margin:10px 0 16px}.mission-slots{display:grid;gap:12px;margin-bottom:18px}.mission-slots label,.mission-estimate label{display:block;font-size:13px;font-weight:600}.mission-slots small{font-size:11px;font-weight:400;color:var(--muted);margin-left:5px}
+.mission-view input:not([type=file]),.mission-view textarea{display:block;width:100%;max-width:100%;min-width:0;min-height:48px;background:#f8fafb;border:1px solid #dce2e8;border-radius:10px;padding:12px;margin:7px 0 0;color:var(--ink);font-size:16px;appearance:none;-webkit-appearance:none}.mission-view input[type=datetime-local]{min-height:52px}.mission-estimate summary{cursor:pointer;font-size:14px;font-weight:700}.mission-estimate summary span{display:inline-block;font-size:11px;font-weight:500;color:var(--muted);margin-left:5px}.mission-estimate label{margin-top:15px}.mission-estimate .btn{margin-top:12px}.mission-view .btn{min-height:48px;border-radius:11px;font-size:14px;box-shadow:none}.mission-footer{padding:6px 0}.mission-cancel{display:block;width:100%;min-height:44px;background:transparent;border:0;color:#9d3b36;font-size:13px;text-decoration:underline;margin-top:12px}.mission-confirmed{background:var(--success-bg);color:var(--success);padding:15px;border-radius:12px;font-size:13px}.mission-proof{display:block;font-size:14px;margin-bottom:15px}.mission-proof small{display:block;color:var(--muted);font-size:12px;margin:5px 0}.mission-proof input{max-width:100%}#estimate-feedback{font-size:12px;color:var(--muted);margin-top:10px}
+@media(max-width:480px){.mission-panel{padding:15px}.mission-heading h2{font-size:22px}.mission-quick-actions{flex-wrap:wrap}.mission-quick-actions a{min-width:110px}}
+
 </style>
 </head>
 <body>
@@ -1567,6 +1577,7 @@ function renderMissionsList() {
 /* =========================================================================
    MODALE — SUIVI D'UNE MISSION ASSIGNÉE (progression + clôture photo)
    ========================================================================= */
+function localScheduleValue(value) { const date=new Date(value); if(!Number.isFinite(date.getTime()))return ''; return new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16); }
 async function ouvrirModaleMission(mission) {
   const cat = categorieMeta(mission.categorie);
   let contact = { nom: '', prenom: '', telephone: '', email: '' };
@@ -1578,55 +1589,26 @@ async function ouvrirModaleMission(mission) {
   const steps = ['assigne', 'en_cours', 'termine'];
   const currentIdx = steps.indexOf(mission.statut);
 
+  const descriptionParts = String(mission.description || '').split(/\n\s*Précisions de la demande\s*:\s*\n?/);
   modalBody.innerHTML = `
-    <h2 class="modal__title" id="modal-title">${cat.icone} ${cat.label}</h2>
-    <div class="modal__meta"><span>Réf. ${esc(mission.reference ?? '—')}</span></div>
-
-    <div class="progress-steps">
-      ${steps.map((s, i) => `<div class="seg ${i <= currentIdx ? 'done' : ''}"></div>`).join('')}
+    <div class="mission-view">
+      <header class="mission-heading"><span class="mission-eyebrow">VOTRE INTERVENTION · ${esc(mission.reference || 'Sans référence')}</span><h2 id="modal-title">${cat.icone} ${cat.label}</h2><span class="mission-status">${esc(STATUTS[mission.statut] || mission.statut)}</span></header>
+      <ol class="mission-timeline" aria-label="Progression">${['Choisie','En cours','Terminée'].map((label,i)=>`<li class="${i<=currentIdx?'is-done':''}" ${i===currentIdx?'aria-current="step"':''}><span>${i<currentIdx?'✓':i+1}</span>${label}</li>`).join('')}</ol>
+      <section class="mission-panel"><h3>Le rendez-vous</h3><p class="mission-address">${esc(mission.adresse || '')}${mission.ville?', '+esc(mission.ville):''}</p><div class="mission-contact"><strong>${esc([contact.prenom,contact.nom].filter(Boolean).join(' ') || 'Votre client')}</strong>${contact.telephone?`<span>${esc(contact.telephone)}</span>`:''}</div><div class="mission-quick-actions"><a href="${urlWaze(mission)}" target="_blank" rel="noopener">Itinéraire Waze ↗</a>${contact.telephone?`<a class="mission-call" href="tel:${esc(contact.telephone)}">Appeler le client</a>`:''}</div>${contact.acces_info?`<details class="mission-details"><summary>Informations d’accès privées</summary><p>${escNl(contact.acces_info)}</p></details>`:''}</section>
+      <section class="mission-panel"><h3>Le besoin du client</h3><p class="mission-description">${escNl(descriptionParts[0])}</p>${descriptionParts[1]?`<details class="mission-details"><summary>Voir les précisions de la demande</summary><p>${escNl(descriptionParts.slice(1).join('\n'))}</p></details>`:''}</section>
+      ${mission.statut==='assigne'?`<section class="mission-panel"><div class="mission-section-title"><h3>Organiser l’intervention</h3><span>Rendez-vous</span></div>${planning.creneau_retenu?`<p class="mission-confirmed">✓ Créneau confirmé<br><strong>${esc(new Date(planning.creneau_retenu).toLocaleString('fr-FR',{dateStyle:'full',timeStyle:'short'}))}</strong></p>`:`<p class="mission-help">Proposez jusqu’à 3 créneaux. Le client choisira celui qui lui convient.</p><div class="mission-slots">${[0,1,2].map(i=>`<label>Créneau ${i+1} <small>${i?'Facultatif':'Premier choix'}</small><input type="datetime-local" class="schedule-input" value="${planning.creneaux_proposes?.[i]?esc(localScheduleValue(planning.creneaux_proposes[i])):''}" /></label>`).join('')}</div><button type="button" class="btn btn-primary btn-block" id="proposer-creneaux-btn">Partager mes disponibilités</button>`}</section>`:''}
+      ${mission.statut!=='termine'?`<details class="mission-panel mission-estimate"><summary>Proposer une estimation au client <span>Optionnel</span></summary><p class="mission-help">Indiquez un montant indicatif et ce qu’il comprend. Confirmez le prix avec le client avant d’intervenir.</p><label for="mission-estimate-amount">Montant estimé TTC (€)</label><input id="mission-estimate-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Ex. 120" /><label for="mission-estimate-notes">Ce que comprend l’estimation</label><textarea id="mission-estimate-notes" rows="3" maxlength="1500" placeholder="Déplacement, main-d’œuvre, fournitures…"></textarea><p class="mission-help">${contact.email?'Un email sera préparé dans votre messagerie. Vous pourrez le vérifier avant de l’envoyer.':'Vous pourrez copier l’estimation et la partager au client.'}</p><button type="button" class="btn btn-ghost btn-block" id="prepare-estimate-btn">${contact.email?'Préparer l’email au client':'Copier l’estimation'}</button><p id="estimate-feedback" role="status"></p></details>`:''}
+      <div class="mission-footer">${mission.statut==='termine'?`<p class="mission-confirmed">✓ Intervention terminée le ${esc(new Date(mission.updated_at).toLocaleDateString('fr-FR'))}.</p>`:mission.statut==='en_cours'?`<label class="mission-proof" for="photo-fin-input">Photo de fin d’intervention <small>Facultative · pour le client</small><input type="file" id="photo-fin-input" accept="image/*" /></label><button class="btn btn-primary btn-block" id="cloturer-btn">Terminer l’intervention</button>`:mission.statut==='assigne'?`<button class="btn btn-primary btn-block" id="demarrer-btn">Démarrer l’intervention</button><button type="button" class="mission-cancel" id="annuler-mission-btn">Me retirer de cette intervention</button>`:''}</div>
     </div>
-
-    <div class="modal__section">
-      <h4>Adresse</h4>
-      <p>${esc(mission.adresse ?? '')}${mission.ville ? ', ' + esc(mission.ville) : ''}</p>
-    </div>
-    <div class="action-grid-2">
-      <a class="btn-action" href="${urlWaze(mission)}" target="_blank" rel="noopener">🚗 Aller avec Waze</a>
-      <a class="btn-action btn-call" href="tel:${esc(contact.telephone)}">📞 Appeler</a>
-    </div>
-    <div class="modal__section">
-      <h4>Contact du demandeur</h4>
-      <p>${esc(contact.prenom)} ${esc(contact.nom)} · ${esc(contact.telephone)}</p>
-    </div>
-    ${contact.acces_info ? `<div class="modal__section"><h4>Informations d’accès privées</h4><p>${esc(contact.acces_info)}</p></div>` : ''}
-    <div class="modal__section">
-      <h4>Description</h4>
-      <p>${escNl(mission.description)}</p>
-    </div>
-
-    ${mission.statut === 'assigne' ? `
-      ${planning.creneau_retenu ? `<div class="form-success">✓ Créneau choisi par le client : ${new Date(planning.creneau_retenu).toLocaleString('fr-FR',{dateStyle:'full',timeStyle:'short'})}</div>` : `
-        <div class="modal__section"><h4>Proposer des créneaux</h4><p class="hint">Le client choisira un créneau parmi vos propositions.</p>
-          <input type="datetime-local" class="schedule-input" aria-label="Premier créneau" />
-          <input type="datetime-local" class="schedule-input" aria-label="Deuxième créneau (facultatif)" />
-          <input type="datetime-local" class="schedule-input" aria-label="Troisième créneau (facultatif)" />
-          <button class="btn btn-gold btn-block" id="proposer-creneaux-btn">Envoyer mes créneaux</button>
-        </div>`}
-      <button class="btn btn-block" id="annuler-mission-btn" style="background:#9d241e">Annuler ma participation avant le démarrage</button>
-    ` : ''}
-
-    ${mission.statut === 'termine' ? `
-      <div class="form-success">✓ Mission clôturée le ${new Date(mission.updated_at).toLocaleDateString('fr-FR')}.</div>
-    ` : mission.statut === 'en_cours' ? `
-      <div class="photo-zone">
-        <h5>📸 Photo de fin de chantier (preuve pour le syndic)</h5>
-        <input type="file" id="photo-fin-input" accept="image/*" />
-      </div>
-      <button class="btn btn-gold btn-block" id="cloturer-btn">Clôturer le chantier</button>
-    ` : `
-      <button class="btn btn-primary btn-block" id="demarrer-btn">Démarrer l'intervention</button>
-    `}
   `;
+  document.getElementById('prepare-estimate-btn')?.addEventListener('click', async () => {
+    const amount=Number(document.getElementById('mission-estimate-amount').value);
+    if(!Number.isFinite(amount)||amount<=0){toast('Indiquez un montant supérieur à zéro.', 'error');return;}
+    const notes=document.getElementById('mission-estimate-notes').value.trim();
+    const body=['Bonjour,', '', 'Voici mon estimation pour votre demande '+(mission.reference||'')+' :',new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(amount)+' TTC',notes,'','Montant indicatif, à confirmer ensemble avant l’intervention.','',currentArtisan.nom_entreprise||'',currentArtisan.telephone||''].filter(x=>x!==undefined).join('\n');
+    if(contact.email){window.location.href='mailto:'+encodeURIComponent(contact.email)+'?subject='+encodeURIComponent('Estimation pour votre intervention '+(mission.reference||''))+'&body='+encodeURIComponent(body);document.getElementById('estimate-feedback').textContent='L’envoi est à confirmer dans votre messagerie.';}
+    else {try{await navigator.clipboard.writeText(body);document.getElementById('estimate-feedback').textContent='Estimation copiée. Vous pouvez la partager au client.';}catch{document.getElementById('estimate-feedback').textContent='Copie indisponible. Vous pouvez sélectionner le texte ci-dessous.';const area=document.createElement('textarea');area.value=body;area.readOnly=true;document.getElementById('estimate-feedback').appendChild(area);}}
+  });
 
   document.getElementById('demarrer-btn')?.addEventListener('click', () => changerStatutMission(mission.id, 'en_cours'));
   document.getElementById('cloturer-btn')?.addEventListener('click', () => cloturerMission(mission.id));
